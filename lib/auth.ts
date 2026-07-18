@@ -1,31 +1,59 @@
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "artkmv1@ya.ru";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Artkmv11";
+const MAIN_ADMIN_EMAIL = process.env.ADMIN_EMAIL || "artkmv1@ya.ru";
+const MAIN_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Artkmv11";
 const TOKEN_PREFIX = "magazin_tour_admin_v1:";
 
-export function verifyCredentials(email: string, password: string): boolean {
-  return email === ADMIN_EMAIL && password === ADMIN_PASSWORD;
+export interface TokenPayload {
+  email: string;
+  role: "main_admin" | "admin";
+  ts: number;
 }
 
-export function createToken(): string {
-  const payload = JSON.stringify({
-    email: ADMIN_EMAIL,
-    ts: Date.now(),
-  });
-  const encoded = Buffer.from(TOKEN_PREFIX + payload).toString("base64");
+export async function verifyCredentials(
+  email: string,
+  password: string
+): Promise<{ email: string; role: "main_admin" | "admin" } | null> {
+  if (email === MAIN_ADMIN_EMAIL && password === MAIN_ADMIN_PASSWORD) {
+    return { email, role: "main_admin" };
+  }
+
+  try {
+    const { getAdminByEmail } = await import("./models");
+    const admin = await getAdminByEmail(email);
+    if (admin && admin.password === password) {
+      return { email, role: "admin" };
+    }
+  } catch {}
+
+  return null;
+}
+
+export function createToken(
+  email: string,
+  role: "main_admin" | "admin"
+): string {
+  const payload: TokenPayload = { email, role, ts: Date.now() };
+  const encoded = Buffer.from(TOKEN_PREFIX + JSON.stringify(payload)).toString(
+    "base64"
+  );
   return encoded;
 }
 
-export function verifyToken(token: string): boolean {
+export function verifyToken(token: string): TokenPayload | null {
   try {
     const decoded = Buffer.from(token, "base64").toString("utf-8");
-    if (!decoded.startsWith(TOKEN_PREFIX)) return false;
+    if (!decoded.startsWith(TOKEN_PREFIX)) return null;
     const payload = JSON.parse(decoded.slice(TOKEN_PREFIX.length));
-    return payload.email === ADMIN_EMAIL;
+    if (!payload.email || !payload.role) return null;
+    return payload as TokenPayload;
   } catch {
-    return false;
+    return null;
   }
 }
 
-export function getAdminEmail(): string {
-  return ADMIN_EMAIL;
+export function getMainAdminEmail(): string {
+  return MAIN_ADMIN_EMAIL;
+}
+
+export function isMainAdminEmail(email: string): boolean {
+  return email === MAIN_ADMIN_EMAIL;
 }

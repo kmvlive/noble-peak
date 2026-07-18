@@ -5,7 +5,7 @@ import { createBooking } from "@/lib/models";
 import { getClientEmailFromRequest } from "@/lib/client-auth";
 import { sendEmail } from "@/lib/email";
 import { appName } from "@/lib/app-name";
-import { getAdminEmail } from "@/lib/auth";
+import { getMainAdminEmail } from "@/lib/auth";
 
 const createBookingSchema = z.object({
   activityId: z.string().min(1),
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       false
     );
 
-    const adminEmail = getAdminEmail();
+    const adminEmail = getMainAdminEmail();
     await sendEmail({
       to: adminEmail,
       subject: `Новое бронирование: ${activityTitle}`,

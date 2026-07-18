@@ -13,14 +13,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!verifyCredentials(email, password)) {
+    const result = await verifyCredentials(email, password);
+
+    if (!result) {
       return NextResponse.json(
         { error: "Неверный email или пароль" },
         { status: 401 }
       );
     }
 
-    const token = createToken();
+    const token = createToken(result.email, result.role);
 
     const response = NextResponse.json({ success: true, token });
     response.cookies.set("admin_token", token, {

@@ -10,7 +10,7 @@ import {
   failBookingPayment,
 } from "@/lib/models";
 import { sendEmail } from "@/lib/email";
-import { getAdminEmail } from "@/lib/auth";
+import { getMainAdminEmail } from "@/lib/auth";
 import { appName } from "@/lib/app-name";
 
 export async function POST(request: NextRequest) {
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     if (isPaymentSuccessful(Status)) {
       await confirmBookingPayment(booking.id, Status);
 
-      const adminEmail = getAdminEmail();
+      const adminEmail = getMainAdminEmail();
       await sendEmail({
         to: adminEmail,
         subject: `Оплачено: ${booking.activityTitle}`,

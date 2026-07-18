@@ -583,3 +583,107 @@ export async function savePaymentSettings(
   );
   return record;
 }
+
+export interface AdminRecord {
+  email: string;
+  password: string;
+  name: string;
+  role: "admin";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function getAllAdmins(): Promise<AdminRecord[]> {
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.ADMINS,
+    })
+  );
+  return (result.Items as AdminRecord[]) ?? [];
+}
+
+export async function getAdminByEmail(
+  email: string
+): Promise<AdminRecord | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TableName.ADMINS,
+      Key: { email },
+    })
+  );
+  return (result.Item as AdminRecord) ?? null;
+}
+
+export async function createAdmin(
+  data: Omit<AdminRecord, "createdAt" | "updatedAt">
+): Promise<AdminRecord> {
+  const now = new Date().toISOString();
+  const admin: AdminRecord = {
+    ...data,
+    email: data.email.toLowerCase(),
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.ADMINS,
+      Item: admin,
+      ConditionExpression: "attribute_not_exists(email)",
+    })
+  );
+
+  return admin;
+}
+
+export async function updateAdmin(
+  email: string,
+  data: Partial<Pick<AdminRecord, "password" | "name">>
+): Promise<AdminRecord> {
+  const updateExpr: string[] = [];
+  const exprValues: Record<string, unknown> = {};
+  const exprNames: Record<string, string> = {};
+
+  if (data.password !== undefined) {
+    updateExpr.push("#password = :password");
+    exprValues[":password"] = data.password;
+    exprNames["#password"] = "password";
+  }
+
+  if (data.name !== undefined) {
+    updateExpr.push("#name = :name");
+    exprValues[":name"] = data.name;
+    exprNames["#name"] = "name";
+  }
+
+  if (updateExpr.length === 0) {
+    const existing = await getAdminByEmail(email);
+    if (!existing) throw new Error("Admin not found");
+    return existing;
+  }
+
+  updateExpr.push("updatedAt = :updatedAt");
+  exprValues[":updatedAt"] = new Date().toISOString();
+
+  const result = await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.ADMINS,
+      Key: { email },
+      UpdateExpression: `set ${updateExpr.join(", ")}`,
+      ExpressionAttributeValues: exprValues,
+      ExpressionAttributeNames: exprNames,
+      ReturnValues: "ALL_NEW",
+    })
+  );
+
+  return result.Attributes as AdminRecord;
+}
+
+export async function deleteAdmin(email: string): Promise<void> {
+  await docClient.send(
+    new DeleteCommand({
+      TableName: TableName.ADMINS,
+      Key: { email },
+    })
+  );
+}

@@ -6,6 +6,7 @@ import type {
   BookingRecord,
   EmailSettingsRecord,
   PaymentSettingsRecord,
+  AdminRecord,
 } from "./models";
 import {
   activities as staticActivities,
@@ -160,3 +161,14 @@ export const mockPaymentSettings: PaymentSettingsRecord = {
   webhookUrl: "",
   updatedAt: new Date().toISOString(),
 };
+
+export const mockAdmins: AdminRecord[] = [
+  {
+    email: "artkmv1@ya.ru",
+    password: "Artkmv11",
+    name: "Главный администратор",
+    role: "admin",
+    createdAt: new Date("2024-01-01").toISOString(),
+    updatedAt: new Date("2024-01-01").toISOString(),
+  },
+];

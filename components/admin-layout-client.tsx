@@ -13,10 +13,13 @@ import {
   FolderOpen,
   Settings,
   CreditCard,
+  Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const TOKEN_KEY = "admin_token";
+const TOKEN_PREFIX = "magazin_tour_admin_v1:";
+const MAIN_ADMIN_EMAIL = "artkmv1@ya.ru";
 
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -35,6 +38,23 @@ export { getToken };
 
 function hasToken(): boolean {
   return !!getToken();
+}
+
+function getTokenEmail(): string | null {
+  const token = getToken();
+  if (!token) return null;
+  try {
+    const decoded = atob(token);
+    if (!decoded.startsWith(TOKEN_PREFIX)) return null;
+    const payload = JSON.parse(decoded.slice(TOKEN_PREFIX.length));
+    return payload.email ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function isMainAdmin(): boolean {
+  return getTokenEmail() === MAIN_ADMIN_EMAIL;
 }
 
 export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
@@ -65,10 +85,13 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
 
   if (!isAuthed) return null;
 
-  const navItems = [
+  const isMain = isMainAdmin();
+
+  const allNavItems = [
     { href: "/admin", label: "Дашборд", icon: LayoutDashboard },
     { href: "/admin", label: "Активности", icon: List },
     { href: "/admin/sections", label: "Разделы", icon: FolderOpen },
+    { href: "/admin/admins", label: "Администраторы", icon: Shield },
     {
       href: "/admin/payment-settings",
       label: "Платёжная система",
@@ -76,6 +99,16 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
     },
     { href: "/admin/settings", label: "Настройки", icon: Settings },
   ];
+
+  const mainOnlyItems = [
+    "/admin/admins",
+    "/admin/payment-settings",
+    "/admin/settings",
+  ];
+
+  const navItems = isMain
+    ? allNavItems
+    : allNavItems.filter((item) => !mainOnlyItems.includes(item.href));
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-background">
