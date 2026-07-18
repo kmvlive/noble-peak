@@ -22,18 +22,16 @@ tasks:
     depends_on: []
     related_feature: Просмотр и каталог активностей
     status: completed
-    summary: >-
-      Реализована главная страница со статическими данными-заглушками. В шапке
-      отображается «magazin-tour. Магазин туров и активностей». На странице
-      присутствует hero-секция с призывом, блок «Последние активности» (5
-      карточек) и блок «Популярные активности» (6 карточек). Данные активностей
-      хранятся в lib/data.ts. Основная реализация: app/page.tsx, lib/data.ts,
-      app/layout.tsx.
+    summary: "Реализована главная страница со статическими данными-заглушками. В
+      шапке отображается «magazin-tour. Магазин туров и активностей». На
+      странице присутствует hero-секция с призывом, блок «Последние активности»
+      (5 карточек) и блок «Популярные активности» (6 карточек). Данные
+      активностей хранятся в lib/data.ts. Основная реализация: app/page.tsx,
+      lib/data.ts, app/layout.tsx."
   - id: task-002
     phase: mvp
     title: Страница активности с фото, описанием, ценой и лайком
-    description:
-      "Создать отдельную страницу для каждой активности с уникальным URL.
+    description: "Создать отдельную страницу для каждой активности с уникальным URL.
       На странице: фотографии, название, описание (WYSIWYG), цена, кнопка лайка.
       Данные пока статические-заглушки."
     priority: high
@@ -46,16 +44,15 @@ tasks:
       - task-001
     related_feature: Просмотр и каталог активностей
     status: completed
-    summary: >-
-      Реализованы отдельные страницы для каждой активности по URL
+    summary: "Реализованы отдельные страницы для каждой активности по URL
       /activities/[id]. На странице: галерея фото (градиенты-заглушки с
       переключением), название, категория, короткое описание, полное описание
-      (HTML с форматированием, отображается через dangerouslySetInnerHTML),
-      цена и кнопка лайка (client-компонент с состоянием). Карточки на главной
-      стали ссылками на страницы активностей. Все 10 активностей статически
-      сгенерированы через generateStaticParams.
-      Основная реализация: app/activities/[id]/page.tsx,
-      components/activity-page-content.tsx, lib/data.ts.
+      (HTML с форматированием, отображается через dangerouslySetInnerHTML), цена
+      и кнопка лайка (client-компонент с состоянием). Карточки на главной стали
+      ссылками на страницы активностей. Все 10 активностей статически
+      сгенерированы через generateStaticParams. Основная реализация:
+      app/activities/[id]/page.tsx, components/activity-page-content.tsx,
+      lib/data.ts."
   - id: task-003
     phase: mvp
     title: Разделы активностей
@@ -70,19 +67,17 @@ tasks:
       - task-002
     related_feature: Просмотр и каталог активностей
     status: completed
-    summary: >-
-      Созданы 7 разделов активностей (Водные, Треккинг, Гастрономия, Активный
-      отдых, Экскурсии, Развлечения, Экстрим). Разделы отображаются на главной
-      странице в виде карточек с иконками и количеством активностей, а также в
-      навигационном меню в шапке сайта. Страница раздела (/sections/[slug])
-      показывает все активности выбранной категории в сетке. Данные — статические
-      в lib/data.ts. Основная реализация: app/sections/[slug]/page.tsx,
-      lib/data.ts, app/page.tsx, app/layout.tsx.
+    summary: "Созданы 7 разделов активностей (Водные, Треккинг, Гастрономия,
+      Активный отдых, Экскурсии, Развлечения, Экстрим). Разделы отображаются на
+      главной странице в виде карточек с иконками и количеством активностей, а
+      также в навигационном меню в шапке сайта. Страница раздела
+      (/sections/[slug]) показывает все активности выбранной категории в сетке.
+      Данные — статические в lib/data.ts. Основная реализация:
+      app/sections/[slug]/page.tsx, lib/data.ts, app/page.tsx, app/layout.tsx."
   - id: task-004
     phase: mvp
     title: "Админ-панель: вход и управление активностями"
-    description:
-      "Создать отдельную страницу входа для администратора по отдельному
+    description: "Создать отдельную страницу входа для администратора по отдельному
       URL. После входа: CRUD для активностей (название, описание в
       WYSIWYG-редакторе, загрузка фотографий, цена, выбор раздела, ползунок
       «оплата / форма заказа»)."
@@ -99,22 +94,20 @@ tasks:
       - task-003
     related_feature: Админ-панель
     status: completed
-    summary: >-
-      Реализована админ-панель с отдельной страницей входа (/admin/login,
-      проверка email/пароля, токен в localStorage). Дашборд (/admin) со
-      списком активностей, поиском, созданием, редактированием и удалением.
-      Форма создания/редактирования включает: WYSIWYG-редактор (TipTap),
-      загрузку изображений (URL/градиенты), выбор раздела из существующих,
-      ползунок «Оплата / Форма заказа», цену, лайки, популярность.
-      API: POST /api/admin/login, GET/POST /api/admin/activities,
-      GET/PUT/DELETE /api/admin/activities/[id]. Основная реализация:
-      app/admin/, components/admin-*.tsx, lib/auth.ts, lib/models.ts
-      (ActivityRecord), lib/schema.ts (таблица activities).
+    summary: "Реализована админ-панель с отдельной страницей входа (/admin/login,
+      проверка email/пароля, токен в localStorage). Дашборд (/admin) со списком
+      активностей, поиском, созданием, редактированием и удалением. Форма
+      создания/редактирования включает: WYSIWYG-редактор (TipTap), загрузку
+      изображений (URL/градиенты), выбор раздела из существующих, ползунок
+      «Оплата / Форма заказа», цену, лайки, популярность. API: POST
+      /api/admin/login, GET/POST /api/admin/activities, GET/PUT/DELETE
+      /api/admin/activities/[id]. Основная реализация: app/admin/,
+      components/admin-*.tsx, lib/auth.ts, lib/models.ts (ActivityRecord),
+      lib/schema.ts (таблица activities)."
   - id: task-005
     phase: mvp
     title: "Админ-панель: управление разделами и календарём"
-    description:
-      "Добавить в админ-панель: создание и удаление разделов, управление
+    description: "Добавить в админ-панель: создание и удаление разделов, управление
       календарём доступных дат и часов для каждой активности."
     priority: high
     acceptance_criteria:
@@ -126,8 +119,7 @@ tasks:
       - task-004
     related_feature: Админ-панель
     status: completed
-    summary: >-
-      Реализовано управление разделами (создание/удаление) на странице
+    summary: "Реализовано управление разделами (создание/удаление) на странице
       /admin/sections через API /api/admin/sections, и управление календарём
       доступных дат/часов для каждой активности на странице редактирования
       активности (/admin/activities/[id]/edit) через API
@@ -138,12 +130,11 @@ tasks:
       components/admin-activity-calendar.tsx,
       components/admin-activity-form.tsx, app/api/admin/sections/route.ts,
       app/api/admin/activities/[id]/calendar/route.ts, lib/models.ts,
-      lib/schema.ts.
+      lib/schema.ts."
   - id: task-006
     phase: mvp
     title: "Личный кабинет клиента: регистрация и вход"
-    description:
-      "Создать отдельную страницу входа/регистрации клиента по отдельному
+    description: "Создать отдельную страницу входа/регистрации клиента по отдельному
       URL. Регистрация: имя, телефон, email, пароль. Вход по email и паролю.
       После регистрации письмо с данными на email."
     priority: high
@@ -156,19 +147,17 @@ tasks:
       - task-003
     related_feature: Личный кабинет клиента
     status: completed
-    summary: >-
-      Реализована страница входа/регистрации клиента (/client/login) с двумя
+    summary: "Реализована страница входа/регистрации клиента (/client/login) с двумя
       режимами: вход (email + пароль) и регистрация (имя, телефон, email,
-      пароль). Добавлена таблица clients в DynamoDB, модель ClientRecord,
-      API /api/client/register (с валидацией zod, хешированием пароля через
-      crypto), API /api/client/login (с проверкой хеша). После регистрации
-      отправляется письмо с данными через nodemailer (SMTP). Аутентификация
-      через httpOnly cookie и токен.
+      пароль). Добавлена таблица clients в DynamoDB, модель ClientRecord, API
+      /api/client/register (с валидацией zod, хешированием пароля через crypto),
+      API /api/client/login (с проверкой хеша). После регистрации отправляется
+      письмо с данными через nodemailer (SMTP). Аутентификация через httpOnly
+      cookie и токен."
   - id: task-007
     phase: mvp
     title: Календарь на странице активности и выбор даты/времени
-    description:
-      На странице активности отобразить календарь с доступными датами (из
+    description: На странице активности отобразить календарь с доступными датами (из
       админ-панели). Если для даты отмечены часы — показать их для выбора. Если
       нет — доступен весь день.
     priority: high
@@ -182,14 +171,12 @@ tasks:
       - task-006
     related_feature: Календарь и бронирование
     status: completed
-    summary: >-
-      На странице активности (/activities/[id]) добавлен календарь с выбором
-      даты и времени. Данные берутся из админ-панели через публичный API
-      GET /api/activities/[id]/calendar. Компонент ActivityBookingCalendar
-      отображает месяц с доступными датами (из админ-панели), при клике на
-      дату с часами показывает выбор часов, при дате без часов — помечает
-      «Весь день». Интеграция в ActivityPageContent. typecheck, lint, build
-      проходят.
+    summary: На странице активности (/activities/[id]) добавлен календарь с выбором
+      даты и времени. Данные берутся из админ-панели через публичный API GET
+      /api/activities/[id]/calendar. Компонент ActivityBookingCalendar
+      отображает месяц с доступными датами (из админ-панели), при клике на дату
+      с часами показывает выбор часов, при дате без часов — помечает «Весь
+      день». Интеграция в ActivityPageContent. typecheck, lint, build проходят.
   - id: task-008
     phase: mvp
     title: Форма заказа и страница подтверждения
@@ -208,16 +195,15 @@ tasks:
       - task-007
     related_feature: Календарь и бронирование
     status: completed
-    summary: >-
-      Реализована форма заказа на странице активности: при выборе даты/времени
-      показываются поля (название, дата, время, имя, телефон, «Мои подробности»)
-      и кнопка «Забронировать». POST /api/bookings создаёт бронь в DynamoDB и
-      отправляет письмо администратору. Если активность настроена на оплату —
-      показывается ссылка на страницу /payment (заглушка). После бронирования
-      открывается страница подтверждения /client/bookings/[id] со статусом,
-      номером брони и кнопками навигации. Добавлен личный кабинет клиента с
-      /client/bookings (список бронирований) и /api/client/me (данные клиента).
-      Таблица bookings в DynamoDB, typecheck, lint, build проходят.
+    summary: "Реализована форма заказа на странице активности: при выборе
+      даты/времени показываются поля (название, дата, время, имя, телефон, «Мои
+      подробности») и кнопка «Забронировать». POST /api/bookings создаёт бронь в
+      DynamoDB и отправляет письмо администратору. Если активность настроена на
+      оплату — показывается ссылка на страницу /payment (заглушка). После
+      бронирования открывается страница подтверждения /client/bookings/[id] со
+      статусом, номером брони и кнопками навигации. Добавлен личный кабинет
+      клиента с /client/bookings (список бронирований) и /api/client/me (данные
+      клиента). Таблица bookings в DynamoDB, typecheck, lint, build проходят."
   - id: task-009
     phase: mvp
     title: "Админ-панель: управление email-ящиками и настройки"
@@ -233,19 +219,17 @@ tasks:
       - task-005
     related_feature: Админ-панель
     status: completed
-    summary: >-
-      Создана страница /admin/settings в админ-панели для управления
+    summary: "Создана страница /admin/settings в админ-панели для управления
       email-ящиками уведомлений. Реализовано: добавление/удаление email-ящиков,
-      выбор email по умолчанию (звёздочка), сохранение настроек через API
-      PUT /api/admin/settings. Добавлена таблица email_settings в DynamoDB,
-      модель EmailSettingsRecord и CRUD-функции в lib/models.ts, мок-данные в
+      выбор email по умолчанию (звёздочка), сохранение настроек через API PUT
+      /api/admin/settings. Добавлена таблица email_settings в DynamoDB, модель
+      EmailSettingsRecord и CRUD-функции в lib/models.ts, мок-данные в
       lib/mock-data.ts. Пункт «Настройки» добавлен в боковое меню админ-панели.
-      typecheck, lint, build проходят.
+      typecheck, lint, build проходят."
   - id: task-010
     phase: mvp
     title: Интеграция с платёжной системой Т-банка
-    description:
-      Реализовать страницу оплаты с интеграцией Т-банка. После успешной
+    description: Реализовать страницу оплаты с интеграцией Т-банка. После успешной
       оплаты бронирование подтверждается. При ошибке — сообщение об ошибке.
     priority: medium
     acceptance_criteria:
@@ -256,16 +240,29 @@ tasks:
       - task-008
     related_feature: Оплата через Т-банк
     status: completed
-    summary: >-
-      Реализована интеграция с платёжной системой Т-банка (Tinkoff).
-      Создан клиент T-Bank API (lib/payment.ts) с функциями Init, GetState,
+    summary: "Реализована интеграция с платёжной системой Т-банка (Tinkoff). Создан
+      клиент T-Bank API (lib/payment.ts) с функциями Init, GetState,
       верификацией токена и проверкой статуса. API-маршруты: POST
-      /api/payments/init (создание брони + инициация платежа),
-      POST /api/payments/callback (вебхук от Т-банка для обновления статуса),
-      GET /api/payments/status (проверка статуса). Страница /payment
-      (components/payment-page-content.tsx) создаёт платёж и перенаправляет
-      на страницу Т-банка. Страницы /payment/success и /payment/fail
-      обрабатывают результат. В BookingRecord добавлены поля price,
-      paymentId, paymentUrl, paymentStatus. Статус брони: pending_payment →
-      confirmed после оплаты. Добавлены env-переменные TINKOFF_TERMINAL_KEY,
-      TINKOFF_PASSWORD, BASE_URL. typecheck, lint, build проходят.
+      /api/payments/init (создание брони + инициация платежа), POST
+      /api/payments/callback (вебхук от Т-банка для обновления статуса), GET
+      /api/payments/status (проверка статуса). Страница /payment
+      (components/payment-page-content.tsx) создаёт платёж и перенаправляет на
+      страницу Т-банка. Страницы /payment/success и /payment/fail обрабатывают
+      результат. В BookingRecord добавлены поля price, paymentId, paymentUrl,
+      paymentStatus. Статус брони: pending_payment → confirmed после оплаты.
+      Добавлены env-переменные TINKOFF_TERMINAL_KEY, TINKOFF_PASSWORD, BASE_URL.
+      typecheck, lint, build проходят."
+  - id: task-011
+    phase: mvp
+    title: Сменить логин и пароль администратора
+    description: "Заменить учётные данные для входа в админ-панель: логин на
+      artkmv1@ya.ru, пароль на Artkmv11."
+    priority: high
+    acceptance_criteria:
+      - Вход в админ-панель работает с новым логином artkmv1@ya.ru и паролем
+        Artkmv11
+      - Старые учётные данные больше не работают
+    depends_on: []
+    related_feature: Админ-панель
+    status: pending
+    summary: null
