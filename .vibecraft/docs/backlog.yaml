@@ -45,8 +45,17 @@ tasks:
     depends_on:
       - task-001
     related_feature: Просмотр и каталог активностей
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Реализованы отдельные страницы для каждой активности по URL
+      /activities/[id]. На странице: галерея фото (градиенты-заглушки с
+      переключением), название, категория, короткое описание, полное описание
+      (HTML с форматированием, отображается через dangerouslySetInnerHTML),
+      цена и кнопка лайка (client-компонент с состоянием). Карточки на главной
+      стали ссылками на страницы активностей. Все 10 активностей статически
+      сгенерированы через generateStaticParams.
+      Основная реализация: app/activities/[id]/page.tsx,
+      components/activity-page-content.tsx, lib/data.ts.
   - id: task-003
     phase: mvp
     title: Разделы активностей

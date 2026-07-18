@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Heart, MapPin, Star, Compass } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,34 +22,36 @@ function ActivityCard({
   likes: number;
 }) {
   return (
-    <Card className="min-w-[260px] snap-start card-hover">
-      <div
-        className={`flex h-32 items-center justify-center bg-gradient-to-br ${imageGradient}`}
-      >
-        <Compass className="h-10 w-10 text-white/80" />
-      </div>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <Badge variant="secondary">
-            <MapPin className="mr-0.5 h-3 w-3" />
-            {category}
-          </Badge>
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Heart className="h-3 w-3" />
-            {likes}
-          </span>
+    <Link href={`/activities/${_id}`}>
+      <Card className="min-w-[260px] snap-start card-hover">
+        <div
+          className={`flex h-32 items-center justify-center bg-gradient-to-br ${imageGradient}`}
+        >
+          <Compass className="h-10 w-10 text-white/80" />
         </div>
-        <CardTitle className="mt-1">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground line-clamp-2">
-          {shortDescription}
-        </p>
-        <p className="mt-3 text-lg font-semibold text-primary">
-          {price.toLocaleString("ru-RU")} ₽
-        </p>
-      </CardContent>
-    </Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <Badge variant="secondary">
+              <MapPin className="mr-0.5 h-3 w-3" />
+              {category}
+            </Badge>
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Heart className="h-3 w-3" />
+              {likes}
+            </span>
+          </div>
+          <CardTitle className="mt-1">{title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground line-clamp-2">
+            {shortDescription}
+          </p>
+          <p className="mt-3 text-lg font-semibold text-primary">
+            {price.toLocaleString("ru-RU")} ₽
+          </p>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }
 
