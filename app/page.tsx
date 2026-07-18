@@ -1,8 +1,66 @@
 import Link from "next/link";
-import { Heart, MapPin, Star, Compass } from "lucide-react";
+import {
+  Heart,
+  MapPin,
+  Star,
+  Compass,
+  Waves,
+  Mountain,
+  UtensilsCrossed,
+  Bike,
+  Gamepad2,
+  Zap,
+  Map,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { activities, latestActivities, popularActivities } from "@/lib/data";
+import {
+  activities,
+  latestActivities,
+  popularActivities,
+  sections,
+} from "@/lib/data";
+import type { Section } from "@/lib/data";
+
+const sectionIcons: Record<string, React.ReactNode> = {
+  Waves: <Waves className="h-6 w-6" />,
+  Mountain: <Mountain className="h-6 w-6" />,
+  UtensilsCrossed: <UtensilsCrossed className="h-6 w-6" />,
+  Bike: <Bike className="h-6 w-6" />,
+  Map: <Map className="h-6 w-6" />,
+  Gamepad2: <Gamepad2 className="h-6 w-6" />,
+  Zap: <Zap className="h-6 w-6" />,
+};
+
+function SectionCard({ section }: { section: Section }) {
+  const activityCount = activities.filter(
+    (a) => a.category.toLowerCase() === section.category.toLowerCase()
+  ).length;
+
+  return (
+    <Link href={`/sections/${section.slug}`}>
+      <Card className="min-w-[180px] snap-start card-hover">
+        <div
+          className={`flex h-24 items-center justify-center rounded-t-lg bg-gradient-to-br ${section.imageGradient}`}
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/30 backdrop-blur-sm">
+            {sectionIcons[section.icon] || (
+              <Compass className="h-6 w-6 text-white" />
+            )}
+          </div>
+        </div>
+        <CardHeader className="p-3">
+          <CardTitle className="text-sm">{section.name}</CardTitle>
+        </CardHeader>
+        <CardContent className="p-3 pt-0">
+          <p className="text-xs text-muted-foreground">
+            {activityCount} {activityCount === 1 ? "активность" : "активностей"}
+          </p>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
 
 function ActivityCard({
   _id,
@@ -100,6 +158,20 @@ export default function HomePage() {
       </section>
 
       <div className="mx-auto max-w-5xl space-y-10 px-4 py-8 sm:py-12">
+        <section className="space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+              <Map className="h-4 w-4 text-primary" />
+            </div>
+            <h2 className="text-xl font-semibold tracking-tight">Разделы</h2>
+          </div>
+          <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-none">
+            {sections.map((section) => (
+              <SectionCard key={section.slug} section={section} />
+            ))}
+          </div>
+        </section>
+
         <ActivitySection
           title="Последние активности"
           icon={Star}

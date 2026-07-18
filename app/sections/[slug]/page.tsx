@@ -1,0 +1,103 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Heart, ChevronLeft, MapPin, Compass } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { sections, getSectionBySlug, activities } from "@/lib/data";
+
+export function generateStaticParams() {
+  return sections.map((s) => ({ slug: s.slug }));
+}
+
+export default async function SectionPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const section = getSectionBySlug(slug);
+  if (!section) notFound();
+
+  const categoryActivities = activities.filter(
+    (a) => a.category.toLowerCase() === section.category.toLowerCase()
+  );
+
+  return (
+    <div className="mx-auto max-w-5xl px-4 py-8 sm:py-12">
+      <Link
+        href="/"
+        className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ChevronLeft className="h-4 w-4" />
+        На главную
+      </Link>
+
+      <div className="mb-8 space-y-2">
+        <div
+          className={`flex h-24 sm:h-32 items-center justify-center rounded-xl bg-gradient-to-br ${section.imageGradient} mb-4`}
+        >
+          <Compass className="h-10 w-10 text-white/70 sm:h-14 sm:w-14" />
+        </div>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+          {section.name}
+        </h1>
+        <p className="text-muted-foreground">{section.description}</p>
+        <p className="text-sm text-muted-foreground">
+          {categoryActivities.length}{" "}
+          {categoryActivities.length === 1 ? "активность" : "активностей"}
+        </p>
+      </div>
+
+      {categoryActivities.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+            <Compass className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <p className="text-lg font-medium">
+            В этом разделе пока нет активностей
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Скоро здесь появятся новые приключения
+          </p>
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {categoryActivities.map((activity) => (
+            <Link key={activity.id} href={`/activities/${activity.id}`}>
+              <Card className="h-full card-hover">
+                <div
+                  className={`flex h-28 items-center justify-center bg-gradient-to-br ${activity.imageGradient}`}
+                >
+                  <Compass className="h-8 w-8 text-white/70" />
+                </div>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <Badge variant="secondary">
+                      <MapPin className="mr-0.5 h-3 w-3" />
+                      {activity.category}
+                    </Badge>
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Heart className="h-3 w-3" />
+                      {activity.likes}
+                    </span>
+                  </div>
+                  <CardTitle className="mt-1 text-base">
+                    {activity.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {activity.shortDescription}
+                  </p>
+                  <p className="mt-3 text-lg font-semibold text-primary">
+                    {activity.price.toLocaleString("ru-RU")} ₽
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

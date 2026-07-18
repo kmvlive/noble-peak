@@ -11,6 +11,84 @@ export interface Activity {
   isPopular: boolean;
 }
 
+export interface Section {
+  slug: string;
+  name: string;
+  description: string;
+  icon: string;
+  imageGradient: string;
+  category: string;
+}
+
+export const sections: Section[] = [
+  {
+    slug: "vodnye",
+    name: "Водные активности",
+    description: "Сплавы, яхтинг, дайвинг и всё, что связано с водой",
+    icon: "Waves",
+    imageGradient: "from-blue-400 to-indigo-500",
+    category: "Водные",
+  },
+  {
+    slug: "trekking",
+    name: "Треккинг",
+    description: "Пешие походы и горные маршруты любой сложности",
+    icon: "Mountain",
+    imageGradient: "from-emerald-400 to-cyan-500",
+    category: "Треккинг",
+  },
+  {
+    slug: "gastronomiya",
+    name: "Гастрономия",
+    description: "Кулинарные мастер-классы и дегустации",
+    icon: "UtensilsCrossed",
+    imageGradient: "from-orange-400 to-rose-500",
+    category: "Гастрономия",
+  },
+  {
+    slug: "aktivnyj-otdyh",
+    name: "Активный отдых",
+    description: "Прогулки верхом и другие активности на свежем воздухе",
+    icon: "Bike",
+    imageGradient: "from-amber-500 to-yellow-400",
+    category: "Активный отдых",
+  },
+  {
+    slug: "ekskursii",
+    name: "Экскурсии",
+    description: "Пешеходные прогулки с гидом по знаковым местам",
+    icon: "Map",
+    imageGradient: "from-stone-400 to-zinc-500",
+    category: "Экскурсии",
+  },
+  {
+    slug: "razvlecheniya",
+    name: "Развлечения",
+    description: "Квесты и командные игры для любой компании",
+    icon: "Gamepad2",
+    imageGradient: "from-red-400 to-pink-500",
+    category: "Развлечения",
+  },
+  {
+    slug: "ekstrim",
+    name: "Экстрим",
+    description: "Прыжки с парашютом и другие острые ощущения",
+    icon: "Zap",
+    imageGradient: "from-orange-400 to-red-500",
+    category: "Экстрим",
+  },
+];
+
+export function getActivitiesByCategory(category: string): Activity[] {
+  return activities.filter(
+    (a) => a.category.toLowerCase() === category.toLowerCase()
+  );
+}
+
+export function getSectionBySlug(slug: string): Section | undefined {
+  return sections.find((s) => s.slug === slug);
+}
+
 export const activities: Activity[] = [
   {
     id: "gornyj-pohod",
