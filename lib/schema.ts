@@ -7,6 +7,8 @@ import {
 export const TableName = {
   SERVICES: "services",
   ACTIVITIES: "activities",
+  SECTIONS: "sections",
+  ACTIVITY_CALENDAR: "activity_calendar",
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];
@@ -41,6 +43,16 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
       { AttributeName: "id", AttributeType: "S" },
       { AttributeName: "section", AttributeType: "S" },
     ],
+  },
+  [TableName.SECTIONS]: {
+    name: TableName.SECTIONS,
+    keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+    attributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
+  },
+  [TableName.ACTIVITY_CALENDAR]: {
+    name: TableName.ACTIVITY_CALENDAR,
+    keySchema: [{ AttributeName: "activityId", KeyType: "HASH" }],
+    attributeDefinitions: [{ AttributeName: "activityId", AttributeType: "S" }],
   },
 };
 

@@ -125,8 +125,20 @@ tasks:
     depends_on:
       - task-004
     related_feature: Админ-панель
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Реализовано управление разделами (создание/удаление) на странице
+      /admin/sections через API /api/admin/sections, и управление календарём
+      доступных дат/часов для каждой активности на странице редактирования
+      активности (/admin/activities/[id]/edit) через API
+      /api/admin/activities/[id]/calendar. Календарь отображает месячную сетку с
+      возможностью отмечать доступные даты и выбирать часы (если часы не
+      отмечены — доступен весь день). Основная реализация:
+      components/admin-sections-manager.tsx,
+      components/admin-activity-calendar.tsx,
+      components/admin-activity-form.tsx, app/api/admin/sections/route.ts,
+      app/api/admin/activities/[id]/calendar/route.ts, lib/models.ts,
+      lib/schema.ts.
   - id: task-006
     phase: mvp
     title: "Личный кабинет клиента: регистрация и вход"

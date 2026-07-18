@@ -241,3 +241,96 @@ export async function deleteActivity(id: string): Promise<void> {
     })
   );
 }
+
+export interface SectionRecord {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  imageGradient: string;
+  category: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function getAllSections(): Promise<SectionRecord[]> {
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.SECTIONS,
+    })
+  );
+  return (result.Items as SectionRecord[]) ?? [];
+}
+
+export async function createSection(
+  data: Omit<SectionRecord, "createdAt" | "updatedAt">
+): Promise<SectionRecord> {
+  const now = new Date().toISOString();
+  const section: SectionRecord = {
+    ...data,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.SECTIONS,
+      Item: section,
+    })
+  );
+
+  return section;
+}
+
+export async function deleteSection(id: string): Promise<void> {
+  await docClient.send(
+    new DeleteCommand({
+      TableName: TableName.SECTIONS,
+      Key: { id },
+    })
+  );
+}
+
+export interface CalendarDateEntry {
+  available: boolean;
+  hours?: string[];
+}
+
+export interface ActivityCalendarRecord {
+  activityId: string;
+  dates: Record<string, CalendarDateEntry>;
+  updatedAt: string;
+}
+
+export async function getActivityCalendar(
+  activityId: string
+): Promise<ActivityCalendarRecord | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TableName.ACTIVITY_CALENDAR,
+      Key: { activityId },
+    })
+  );
+  return (result.Item as ActivityCalendarRecord) ?? null;
+}
+
+export async function setActivityCalendar(
+  activityId: string,
+  dates: Record<string, CalendarDateEntry>
+): Promise<ActivityCalendarRecord> {
+  const now = new Date().toISOString();
+  const record: ActivityCalendarRecord = {
+    activityId,
+    dates,
+    updatedAt: now,
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.ACTIVITY_CALENDAR,
+      Item: record,
+    })
+  );
+
+  return record;
+}

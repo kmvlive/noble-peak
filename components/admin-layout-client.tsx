@@ -3,7 +3,15 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, List, LogOut, Menu, X, Sparkles } from "lucide-react";
+import {
+  LayoutDashboard,
+  List,
+  LogOut,
+  Menu,
+  X,
+  Sparkles,
+  FolderOpen,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const TOKEN_KEY = "admin_token";
@@ -58,6 +66,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const navItems = [
     { href: "/admin", label: "Дашборд", icon: LayoutDashboard },
     { href: "/admin", label: "Активности", icon: List },
+    { href: "/admin/sections", label: "Разделы", icon: FolderOpen },
   ];
 
   return (

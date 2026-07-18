@@ -2,15 +2,17 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, CalendarDays } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { getToken } from "./admin-layout-client";
 import { WysiwygEditor } from "./wysiwyg-editor";
 import { sections } from "@/lib/data";
 import type { OrderType } from "@/lib/models";
+import { AdminActivityCalendar } from "./admin-activity-calendar";
 
 interface AdminActivityFormProps {
   activity?: {
@@ -393,6 +395,21 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
           </Link>
         </div>
       </form>
+
+      {isEditing && activity && (
+        <>
+          <Separator />
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <CalendarDays className="h-5 w-5 text-muted-foreground" />
+              <h2 className="text-lg font-semibold tracking-tight">
+                Календарь доступных дат
+              </h2>
+            </div>
+            <AdminActivityCalendar activityId={activity.id} />
+          </div>
+        </>
+      )}
     </div>
   );
 }
