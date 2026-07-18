@@ -646,7 +646,7 @@ export interface AdminRecord {
   email: string;
   password: string;
   name: string;
-  role: "admin";
+  role: "main_admin" | "admin";
   createdAt: string;
   updatedAt: string;
 }

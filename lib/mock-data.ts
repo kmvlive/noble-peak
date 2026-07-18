@@ -168,7 +168,7 @@ export const mockAdmins: AdminRecord[] = [
     email: "artkmv1@ya.ru",
     password: "Artkmv11",
     name: "Главный администратор",
-    role: "admin",
+    role: "main_admin",
     createdAt: new Date("2024-01-01").toISOString(),
     updatedAt: new Date("2024-01-01").toISOString(),
   },
