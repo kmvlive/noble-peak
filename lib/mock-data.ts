@@ -4,6 +4,7 @@ import type {
   SectionRecord,
   ActivityCalendarRecord,
   BookingRecord,
+  EmailSettingsRecord,
 } from "./models";
 import {
   activities as staticActivities,
@@ -105,3 +106,10 @@ export const mockCalendars: ActivityCalendarRecord[] = staticActivities.map(
 );
 
 export const mockBookings: BookingRecord[] = [];
+
+export const mockEmailSettings: EmailSettingsRecord = {
+  id: "default",
+  emails: ["admin@magazin-tour.ru"],
+  defaultEmail: "admin@magazin-tour.ru",
+  updatedAt: new Date().toISOString(),
+};

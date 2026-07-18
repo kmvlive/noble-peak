@@ -232,8 +232,15 @@ tasks:
     depends_on:
       - task-005
     related_feature: Админ-панель
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Создана страница /admin/settings в админ-панели для управления
+      email-ящиками уведомлений. Реализовано: добавление/удаление email-ящиков,
+      выбор email по умолчанию (звёздочка), сохранение настроек через API
+      PUT /api/admin/settings. Добавлена таблица email_settings в DynamoDB,
+      модель EmailSettingsRecord и CRUD-функции в lib/models.ts, мок-данные в
+      lib/mock-data.ts. Пункт «Настройки» добавлен в боковое меню админ-панели.
+      typecheck, lint, build проходят.
   - id: task-010
     phase: mvp
     title: Интеграция с платёжной системой Т-банка

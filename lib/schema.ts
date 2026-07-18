@@ -11,6 +11,7 @@ export const TableName = {
   ACTIVITY_CALENDAR: "activity_calendar",
   CLIENTS: "clients",
   BOOKINGS: "bookings",
+  EMAIL_SETTINGS: "email_settings",
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];
@@ -72,6 +73,11 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
         Projection: { ProjectionType: "ALL" },
       },
     ],
+  },
+  [TableName.EMAIL_SETTINGS]: {
+    name: TableName.EMAIL_SETTINGS,
+    keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+    attributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
   },
 };
 

@@ -438,3 +438,38 @@ export async function getClientBookings(
   );
   return (result.Items as BookingRecord[]) ?? [];
 }
+
+export interface EmailSettingsRecord {
+  id: string;
+  emails: string[];
+  defaultEmail: string;
+  updatedAt: string;
+}
+
+export async function getEmailSettings(): Promise<EmailSettingsRecord | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TableName.EMAIL_SETTINGS,
+      Key: { id: "default" },
+    })
+  );
+  return (result.Item as EmailSettingsRecord) ?? null;
+}
+
+export async function saveEmailSettings(
+  data: Omit<EmailSettingsRecord, "id" | "updatedAt">
+): Promise<EmailSettingsRecord> {
+  const now = new Date().toISOString();
+  const record: EmailSettingsRecord = {
+    id: "default",
+    ...data,
+    updatedAt: now,
+  };
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.EMAIL_SETTINGS,
+      Item: record,
+    })
+  );
+  return record;
+}
