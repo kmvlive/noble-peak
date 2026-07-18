@@ -25,6 +25,7 @@ interface AdminActivityFormProps {
     price: number;
     likes: number;
     isPopular: boolean;
+    over18: boolean;
     orderType: OrderType;
     imageGradient: string;
   };
@@ -67,6 +68,7 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
   const [imageUrls, setImageUrls] = useState<string[]>(activity?.images ?? []);
   const [newImageUrl, setNewImageUrl] = useState("");
   const [saving, setSaving] = useState(false);
+  const [over18, setOver18] = useState(activity?.over18 ?? false);
 
   const [id, setId] = useState(activity?.id ?? "");
 
@@ -107,6 +109,7 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
       price: Number(price),
       likes: Number(likes),
       isPopular,
+      over18,
       orderType,
       imageGradient,
     };
@@ -376,6 +379,19 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
           />
           <label htmlFor="isPopular" className="text-sm font-medium">
             Популярная активность
+          </label>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id="over18"
+            checked={over18}
+            onChange={(e) => setOver18(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+          />
+          <label htmlFor="over18" className="text-sm font-medium">
+            18+
           </label>
         </div>
 

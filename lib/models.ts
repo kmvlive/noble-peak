@@ -32,6 +32,7 @@ export interface ActivityRecord {
   price: number;
   likes: number;
   isPopular: boolean;
+  over18: boolean;
   orderType: OrderType;
   imageGradient: string;
   createdAt: string;

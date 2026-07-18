@@ -16,6 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import type { Activity } from "@/lib/data";
 import { ActivityBookingCalendar } from "@/components/activity-booking-calendar";
 import { BookingForm } from "@/components/booking-form";
+import { AgeVerificationOverlay } from "@/components/age-verification-overlay";
 
 export function ActivityPageContent({ activity }: { activity: Activity }) {
   const [likes, setLikes] = useState(activity.likes);
@@ -68,6 +69,8 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
 
   return (
     <div className="mx-auto max-w-3xl">
+      {activity.over18 && <AgeVerificationOverlay />}
+
       <div className="relative">
         {activity.images.length > 1 && (
           <>

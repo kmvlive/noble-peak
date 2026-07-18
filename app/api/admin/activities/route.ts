@@ -20,6 +20,7 @@ const createActivitySchema = z.object({
   price: z.number().min(0),
   likes: z.number().min(0).optional().default(0),
   isPopular: z.boolean().optional().default(false),
+  over18: z.boolean().optional().default(false),
   orderType: z.enum(["payment", "order_form"]).optional().default("order_form"),
   imageGradient: z.string().optional().default("from-blue-400 to-indigo-500"),
 });

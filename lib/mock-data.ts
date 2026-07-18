@@ -55,6 +55,7 @@ function mapStaticActivityToRecord(
     price: a.price,
     likes: a.likes,
     isPopular: a.isPopular,
+    over18: false,
     orderType: "order_form",
     imageGradient: a.imageGradient,
     createdAt: new Date("2024-06-01").toISOString(),

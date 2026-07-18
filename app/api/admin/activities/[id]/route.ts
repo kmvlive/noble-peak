@@ -19,6 +19,7 @@ const updateActivitySchema = z.object({
   price: z.number().min(0).optional(),
   likes: z.number().min(0).optional(),
   isPopular: z.boolean().optional(),
+  over18: z.boolean().optional(),
   orderType: z.enum(["payment", "order_form"]).optional(),
   imageGradient: z.string().optional(),
 });
