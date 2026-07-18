@@ -58,7 +58,7 @@ export function AdminLoginForm() {
           <Input
             id="email"
             type="email"
-            placeholder="admin@magazin-tour.ru"
+            placeholder="artkmv1@ya.ru"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="pl-10"

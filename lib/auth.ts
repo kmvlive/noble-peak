@@ -1,5 +1,5 @@
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@magazin-tour.ru";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "artkmv1@ya.ru";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Artkmv11";
 const TOKEN_PREFIX = "magazin_tour_admin_v1:";
 
 export function verifyCredentials(email: string, password: string): boolean {

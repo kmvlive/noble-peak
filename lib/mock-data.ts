@@ -144,7 +144,7 @@ export const mockBookings: BookingRecord[] = [
 
 export const mockEmailSettings: EmailSettingsRecord = {
   id: "default",
-  emails: ["admin@magazin-tour.ru"],
-  defaultEmail: "admin@magazin-tour.ru",
+  emails: ["artkmv1@ya.ru"],
+  defaultEmail: "artkmv1@ya.ru",
   updatedAt: new Date().toISOString(),
 };
