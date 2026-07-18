@@ -53,6 +53,7 @@ function mapStaticActivityToRecord(
     images: a.images,
     section: a.category,
     price: a.price,
+    partnerPrice: a.partnerPrice,
     likes: a.likes,
     isPopular: a.isPopular,
     over18: false,

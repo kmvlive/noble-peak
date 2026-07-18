@@ -18,6 +18,7 @@ const createActivitySchema = z.object({
       message: "Некорректный раздел",
     }),
   price: z.number().min(0),
+  partnerPrice: z.number().min(0).optional(),
   likes: z.number().min(0).optional().default(0),
   isPopular: z.boolean().optional().default(false),
   over18: z.boolean().optional().default(false),

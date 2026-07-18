@@ -17,6 +17,7 @@ const updateActivitySchema = z.object({
     })
     .optional(),
   price: z.number().min(0).optional(),
+  partnerPrice: z.number().min(0).optional(),
   likes: z.number().min(0).optional(),
   isPopular: z.boolean().optional(),
   over18: z.boolean().optional(),

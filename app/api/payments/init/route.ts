@@ -59,6 +59,8 @@ export async function POST(request: NextRequest) {
     const clientName = clientData?.client?.name ?? "";
     const clientPhone = clientData?.client?.phone ?? "";
 
+    const amount = activity.partnerPrice ?? activity.price;
+
     const booking = await createBooking(
       {
         clientEmail,
@@ -69,12 +71,12 @@ export async function POST(request: NextRequest) {
         date,
         time,
         details,
-        price: activity.price,
+        price: amount,
       },
       true
     );
 
-    const amountKopecks = Math.round(activity.price * 100);
+    const amountKopecks = Math.round(amount * 100);
     const tinkoffRes = await initPayment(
       booking.id,
       amountKopecks,

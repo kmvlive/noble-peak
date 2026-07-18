@@ -30,6 +30,7 @@ export interface ActivityRecord {
   images: string[];
   section: string;
   price: number;
+  partnerPrice?: number;
   likes: number;
   isPopular: boolean;
   over18: boolean;

@@ -6,6 +6,7 @@ export interface Activity {
   images: string[];
   category: string;
   price: number;
+  partnerPrice?: number;
   imageGradient: string;
   likes: number;
   isPopular: boolean;

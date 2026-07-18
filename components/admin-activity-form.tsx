@@ -24,6 +24,7 @@ interface AdminActivityFormProps {
     images: string[];
     section: string;
     price: number;
+    partnerPrice?: number;
     likes: number;
     isPopular: boolean;
     over18: boolean;
@@ -59,6 +60,9 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
     activity?.section ?? sections[0]?.category ?? ""
   );
   const [price, setPrice] = useState(String(activity?.price ?? ""));
+  const [partnerPrice, setPartnerPrice] = useState(
+    String(activity?.partnerPrice ?? "")
+  );
   const [orderType, setOrderType] = useState<OrderType>(
     activity?.orderType ?? "order_form"
   );
@@ -108,6 +112,7 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
       images: imageUrls,
       section,
       price: Number(price),
+      partnerPrice: partnerPrice ? Number(partnerPrice) : undefined,
       likes: Number(likes),
       isPopular,
       over18,
@@ -387,7 +392,7 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
 
           <div className="space-y-2">
             <label htmlFor="price" className="text-sm font-medium">
-              Цена (₽)
+              Цена для клиента (₽)
             </label>
             <Input
               id="price"
@@ -397,6 +402,26 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
               onChange={(e) => setPrice(e.target.value)}
               placeholder="3500"
             />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div className="space-y-2">
+            <label htmlFor="partnerPrice" className="text-sm font-medium">
+              Цена для партнёра (₽)
+            </label>
+            <Input
+              id="partnerPrice"
+              type="number"
+              min="0"
+              value={partnerPrice}
+              onChange={(e) => setPartnerPrice(e.target.value)}
+              placeholder="3000"
+            />
+            <p className="text-xs text-muted-foreground">
+              Эта цена будет списываться при оплате через Т-банк. Не
+              отображается на странице активности.
+            </p>
           </div>
         </div>
 
