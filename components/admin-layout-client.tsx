@@ -43,14 +43,14 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const redirectedRef = useRef(false);
 
-  const isAuthed = hasToken();
-
   useEffect(() => {
-    if (!isAuthed && pathname !== "/admin/login" && !redirectedRef.current) {
+    if (!hasToken() && !redirectedRef.current) {
       redirectedRef.current = true;
       router.replace("/admin/login");
     }
-  }, [isAuthed, pathname, router]);
+  }, [router]);
+
+  const isAuthed = hasToken();
 
   const handleLogout = useCallback(() => {
     clearToken();
