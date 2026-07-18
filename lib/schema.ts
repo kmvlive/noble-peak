@@ -12,6 +12,7 @@ export const TableName = {
   CLIENTS: "clients",
   BOOKINGS: "bookings",
   EMAIL_SETTINGS: "email_settings",
+  PAYMENT_SETTINGS: "payment_settings",
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];
@@ -76,6 +77,11 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
   },
   [TableName.EMAIL_SETTINGS]: {
     name: TableName.EMAIL_SETTINGS,
+    keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+    attributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
+  },
+  [TableName.PAYMENT_SETTINGS]: {
+    name: TableName.PAYMENT_SETTINGS,
     keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
     attributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
   },

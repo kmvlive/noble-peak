@@ -5,6 +5,7 @@ import type {
   ActivityCalendarRecord,
   BookingRecord,
   EmailSettingsRecord,
+  PaymentSettingsRecord,
 } from "./models";
 import {
   activities as staticActivities,
@@ -146,5 +147,13 @@ export const mockEmailSettings: EmailSettingsRecord = {
   id: "default",
   emails: ["artkmv1@ya.ru"],
   defaultEmail: "artkmv1@ya.ru",
+  updatedAt: new Date().toISOString(),
+};
+
+export const mockPaymentSettings: PaymentSettingsRecord = {
+  id: "default",
+  terminalKey: "",
+  password: "",
+  webhookUrl: "",
   updatedAt: new Date().toISOString(),
 };

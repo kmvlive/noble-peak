@@ -544,3 +544,39 @@ export async function saveEmailSettings(
   );
   return record;
 }
+
+export interface PaymentSettingsRecord {
+  id: string;
+  terminalKey: string;
+  password: string;
+  webhookUrl: string;
+  updatedAt: string;
+}
+
+export async function getPaymentSettings(): Promise<PaymentSettingsRecord | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TableName.PAYMENT_SETTINGS,
+      Key: { id: "default" },
+    })
+  );
+  return (result.Item as PaymentSettingsRecord) ?? null;
+}
+
+export async function savePaymentSettings(
+  data: Omit<PaymentSettingsRecord, "id" | "updatedAt">
+): Promise<PaymentSettingsRecord> {
+  const now = new Date().toISOString();
+  const record: PaymentSettingsRecord = {
+    id: "default",
+    ...data,
+    updatedAt: now,
+  };
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.PAYMENT_SETTINGS,
+      Item: record,
+    })
+  );
+  return record;
+}
