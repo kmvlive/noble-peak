@@ -13,6 +13,7 @@ import { WysiwygEditor } from "./wysiwyg-editor";
 import { sections } from "@/lib/data";
 import type { OrderType } from "@/lib/models";
 import { AdminActivityCalendar } from "./admin-activity-calendar";
+import { slugify } from "@/lib/utils";
 
 interface AdminActivityFormProps {
   activity?: {
@@ -73,11 +74,7 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
   const [id, setId] = useState(activity?.id ?? "");
 
   const generateSlug = (val: string) => {
-    const slug = val
-      .toLowerCase()
-      .replace(/[^а-яa-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "");
-    if (!isEditing) setId(slug);
+    if (!isEditing) setId(slugify(val));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

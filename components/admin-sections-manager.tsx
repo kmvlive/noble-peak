@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { getToken } from "./admin-layout-client";
+import { slugify } from "@/lib/utils";
 
 const ICON_MAP: Record<string, React.ReactNode> = {
   FolderOpen: <FolderOpen className="h-4 w-4" />,
@@ -80,11 +81,7 @@ export function AdminSectionsManager() {
     }
   };
 
-  const generateId = (val: string) =>
-    val
-      .toLowerCase()
-      .replace(/[^а-яa-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "");
+  const generateId = (val: string) => slugify(val);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
