@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import {
@@ -40,9 +40,10 @@ function hasToken(): boolean {
 export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [isAuthed, setIsAuthed] = useState(hasToken);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const redirectedRef = useRef(false);
+
+  const isAuthed = hasToken();
 
   useEffect(() => {
     if (!isAuthed && pathname !== "/admin/login" && !redirectedRef.current) {
@@ -51,11 +52,10 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
     }
   }, [isAuthed, pathname, router]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     clearToken();
-    setIsAuthed(false);
     router.replace("/admin/login");
-  };
+  }, [router]);
 
   const isLoginPage = pathname === "/admin/login";
 
