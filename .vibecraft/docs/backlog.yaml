@@ -98,8 +98,18 @@ tasks:
     depends_on:
       - task-003
     related_feature: Админ-панель
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Реализована админ-панель с отдельной страницей входа (/admin/login,
+      проверка email/пароля, токен в localStorage). Дашборд (/admin) со
+      списком активностей, поиском, созданием, редактированием и удалением.
+      Форма создания/редактирования включает: WYSIWYG-редактор (TipTap),
+      загрузку изображений (URL/градиенты), выбор раздела из существующих,
+      ползунок «Оплата / Форма заказа», цену, лайки, популярность.
+      API: POST /api/admin/login, GET/POST /api/admin/activities,
+      GET/PUT/DELETE /api/admin/activities/[id]. Основная реализация:
+      app/admin/, components/admin-*.tsx, lib/auth.ts, lib/models.ts
+      (ActivityRecord), lib/schema.ts (таблица activities).
   - id: task-005
     phase: mvp
     title: "Админ-панель: управление разделами и календарём"

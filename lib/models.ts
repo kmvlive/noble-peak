@@ -19,6 +19,24 @@ export interface Service {
   updatedAt: string;
 }
 
+export type OrderType = "payment" | "order_form";
+
+export interface ActivityRecord {
+  id: string;
+  title: string;
+  shortDescription: string;
+  description: string;
+  images: string[];
+  section: string;
+  price: number;
+  likes: number;
+  isPopular: boolean;
+  orderType: OrderType;
+  imageGradient: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export async function getServiceById(id: string): Promise<Service | null> {
   const result = await docClient.send(
     new GetCommand({
@@ -129,6 +147,96 @@ export async function deleteService(id: string): Promise<void> {
   await docClient.send(
     new DeleteCommand({
       TableName: TableName.SERVICES,
+      Key: { id },
+    })
+  );
+}
+
+export async function getAllActivities(): Promise<ActivityRecord[]> {
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.ACTIVITIES,
+    })
+  );
+  return (result.Items as ActivityRecord[]) ?? [];
+}
+
+export async function getActivityById(
+  id: string
+): Promise<ActivityRecord | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TableName.ACTIVITIES,
+      Key: { id },
+    })
+  );
+  return (result.Item as ActivityRecord) ?? null;
+}
+
+export async function createActivity(
+  data: Omit<ActivityRecord, "createdAt" | "updatedAt">
+): Promise<ActivityRecord> {
+  const now = new Date().toISOString();
+  const activity: ActivityRecord = {
+    ...data,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.ACTIVITIES,
+      Item: activity,
+    })
+  );
+
+  return activity;
+}
+
+export async function updateActivity(
+  id: string,
+  data: Partial<Omit<ActivityRecord, "id" | "createdAt" | "updatedAt">>
+): Promise<ActivityRecord> {
+  const updateExpr: string[] = [];
+  const exprValues: Record<string, unknown> = {};
+  const exprNames: Record<string, string> = {};
+
+  for (const [key, value] of Object.entries(data)) {
+    if (value === undefined) continue;
+    const nameKey = `#${key}`;
+    const valKey = `:${key}`;
+    updateExpr.push(`${nameKey} = ${valKey}`);
+    exprValues[valKey] = value;
+    exprNames[nameKey] = key;
+  }
+
+  if (updateExpr.length === 0) {
+    const existing = await getActivityById(id);
+    if (!existing) throw new Error("Activity not found");
+    return existing;
+  }
+
+  updateExpr.push("updatedAt = :updatedAt");
+  exprValues[":updatedAt"] = new Date().toISOString();
+
+  const result = await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.ACTIVITIES,
+      Key: { id },
+      UpdateExpression: `set ${updateExpr.join(", ")}`,
+      ExpressionAttributeValues: exprValues,
+      ExpressionAttributeNames: exprNames,
+      ReturnValues: "ALL_NEW",
+    })
+  );
+
+  return result.Attributes as ActivityRecord;
+}
+
+export async function deleteActivity(id: string): Promise<void> {
+  await docClient.send(
+    new DeleteCommand({
+      TableName: TableName.ACTIVITIES,
       Key: { id },
     })
   );

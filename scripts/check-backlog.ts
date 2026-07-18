@@ -2,7 +2,12 @@ import fs from "node:fs";
 import path from "node:path";
 import yaml from "js-yaml";
 
-const backlogPath = path.join(process.cwd(), ".vibecraft", "docs", "backlog.yaml");
+const backlogPath = path.join(
+  process.cwd(),
+  ".vibecraft",
+  "docs",
+  "backlog.yaml"
+);
 
 if (!fs.existsSync(backlogPath)) {
   console.log("backlog.yaml not found, skipping YAML validation.");

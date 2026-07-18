@@ -1,7 +1,6 @@
-// Мок-данные для статического режима (без БД)
-// Используются когда USE_DATABASE=false или БД недоступна
-
 import { Service } from "./models";
+import type { ActivityRecord } from "./models";
+import { activities as staticActivities } from "./data";
 
 export const mockServices: Service[] = [
   {
@@ -32,3 +31,27 @@ export const mockServices: Service[] = [
     updatedAt: new Date("2024-03-10").toISOString(),
   },
 ];
+
+function mapStaticActivityToRecord(
+  a: (typeof staticActivities)[number]
+): ActivityRecord {
+  return {
+    id: a.id,
+    title: a.title,
+    shortDescription: a.shortDescription,
+    description: a.description,
+    images: a.images,
+    section: a.category,
+    price: a.price,
+    likes: a.likes,
+    isPopular: a.isPopular,
+    orderType: "order_form",
+    imageGradient: a.imageGradient,
+    createdAt: new Date("2024-06-01").toISOString(),
+    updatedAt: new Date("2024-06-01").toISOString(),
+  };
+}
+
+export const mockActivities: ActivityRecord[] = staticActivities.map(
+  mapStaticActivityToRecord
+);
