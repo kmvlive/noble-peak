@@ -4,7 +4,6 @@ import { getAllActivities, createActivity } from "@/lib/models";
 import { mockActivities } from "@/lib/mock-data";
 import { verifyToken } from "@/lib/auth";
 import { z } from "zod";
-import { sections } from "@/lib/data";
 
 const createActivitySchema = z.object({
   id: z.string().min(1).max(100),
@@ -12,11 +11,7 @@ const createActivitySchema = z.object({
   shortDescription: z.string().max(500).optional().default(""),
   description: z.string().max(50_000).optional().default(""),
   images: z.array(z.string()).optional().default([]),
-  section: z
-    .string()
-    .refine((val) => sections.some((s) => s.category === val), {
-      message: "Некорректный раздел",
-    }),
+  section: z.string().min(1, "Раздел обязателен"),
   price: z.number().min(0),
   partnerPrice: z.number().min(0).optional(),
   likes: z.number().min(0).optional().default(0),

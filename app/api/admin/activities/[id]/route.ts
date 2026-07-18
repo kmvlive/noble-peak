@@ -3,19 +3,13 @@ import { isDatabaseAvailable } from "@/lib/db";
 import { getActivityById, updateActivity, deleteActivity } from "@/lib/models";
 import { verifyToken } from "@/lib/auth";
 import { z } from "zod";
-import { sections } from "@/lib/data";
 
 const updateActivitySchema = z.object({
   title: z.string().min(1).max(200).optional(),
   shortDescription: z.string().max(500).optional(),
   description: z.string().max(50_000).optional(),
   images: z.array(z.string()).optional(),
-  section: z
-    .string()
-    .refine((val) => sections.some((s) => s.category === val), {
-      message: "Некорректный раздел",
-    })
-    .optional(),
+  section: z.string().min(1, "Раздел обязателен").optional(),
   price: z.number().min(0).optional(),
   partnerPrice: z.number().min(0).optional(),
   likes: z.number().min(0).optional(),

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, CalendarDays, Upload, ImageIcon } from "lucide-react";
 import Link from "next/link";
@@ -10,8 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { getToken } from "./admin-layout-client";
 import { WysiwygEditor } from "./wysiwyg-editor";
-import { sections } from "@/lib/data";
-import type { OrderType } from "@/lib/models";
+import type { OrderType, SectionRecord } from "@/lib/models";
 import { AdminActivityCalendar } from "./admin-activity-calendar";
 import { slugify } from "@/lib/utils";
 
@@ -56,9 +55,8 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
     activity?.shortDescription ?? ""
   );
   const [description, setDescription] = useState(activity?.description ?? "");
-  const [section, setSection] = useState(
-    activity?.section ?? sections[0]?.category ?? ""
-  );
+  const [sectionOptions, setSectionOptions] = useState<SectionRecord[]>([]);
+  const [section, setSection] = useState(activity?.section ?? "");
   const [price, setPrice] = useState(String(activity?.price ?? ""));
   const [partnerPrice, setPartnerPrice] = useState(
     String(activity?.partnerPrice ?? "")
@@ -80,6 +78,18 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
   const [location, setLocation] = useState(activity?.location ?? "");
 
   const [id, setId] = useState(activity?.id ?? "");
+
+  useEffect(() => {
+    fetch("/api/admin/sections")
+      .then((res) => res.json())
+      .then((data: SectionRecord[]) => {
+        setSectionOptions(data);
+        if (!activity?.section && data.length > 0) {
+          setSection(data[0].category);
+        }
+      })
+      .catch(() => {});
+  }, [activity]);
 
   const generateSlug = (val: string) => {
     if (!isEditing) setId(slugify(val));
@@ -382,7 +392,10 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
               onChange={(e) => setSection(e.target.value)}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              {sections.map((s) => (
+              {sectionOptions.length === 0 && (
+                <option value="">Нет доступных разделов</option>
+              )}
+              {sectionOptions.map((s) => (
                 <option key={s.category} value={s.category}>
                   {s.name}
                 </option>
