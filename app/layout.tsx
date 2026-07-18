@@ -7,10 +7,9 @@ import { Sparkles } from "lucide-react";
 import { BridgeProvider } from "@/components/bridge-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { sections } from "@/lib/data";
+import { appName } from "@/lib/app-name";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
-
-const appName = "magazin-tour. Магазин туров и активностей";
 
 export const metadata: Metadata = {
   title: appName,

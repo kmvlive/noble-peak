@@ -233,6 +233,46 @@ export async function updateActivity(
   return result.Attributes as ActivityRecord;
 }
 
+export interface ClientRecord {
+  email: string;
+  name: string;
+  phone: string;
+  passwordHash: string;
+  createdAt: string;
+}
+
+export async function getClientByEmail(
+  email: string
+): Promise<ClientRecord | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TableName.CLIENTS,
+      Key: { email },
+    })
+  );
+  return (result.Item as ClientRecord) ?? null;
+}
+
+export async function createClient(
+  data: Omit<ClientRecord, "createdAt">
+): Promise<ClientRecord> {
+  const now = new Date().toISOString();
+  const client: ClientRecord = {
+    ...data,
+    createdAt: now,
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.CLIENTS,
+      Item: client,
+      ConditionExpression: "attribute_not_exists(email)",
+    })
+  );
+
+  return client;
+}
+
 export async function deleteActivity(id: string): Promise<void> {
   await docClient.send(
     new DeleteCommand({

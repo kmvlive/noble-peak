@@ -155,8 +155,15 @@ tasks:
     depends_on:
       - task-003
     related_feature: Личный кабинет клиента
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Реализована страница входа/регистрации клиента (/client/login) с двумя
+      режимами: вход (email + пароль) и регистрация (имя, телефон, email,
+      пароль). Добавлена таблица clients в DynamoDB, модель ClientRecord,
+      API /api/client/register (с валидацией zod, хешированием пароля через
+      crypto), API /api/client/login (с проверкой хеша). После регистрации
+      отправляется письмо с данными через nodemailer (SMTP). Аутентификация
+      через httpOnly cookie и токен.
   - id: task-007
     phase: mvp
     title: Календарь на странице активности и выбор даты/времени
