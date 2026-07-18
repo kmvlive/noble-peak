@@ -3,6 +3,7 @@ import type {
   ActivityRecord,
   SectionRecord,
   ActivityCalendarRecord,
+  BookingRecord,
 } from "./models";
 import {
   activities as staticActivities,
@@ -102,3 +103,5 @@ export const mockCalendars: ActivityCalendarRecord[] = staticActivities.map(
     updatedAt: new Date().toISOString(),
   })
 );
+
+export const mockBookings: BookingRecord[] = [];

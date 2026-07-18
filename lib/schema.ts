@@ -10,6 +10,7 @@ export const TableName = {
   SECTIONS: "sections",
   ACTIVITY_CALENDAR: "activity_calendar",
   CLIENTS: "clients",
+  BOOKINGS: "bookings",
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];
@@ -40,10 +41,7 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
   [TableName.ACTIVITIES]: {
     name: TableName.ACTIVITIES,
     keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
-    attributeDefinitions: [
-      { AttributeName: "id", AttributeType: "S" },
-      { AttributeName: "section", AttributeType: "S" },
-    ],
+    attributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
   },
   [TableName.SECTIONS]: {
     name: TableName.SECTIONS,
@@ -60,12 +58,28 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
     keySchema: [{ AttributeName: "email", KeyType: "HASH" }],
     attributeDefinitions: [{ AttributeName: "email", AttributeType: "S" }],
   },
+  [TableName.BOOKINGS]: {
+    name: TableName.BOOKINGS,
+    keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+    attributeDefinitions: [
+      { AttributeName: "id", AttributeType: "S" },
+      { AttributeName: "clientEmail", AttributeType: "S" },
+    ],
+    globalSecondaryIndexes: [
+      {
+        IndexName: "clientEmail-index",
+        KeySchema: [{ AttributeName: "clientEmail", KeyType: "HASH" }],
+        Projection: { ProjectionType: "ALL" },
+      },
+    ],
+  },
 };
 
 export const TABLE_NAMES: TableName[] = Object.values(TableName);
 
 export const IndexName = {
   SERVICES_STATUS: "status-index",
+  BOOKINGS_CLIENT_EMAIL: "clientEmail-index",
 } as const;
 
 export type IndexName = (typeof IndexName)[keyof typeof IndexName];

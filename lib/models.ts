@@ -8,6 +8,7 @@ import {
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { TableName, IndexName } from "./schema";
+import { randomUUID } from "node:crypto";
 
 export interface Service {
   id: string;
@@ -373,4 +374,67 @@ export async function setActivityCalendar(
   );
 
   return record;
+}
+
+export interface BookingRecord {
+  id: string;
+  clientEmail: string;
+  clientName: string;
+  clientPhone: string;
+  activityId: string;
+  activityTitle: string;
+  date: string;
+  time: string | null;
+  details: string;
+  status: "confirmed" | "cancelled";
+  createdAt: string;
+}
+
+export async function createBooking(
+  data: Omit<BookingRecord, "id" | "createdAt" | "status">
+): Promise<BookingRecord> {
+  const now = new Date().toISOString();
+  const booking: BookingRecord = {
+    ...data,
+    id: randomUUID(),
+    status: "confirmed",
+    createdAt: now,
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.BOOKINGS,
+      Item: booking,
+    })
+  );
+
+  return booking;
+}
+
+export async function getBookingById(
+  id: string
+): Promise<BookingRecord | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TableName.BOOKINGS,
+      Key: { id },
+    })
+  );
+  return (result.Item as BookingRecord) ?? null;
+}
+
+export async function getClientBookings(
+  clientEmail: string
+): Promise<BookingRecord[]> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.BOOKINGS,
+      IndexName: IndexName.BOOKINGS_CLIENT_EMAIL,
+      KeyConditionExpression: "clientEmail = :clientEmail",
+      ExpressionAttributeValues: {
+        ":clientEmail": clientEmail,
+      },
+    })
+  );
+  return (result.Items as BookingRecord[]) ?? [];
 }

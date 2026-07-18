@@ -9,6 +9,7 @@ export interface Activity {
   imageGradient: string;
   likes: number;
   isPopular: boolean;
+  orderType: "order_form" | "payment";
 }
 
 export interface Section {
@@ -117,6 +118,7 @@ export const activities: Activity[] = [
     imageGradient: "from-emerald-400 to-cyan-500",
     likes: 48,
     isPopular: true,
+    orderType: "order_form",
   },
   {
     id: "morskaja-progulka",
@@ -145,6 +147,7 @@ export const activities: Activity[] = [
     imageGradient: "from-blue-400 to-indigo-500",
     likes: 72,
     isPopular: true,
+    orderType: "order_form",
   },
   {
     id: "master-klass-gotovki",
@@ -173,6 +176,7 @@ export const activities: Activity[] = [
     imageGradient: "from-orange-400 to-rose-500",
     likes: 35,
     isPopular: false,
+    orderType: "order_form",
   },
   {
     id: "konnaja-progulka",
@@ -201,6 +205,7 @@ export const activities: Activity[] = [
     imageGradient: "from-amber-500 to-yellow-400",
     likes: 29,
     isPopular: true,
+    orderType: "order_form",
   },
   {
     id: "rafting",
@@ -229,6 +234,7 @@ export const activities: Activity[] = [
     imageGradient: "from-cyan-400 to-teal-500",
     likes: 56,
     isPopular: true,
+    orderType: "order_form",
   },
   {
     id: "ekskursija-po-gorodu",
@@ -258,6 +264,7 @@ export const activities: Activity[] = [
     imageGradient: "from-stone-400 to-zinc-500",
     likes: 41,
     isPopular: false,
+    orderType: "order_form",
   },
   {
     id: "degustacija-vina",
@@ -285,6 +292,7 @@ export const activities: Activity[] = [
     imageGradient: "from-purple-400 to-violet-500",
     likes: 63,
     isPopular: true,
+    orderType: "order_form",
   },
   {
     id: "dajving",
@@ -313,6 +321,7 @@ export const activities: Activity[] = [
     imageGradient: "from-sky-400 to-blue-600",
     likes: 38,
     isPopular: false,
+    orderType: "order_form",
   },
   {
     id: "kvest-komnata",
@@ -340,6 +349,7 @@ export const activities: Activity[] = [
     imageGradient: "from-red-400 to-pink-500",
     likes: 22,
     isPopular: false,
+    orderType: "order_form",
   },
   {
     id: "parashjut",
@@ -368,6 +378,7 @@ export const activities: Activity[] = [
     imageGradient: "from-orange-400 to-red-500",
     likes: 81,
     isPopular: true,
+    orderType: "order_form",
   },
 ];
 

@@ -57,3 +57,13 @@ export function generatePassword(): string {
 }
 
 export { hashPassword, verifyPassword };
+
+import type { NextRequest } from "next/server";
+
+export function getClientEmailFromRequest(request: NextRequest): string | null {
+  const token =
+    request.cookies.get("client_token")?.value ??
+    request.headers.get("authorization")?.replace("Bearer ", "");
+  if (!token) return null;
+  return verifyClientToken(token);
+}

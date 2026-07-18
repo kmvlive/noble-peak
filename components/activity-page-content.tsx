@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Heart,
   ChevronLeft,
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import type { Activity } from "@/lib/data";
 import { ActivityBookingCalendar } from "@/components/activity-booking-calendar";
+import { BookingForm } from "@/components/booking-form";
 
 export function ActivityPageContent({ activity }: { activity: Activity }) {
   const [likes, setLikes] = useState(activity.likes);
@@ -22,6 +23,25 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
   const [currentImage, setCurrentImage] = useState(0);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [clientData, setClientData] = useState<{
+    name: string;
+    phone: string;
+  } | null>(null);
+
+  useEffect(() => {
+    const fetchClient = async () => {
+      try {
+        const res = await fetch("/api/client/me");
+        if (res.ok) {
+          const data = await res.json();
+          setClientData(data.client || null);
+        }
+      } catch {
+        /* not logged in */
+      }
+    };
+    fetchClient();
+  }, []);
 
   const handleLike = () => {
     if (liked) {
@@ -41,6 +61,10 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
     setSelectedDate(date);
     setSelectedTime(time ?? null);
   };
+
+  const hasSelection = selectedDate !== null;
+  const showBookingForm = hasSelection && activity.orderType === "order_form";
+  const showPaymentRedirect = hasSelection && activity.orderType === "payment";
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -151,6 +175,30 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
             />
           </div>
         </div>
+
+        {showBookingForm && (
+          <div className="pt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <BookingForm
+              activityId={activity.id}
+              activityTitle={activity.title}
+              date={selectedDate!}
+              time={selectedTime}
+              clientName={clientData?.name ?? ""}
+              clientPhone={clientData?.phone ?? ""}
+            />
+          </div>
+        )}
+
+        {showPaymentRedirect && (
+          <div className="pt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <Link
+              href={`/payment?activityId=${activity.id}&date=${selectedDate}&time=${selectedTime || ""}`}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              Перейти к оплате — {activity.price.toLocaleString("ru-RU")} ₽
+            </Link>
+          </div>
+        )}
 
         <div className="pt-2">
           <Link
