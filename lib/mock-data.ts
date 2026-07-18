@@ -105,7 +105,42 @@ export const mockCalendars: ActivityCalendarRecord[] = staticActivities.map(
   })
 );
 
-export const mockBookings: BookingRecord[] = [];
+export const mockBookings: BookingRecord[] = [
+  {
+    id: "mock-booking-1",
+    clientEmail: "test@example.com",
+    clientName: "Тест Пользователь",
+    clientPhone: "+7 (999) 123-45-67",
+    activityId: "gastronomic-tour",
+    activityTitle: "Гастрономический тур",
+    date: new Date(Date.now() + 86400000 * 7).toISOString().split("T")[0],
+    time: "12:00",
+    details: "",
+    price: 3500,
+    status: "confirmed",
+    paymentId: null,
+    paymentUrl: null,
+    paymentStatus: null,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "mock-booking-2",
+    clientEmail: "test@example.com",
+    clientName: "Тест Пользователь",
+    clientPhone: "+7 (999) 123-45-67",
+    activityId: "extreme-rafting",
+    activityTitle: "Рафтинг по горной реке",
+    date: new Date(Date.now() + 86400000 * 14).toISOString().split("T")[0],
+    time: null,
+    details: "Хочу увидеть пороги!",
+    price: 5000,
+    status: "pending_payment",
+    paymentId: "mock-payment-id",
+    paymentUrl: null,
+    paymentStatus: "NEW",
+    createdAt: new Date().toISOString(),
+  },
+];
 
 export const mockEmailSettings: EmailSettingsRecord = {
   id: "default",

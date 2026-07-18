@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CalendarDays, Clock, ExternalLink } from "lucide-react";
+import { CalendarDays, Clock, ExternalLink, CreditCard } from "lucide-react";
 import Link from "next/link";
 
 interface Booking {
@@ -14,7 +14,26 @@ interface Booking {
   clientName: string;
   clientPhone: string;
   status: string;
+  paymentStatus: string | null;
   createdAt: string;
+}
+
+function getStatusLabel(status: string, paymentStatus: string | null): string {
+  if (status === "pending_payment") return "Ожидает оплаты";
+  if (status === "confirmed" && paymentStatus === "CONFIRMED")
+    return "Оплачено";
+  if (status === "confirmed") return "Подтверждено";
+  return "Отменено";
+}
+
+function getStatusColor(status: string, paymentStatus: string | null): string {
+  if (status === "pending_payment")
+    return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400";
+  if (status === "confirmed" && paymentStatus === "CONFIRMED")
+    return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
+  if (status === "confirmed")
+    return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
+  return "bg-muted text-muted-foreground";
 }
 
 export function ClientBookingsList() {
@@ -99,14 +118,13 @@ export function ClientBookingsList() {
               </div>
             </div>
             <div className="flex items-center gap-1.5">
+              {booking.status === "pending_payment" && (
+                <CreditCard className="h-3 w-3 text-amber-500" />
+              )}
               <span
-                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${
-                  booking.status === "confirmed"
-                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                    : "bg-muted text-muted-foreground"
-                }`}
+                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${getStatusColor(booking.status, booking.paymentStatus)}`}
               >
-                {booking.status === "confirmed" ? "Подтверждено" : "Отменено"}
+                {getStatusLabel(booking.status, booking.paymentStatus)}
               </span>
               <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
             </div>

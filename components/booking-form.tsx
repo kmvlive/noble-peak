@@ -15,6 +15,7 @@ interface BookingFormProps {
   time: string | null;
   clientName: string;
   clientPhone: string;
+  price: number;
 }
 
 export function BookingForm({
@@ -24,6 +25,7 @@ export function BookingForm({
   time,
   clientName: initialName,
   clientPhone: initialPhone,
+  price,
 }: BookingFormProps) {
   const router = useRouter();
   const [name, setName] = useState(initialName);
@@ -52,6 +54,7 @@ export function BookingForm({
           clientName: name,
           clientPhone: phone,
           details,
+          price,
         }),
       });
 

@@ -15,6 +15,7 @@ const createBookingSchema = z.object({
   clientName: z.string().min(1),
   clientPhone: z.string().min(1),
   details: z.string().max(5000).default(""),
+  price: z.number().min(0),
 });
 
 export async function POST(request: NextRequest) {
@@ -51,18 +52,23 @@ export async function POST(request: NextRequest) {
       clientName,
       clientPhone,
       details,
+      price,
     } = parsed.data;
 
-    const booking = await createBooking({
-      clientEmail,
-      clientName,
-      clientPhone,
-      activityId,
-      activityTitle,
-      date,
-      time,
-      details,
-    });
+    const booking = await createBooking(
+      {
+        clientEmail,
+        clientName,
+        clientPhone,
+        activityId,
+        activityTitle,
+        date,
+        time,
+        details,
+        price,
+      },
+      false
+    );
 
     const adminEmail = getAdminEmail();
     await sendEmail({

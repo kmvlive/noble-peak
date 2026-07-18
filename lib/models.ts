@@ -386,18 +386,29 @@ export interface BookingRecord {
   date: string;
   time: string | null;
   details: string;
-  status: "confirmed" | "cancelled";
+  price: number;
+  status: "pending_payment" | "confirmed" | "cancelled";
+  paymentId: string | null;
+  paymentUrl: string | null;
+  paymentStatus: string | null;
   createdAt: string;
 }
 
 export async function createBooking(
-  data: Omit<BookingRecord, "id" | "createdAt" | "status">
+  data: Omit<
+    BookingRecord,
+    "id" | "createdAt" | "status" | "paymentId" | "paymentUrl" | "paymentStatus"
+  >,
+  isPayment: boolean
 ): Promise<BookingRecord> {
   const now = new Date().toISOString();
   const booking: BookingRecord = {
     ...data,
     id: randomUUID(),
-    status: "confirmed",
+    status: isPayment ? "pending_payment" : "confirmed",
+    paymentId: null,
+    paymentUrl: null,
+    paymentStatus: null,
     createdAt: now,
   };
 
@@ -437,6 +448,66 @@ export async function getClientBookings(
     })
   );
   return (result.Items as BookingRecord[]) ?? [];
+}
+
+export async function updateBookingPayment(
+  id: string,
+  data: {
+    paymentId: string;
+    paymentUrl: string;
+  }
+): Promise<void> {
+  await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.BOOKINGS,
+      Key: { id },
+      UpdateExpression: "set paymentId = :paymentId, paymentUrl = :paymentUrl",
+      ExpressionAttributeValues: {
+        ":paymentId": data.paymentId,
+        ":paymentUrl": data.paymentUrl,
+      },
+    })
+  );
+}
+
+export async function confirmBookingPayment(
+  id: string,
+  paymentStatus: string
+): Promise<void> {
+  await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.BOOKINGS,
+      Key: { id },
+      UpdateExpression: "set #status = :status, paymentStatus = :paymentStatus",
+      ExpressionAttributeNames: {
+        "#status": "status",
+      },
+      ExpressionAttributeValues: {
+        ":status": "confirmed",
+        ":paymentStatus": paymentStatus,
+      },
+    })
+  );
+}
+
+export async function failBookingPayment(
+  id: string,
+  paymentStatus: string
+): Promise<void> {
+  await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.BOOKINGS,
+      Key: { id },
+      UpdateExpression: "set #status = :status, paymentStatus = :paymentStatus",
+      ExpressionAttributeNames: {
+        "#status": "status",
+      },
+      ExpressionAttributeValues: {
+        ":status": "cancelled",
+        ":paymentStatus": paymentStatus,
+      },
+    })
+  );
 }
 
 export interface EmailSettingsRecord {

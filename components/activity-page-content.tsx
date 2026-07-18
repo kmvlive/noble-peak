@@ -185,6 +185,7 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
               time={selectedTime}
               clientName={clientData?.name ?? ""}
               clientPhone={clientData?.phone ?? ""}
+              price={activity.price}
             />
           </div>
         )}

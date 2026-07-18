@@ -255,5 +255,17 @@ tasks:
     depends_on:
       - task-008
     related_feature: Оплата через Т-банк
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Реализована интеграция с платёжной системой Т-банка (Tinkoff).
+      Создан клиент T-Bank API (lib/payment.ts) с функциями Init, GetState,
+      верификацией токена и проверкой статуса. API-маршруты: POST
+      /api/payments/init (создание брони + инициация платежа),
+      POST /api/payments/callback (вебхук от Т-банка для обновления статуса),
+      GET /api/payments/status (проверка статуса). Страница /payment
+      (components/payment-page-content.tsx) создаёт платёж и перенаправляет
+      на страницу Т-банка. Страницы /payment/success и /payment/fail
+      обрабатывают результат. В BookingRecord добавлены поля price,
+      paymentId, paymentUrl, paymentStatus. Статус брони: pending_payment →
+      confirmed после оплаты. Добавлены env-переменные TINKOFF_TERMINAL_KEY,
+      TINKOFF_PASSWORD, BASE_URL. typecheck, lint, build проходят.
