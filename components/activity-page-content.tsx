@@ -30,6 +30,13 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
     phone: string;
   } | null>(null);
 
+  const isImageUrl = (url: string) => {
+    return url.startsWith("http") || url.startsWith("/uploads/");
+  };
+
+  const currentSrc = activity.images[currentImage];
+  const isRealImage = currentSrc && isImageUrl(currentSrc);
+
   useEffect(() => {
     const fetchClient = async () => {
       try {
@@ -99,11 +106,21 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
             </button>
           </>
         )}
-        <div
-          className={`flex h-64 sm:h-80 items-center justify-center bg-gradient-to-br ${activity.images[currentImage]}`}
-        >
-          <Compass className="h-16 w-16 text-white/60" />
-        </div>
+        {isRealImage ? (
+          <div className="flex h-64 sm:h-80 items-center justify-center overflow-hidden bg-muted">
+            <img
+              src={currentSrc}
+              alt={activity.title}
+              className="h-full w-full object-cover"
+            />
+          </div>
+        ) : (
+          <div
+            className={`flex h-64 sm:h-80 items-center justify-center bg-gradient-to-br ${currentSrc}`}
+          >
+            <Compass className="h-16 w-16 text-white/60" />
+          </div>
+        )}
         <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
           {activity.images.map((_, i) => (
             <button

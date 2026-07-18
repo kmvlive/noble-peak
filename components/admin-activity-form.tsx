@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, CalendarDays } from "lucide-react";
+import { ArrowLeft, Save, CalendarDays, Upload, ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,7 +69,9 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
   );
   const [imageUrls, setImageUrls] = useState<string[]>(activity?.images ?? []);
   const [newImageUrl, setNewImageUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [over18, setOver18] = useState(activity?.over18 ?? false);
   const [location, setLocation] = useState(activity?.location ?? "");
 
@@ -154,6 +156,46 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
 
   const removeImageUrl = (url: string) => {
     setImageUrls((prev) => prev.filter((u) => u !== url));
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    const token = getToken();
+    const formData = new FormData();
+    for (const file of Array.from(files)) {
+      formData.append("file", file);
+    }
+
+    try {
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Ошибка загрузки");
+        return;
+      }
+
+      setImageUrls((prev) => [...prev, ...data.urls]);
+      toast.success(`Загружено ${data.urls.length} фото`);
+    } catch {
+      toast.error("Ошибка загрузки файлов");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const isImageUrl = (url: string) => {
+    return url.startsWith("http") || url.startsWith("/uploads/");
   };
 
   return (
@@ -242,6 +284,23 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
             <Button type="button" variant="outline" onClick={addImageUrl}>
               Добавить
             </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+            >
+              <Upload className="mr-1.5 h-4 w-4" />
+              {uploading ? "Загрузка..." : "Загрузить с компьютера"}
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
           </div>
           {imageUrls.length > 0 && (
             <div className="flex flex-wrap gap-2 pt-1">
@@ -250,12 +309,34 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
                   key={url}
                   className="inline-flex items-center gap-1 rounded-md border bg-muted/30 px-2 py-1 text-xs"
                 >
-                  <span
-                    className={`inline-block h-4 w-4 rounded bg-gradient-to-br ${
-                      url.includes("from-") ? url : "from-gray-300 to-gray-400"
-                    }`}
-                  />
-                  {url.length > 30 ? url.slice(0, 30) + "..." : url}
+                  {isImageUrl(url) ? (
+                    <span className="inline-block h-8 w-8 flex-shrink-0 overflow-hidden rounded">
+                      <img
+                        src={url}
+                        alt=""
+                        className="h-full w-full object-cover"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          target.style.display = "none";
+                          target.nextElementSibling?.classList.remove("hidden");
+                        }}
+                      />
+                      <span className="hidden">
+                        <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                      </span>
+                    </span>
+                  ) : (
+                    <span
+                      className={`inline-block h-8 w-8 flex-shrink-0 rounded bg-gradient-to-br ${
+                        url.includes("from-")
+                          ? url
+                          : "from-gray-300 to-gray-400"
+                      }`}
+                    />
+                  )}
+                  <span className="max-w-[120px] truncate">
+                    {url.length > 25 ? url.slice(0, 25) + "..." : url}
+                  </span>
                   <button
                     type="button"
                     onClick={() => removeImageUrl(url)}
@@ -268,8 +349,8 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
             </div>
           )}
           <p className="text-xs text-muted-foreground">
-            Можно указать CSS-градиенты (например, &quot;from-blue-400
-            to-indigo-500&quot;) или URL изображений
+            Можно загрузить фото с компьютера, указать CSS-градиенты или URL
+            изображений
           </p>
         </div>
 
