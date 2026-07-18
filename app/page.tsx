@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {
   Heart,
-  MapPin,
   Star,
   Compass,
   Waves,
@@ -10,35 +9,31 @@ import {
   Bike,
   Gamepad2,
   Zap,
-  Map,
+  Map as MapIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  activities,
-  latestActivities,
-  popularActivities,
-  sections,
-} from "@/lib/data";
-import type { Section } from "@/lib/data";
+import type { ActivityRecord, SectionRecord } from "@/lib/models";
 
 const sectionIcons: Record<string, React.ReactNode> = {
   Waves: <Waves className="h-6 w-6" />,
   Mountain: <Mountain className="h-6 w-6" />,
   UtensilsCrossed: <UtensilsCrossed className="h-6 w-6" />,
   Bike: <Bike className="h-6 w-6" />,
-  Map: <Map className="h-6 w-6" />,
+  Map: <MapIcon className="h-6 w-6" />,
   Gamepad2: <Gamepad2 className="h-6 w-6" />,
   Zap: <Zap className="h-6 w-6" />,
 };
 
-function SectionCard({ section }: { section: Section }) {
-  const activityCount = activities.filter(
-    (a) => a.category.toLowerCase() === section.category.toLowerCase()
-  ).length;
-
+function SectionCard({
+  section,
+  activityCount,
+}: {
+  section: SectionRecord;
+  activityCount: number;
+}) {
   return (
-    <Link href={`/sections/${section.slug}`}>
+    <Link href={`/sections/${section.id}`}>
       <Card className="min-w-[180px] snap-start card-hover">
         <div
           className={`flex h-24 items-center justify-center rounded-t-lg bg-gradient-to-br ${section.imageGradient}`}
@@ -90,7 +85,7 @@ function ActivityCard({
         <CardHeader>
           <div className="flex items-center justify-between">
             <Badge variant="secondary">
-              <MapPin className="mr-0.5 h-3 w-3" />
+              <MapIcon className="mr-0.5 h-3 w-3" />
               {category}
             </Badge>
             <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -120,7 +115,7 @@ function ActivitySection({
 }: {
   title: string;
   icon: typeof Star;
-  items: typeof activities;
+  items: (ActivityRecord & { sectionName: string })[];
 }) {
   return (
     <section className="space-y-4">
@@ -131,15 +126,53 @@ function ActivitySection({
         <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
       </div>
       <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-none">
-        {items.map(({ id, ...rest }) => (
-          <ActivityCard key={id} _id={id} {...rest} />
+        {items.map(({ id, sectionName, ...rest }) => (
+          <ActivityCard key={id} _id={id} category={sectionName} {...rest} />
         ))}
       </div>
     </section>
   );
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const baseUrl = process.env.BASE_URL || "http://localhost:8080";
+
+  const [activitiesRes, sectionsRes] = await Promise.all([
+    fetch(`${baseUrl}/api/activities`, { cache: "no-store" }),
+    fetch(`${baseUrl}/api/sections`, { cache: "no-store" }),
+  ]);
+
+  const activities: ActivityRecord[] = await activitiesRes.json();
+  const sections: SectionRecord[] = await sectionsRes.json();
+
+  const sectionNameMap = new Map<string, string>();
+  for (const s of sections) {
+    sectionNameMap.set(s.id, s.name);
+  }
+
+  const activityCountBySection = new Map<string, number>();
+  for (const a of activities) {
+    activityCountBySection.set(
+      a.section,
+      (activityCountBySection.get(a.section) || 0) + 1
+    );
+  }
+
+  const latest = [...activities]
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, 5)
+    .map((a) => ({
+      ...a,
+      sectionName: sectionNameMap.get(a.section) || a.section,
+    }));
+
+  const popular = activities
+    .filter((a) => a.isPopular)
+    .map((a) => ({
+      ...a,
+      sectionName: sectionNameMap.get(a.section) || a.section,
+    }));
+
   return (
     <div className="min-h-[calc(100vh-9rem)]">
       <section className="gradient-hero-vibrant px-4 py-12 sm:py-16">
@@ -161,13 +194,17 @@ export default function HomePage() {
         <section className="space-y-4">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-              <Map className="h-4 w-4 text-primary" />
+              <MapIcon className="h-4 w-4 text-primary" />
             </div>
             <h2 className="text-xl font-semibold tracking-tight">Разделы</h2>
           </div>
           <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-none">
             {sections.map((section) => (
-              <SectionCard key={section.slug} section={section} />
+              <SectionCard
+                key={section.id}
+                section={section}
+                activityCount={activityCountBySection.get(section.id) || 0}
+              />
             ))}
           </div>
         </section>
@@ -175,13 +212,13 @@ export default function HomePage() {
         <ActivitySection
           title="Последние активности"
           icon={Star}
-          items={latestActivities}
+          items={latest}
         />
 
         <ActivitySection
           title="Популярные активности"
           icon={Heart}
-          items={popularActivities}
+          items={popular}
         />
       </div>
     </div>
