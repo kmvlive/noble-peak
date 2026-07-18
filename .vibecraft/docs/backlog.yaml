@@ -444,5 +444,5 @@ tasks:
       - Город/место сохраняется в базе данных
     depends_on: []
     related_feature: Просмотр и каталог активностей
-    status: pending
-    summary: null
+    status: completed
+    summary: "Добавлено поле «Город / место» (location) для активностей. Поле добавлено в Activity (lib/data.ts), ActivityRecord (lib/models.ts), форму админ-панели (components/admin-activity-form.tsx), zod-схемы create/update API (app/api/admin/activities/route.ts, [id]/route.ts), mock-данные (lib/mock-data.ts) и список активностей (components/admin-activity-list.tsx). На странице активности для клиента (components/activity-page-content.tsx) отображается иконка Map с location под заголовком. typecheck, lint, build проходят."

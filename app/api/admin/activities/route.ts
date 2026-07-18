@@ -23,6 +23,7 @@ const createActivitySchema = z.object({
   over18: z.boolean().optional().default(false),
   orderType: z.enum(["payment", "order_form"]).optional().default("order_form"),
   imageGradient: z.string().optional().default("from-blue-400 to-indigo-500"),
+  location: z.string().max(200).optional().default(""),
 });
 
 function getTokenFromRequest(request: NextRequest): string | null {

@@ -58,6 +58,7 @@ function mapStaticActivityToRecord(
     over18: false,
     orderType: "order_form",
     imageGradient: a.imageGradient,
+    location: a.location,
     createdAt: new Date("2024-06-01").toISOString(),
     updatedAt: new Date("2024-06-01").toISOString(),
   };

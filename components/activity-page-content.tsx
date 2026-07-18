@@ -8,6 +8,7 @@ import {
   Compass,
   MapPin,
   CalendarDays,
+  Map,
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -131,6 +132,12 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
               {activity.title}
             </h1>
+            {activity.location && (
+              <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Map className="h-4 w-4" />
+                {activity.location}
+              </p>
+            )}
           </div>
           <div className="text-right">
             <p className="text-2xl font-bold text-primary">

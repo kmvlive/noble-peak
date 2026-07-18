@@ -22,6 +22,7 @@ const updateActivitySchema = z.object({
   over18: z.boolean().optional(),
   orderType: z.enum(["payment", "order_form"]).optional(),
   imageGradient: z.string().optional(),
+  location: z.string().max(200).optional(),
 });
 
 function getTokenFromRequest(request: NextRequest): string | null {

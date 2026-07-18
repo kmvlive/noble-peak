@@ -29,6 +29,7 @@ interface AdminActivityFormProps {
     over18: boolean;
     orderType: OrderType;
     imageGradient: string;
+    location?: string;
   };
 }
 
@@ -70,6 +71,7 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
   const [newImageUrl, setNewImageUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [over18, setOver18] = useState(activity?.over18 ?? false);
+  const [location, setLocation] = useState(activity?.location ?? "");
 
   const [id, setId] = useState(activity?.id ?? "");
 
@@ -109,6 +111,7 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
       over18,
       orderType,
       imageGradient,
+      location: location.trim(),
     };
 
     try {
@@ -268,6 +271,18 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
             Можно указать CSS-градиенты (например, &quot;from-blue-400
             to-indigo-500&quot;) или URL изображений
           </p>
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="location" className="text-sm font-medium">
+            Город / место
+          </label>
+          <Input
+            id="location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="г. Ялта, ул. Кирова, 15"
+          />
         </div>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">

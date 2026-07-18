@@ -35,6 +35,7 @@ export interface ActivityRecord {
   over18: boolean;
   orderType: OrderType;
   imageGradient: string;
+  location?: string;
   createdAt: string;
   updatedAt: string;
 }

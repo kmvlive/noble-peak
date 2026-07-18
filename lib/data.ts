@@ -11,6 +11,7 @@ export interface Activity {
   isPopular: boolean;
   over18: boolean;
   orderType: "order_form" | "payment";
+  location?: string;
 }
 
 export interface Section {

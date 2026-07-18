@@ -24,6 +24,7 @@ interface ActivityItem {
   likes: number;
   orderType: OrderType;
   isPopular: boolean;
+  location?: string;
 }
 
 export function AdminActivityList() {
@@ -128,6 +129,9 @@ export function AdminActivityList() {
                 <th className="px-4 py-3 text-left font-medium hidden sm:table-cell">
                   Раздел
                 </th>
+                <th className="px-4 py-3 text-left font-medium hidden lg:table-cell">
+                  Город / место
+                </th>
                 <th className="px-4 py-3 text-right font-medium hidden sm:table-cell">
                   Цена
                 </th>
@@ -149,6 +153,9 @@ export function AdminActivityList() {
                   <td className="px-4 py-3 font-medium">{activity.title}</td>
                   <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">
                     {activity.section}
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">
+                    {activity.location || "—"}
                   </td>
                   <td className="px-4 py-3 text-right hidden sm:table-cell">
                     {activity.price.toLocaleString("ru-RU")} ₽
