@@ -573,5 +573,13 @@ tasks:
       - Раздел виден всем администраторам
     depends_on: []
     related_feature: Личный кабинет клиента
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Реализован раздел «Клиенты» в админ-панели (/admin/clients) со списком
+      зарегистрированных клиентов (имя, телефон, email, дата регистрации).
+      Добавлены модели getAllClients, updateClient, deleteClient в lib/models.ts,
+      mock-данные mockClients в lib/mock-data.ts, API /api/admin/clients (GET,
+      PUT, DELETE) с валидацией zod и авторизацией, компонент
+      AdminClientsManager с таблицей и диалогом редактирования, страница
+      app/admin/clients/page.tsx. Пункт «Клиенты» добавлен в боковое меню
+      админ-панели, виден всем администраторам. typecheck, lint, build проходят.

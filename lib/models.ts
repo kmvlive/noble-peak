@@ -277,6 +277,64 @@ export async function createClient(
   return client;
 }
 
+export async function getAllClients(): Promise<ClientRecord[]> {
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.CLIENTS,
+    })
+  );
+  return (result.Items as ClientRecord[]) ?? [];
+}
+
+export async function updateClient(
+  email: string,
+  data: Partial<Pick<ClientRecord, "name" | "phone">>
+): Promise<ClientRecord> {
+  const updateExpr: string[] = [];
+  const exprValues: Record<string, unknown> = {};
+  const exprNames: Record<string, string> = {};
+
+  if (data.name !== undefined) {
+    updateExpr.push("#name = :name");
+    exprValues[":name"] = data.name;
+    exprNames["#name"] = "name";
+  }
+
+  if (data.phone !== undefined) {
+    updateExpr.push("#phone = :phone");
+    exprValues[":phone"] = data.phone;
+    exprNames["#phone"] = "phone";
+  }
+
+  if (updateExpr.length === 0) {
+    const existing = await getClientByEmail(email);
+    if (!existing) throw new Error("Client not found");
+    return existing;
+  }
+
+  const result = await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.CLIENTS,
+      Key: { email },
+      UpdateExpression: `set ${updateExpr.join(", ")}`,
+      ExpressionAttributeValues: exprValues,
+      ExpressionAttributeNames: exprNames,
+      ReturnValues: "ALL_NEW",
+    })
+  );
+
+  return result.Attributes as ClientRecord;
+}
+
+export async function deleteClient(email: string): Promise<void> {
+  await docClient.send(
+    new DeleteCommand({
+      TableName: TableName.CLIENTS,
+      Key: { email },
+    })
+  );
+}
+
 export async function deleteActivity(id: string): Promise<void> {
   await docClient.send(
     new DeleteCommand({

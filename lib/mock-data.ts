@@ -7,6 +7,7 @@ import type {
   EmailSettingsRecord,
   PaymentSettingsRecord,
   AdminRecord,
+  ClientRecord,
 } from "./models";
 import {
   activities as staticActivities,
@@ -170,5 +171,29 @@ export const mockAdmins: AdminRecord[] = [
     role: "admin",
     createdAt: new Date("2024-01-01").toISOString(),
     updatedAt: new Date("2024-01-01").toISOString(),
+  },
+];
+
+export const mockClients: ClientRecord[] = [
+  {
+    email: "ivan@example.com",
+    name: "Иван Петров",
+    phone: "+7 (999) 111-22-33",
+    passwordHash: "hash123",
+    createdAt: new Date("2024-03-01").toISOString(),
+  },
+  {
+    email: "elena@example.com",
+    name: "Елена Смирнова",
+    phone: "+7 (999) 444-55-66",
+    passwordHash: "hash456",
+    createdAt: new Date("2024-04-15").toISOString(),
+  },
+  {
+    email: "alexey@example.com",
+    name: "Алексей Кузнецов",
+    phone: "+7 (999) 777-88-99",
+    passwordHash: "hash789",
+    createdAt: new Date("2024-05-20").toISOString(),
   },
 ];

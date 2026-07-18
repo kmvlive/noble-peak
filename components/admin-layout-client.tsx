@@ -14,6 +14,7 @@ import {
   Settings,
   CreditCard,
   Shield,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -91,6 +92,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
     { href: "/admin", label: "Дашборд", icon: LayoutDashboard },
     { href: "/admin", label: "Активности", icon: List },
     { href: "/admin/sections", label: "Разделы", icon: FolderOpen },
+    { href: "/admin/clients", label: "Клиенты", icon: Users },
     { href: "/admin/admins", label: "Администраторы", icon: Shield },
     {
       href: "/admin/payment-settings",
