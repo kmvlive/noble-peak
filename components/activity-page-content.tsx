@@ -7,16 +7,21 @@ import {
   ChevronRight,
   Compass,
   MapPin,
+  CalendarDays,
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import type { Activity } from "@/lib/data";
+import { ActivityBookingCalendar } from "@/components/activity-booking-calendar";
 
 export function ActivityPageContent({ activity }: { activity: Activity }) {
   const [likes, setLikes] = useState(activity.likes);
   const [liked, setLiked] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
   const handleLike = () => {
     if (liked) {
@@ -25,6 +30,16 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
       setLikes((l) => l + 1);
     }
     setLiked((l) => !l);
+  };
+
+  const handleCalendarSelect = (date: string, time?: string) => {
+    if (!date) {
+      setSelectedDate(null);
+      setSelectedTime(null);
+      return;
+    }
+    setSelectedDate(date);
+    setSelectedTime(time ?? null);
   };
 
   return (
@@ -120,6 +135,24 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
         />
 
         <div className="pt-4">
+          <Separator className="mb-4" />
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <CalendarDays className="h-5 w-5 text-muted-foreground" />
+              <h2 className="text-lg font-semibold tracking-tight">
+                Выберите дату
+              </h2>
+            </div>
+            <ActivityBookingCalendar
+              activityId={activity.id}
+              onSelect={handleCalendarSelect}
+              selectedDate={selectedDate}
+              selectedTime={selectedTime}
+            />
+          </div>
+        </div>
+
+        <div className="pt-2">
           <Link
             href="/"
             className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"

@@ -181,8 +181,15 @@ tasks:
       - task-005
       - task-006
     related_feature: Календарь и бронирование
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      На странице активности (/activities/[id]) добавлен календарь с выбором
+      даты и времени. Данные берутся из админ-панели через публичный API
+      GET /api/activities/[id]/calendar. Компонент ActivityBookingCalendar
+      отображает месяц с доступными датами (из админ-панели), при клике на
+      дату с часами показывает выбор часов, при дате без часов — помечает
+      «Весь день». Интеграция в ActivityPageContent. typecheck, lint, build
+      проходят.
   - id: task-008
     phase: mvp
     title: Форма заказа и страница подтверждения
