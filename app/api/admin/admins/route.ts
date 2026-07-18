@@ -9,7 +9,7 @@ import {
   deleteAdmin,
 } from "@/lib/models";
 import { mockAdmins } from "@/lib/mock-data";
-import { verifyToken, isMainAdminEmail } from "@/lib/auth";
+import { verifyToken, isMainAdminEmail, getMainAdminEmail } from "@/lib/auth";
 
 const createAdminSchema = z.object({
   email: z.string().email().max(200),
@@ -43,19 +43,26 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Доступ запрещён" }, { status: 403 });
   }
 
+  let admins: Array<{
+    email: string;
+    name: string;
+    role: string;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+
   const dbAvailable = await isDatabaseAvailable();
 
   if (dbAvailable) {
     try {
-      const admins = await getAllAdmins();
-      const safeAdmins = admins.map((a) => ({
+      const dbAdmins = await getAllAdmins();
+      admins = dbAdmins.map((a) => ({
         email: a.email,
         name: a.name,
         role: a.role,
         createdAt: a.createdAt,
         updatedAt: a.updatedAt,
       }));
-      return NextResponse.json(safeAdmins);
     } catch (error) {
       console.error("Ошибка получения администраторов:", error);
       return NextResponse.json(
@@ -63,16 +70,29 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       );
     }
+  } else {
+    admins = mockAdmins.map((a) => ({
+      email: a.email,
+      name: a.name,
+      role: a.role,
+      createdAt: a.createdAt,
+      updatedAt: a.updatedAt,
+    }));
   }
 
-  const safeMockAdmins = mockAdmins.map((a) => ({
-    email: a.email,
-    name: a.name,
-    role: a.role,
-    createdAt: a.createdAt,
-    updatedAt: a.updatedAt,
-  }));
-  return NextResponse.json(safeMockAdmins);
+  const mainAdminEmail = getMainAdminEmail();
+  const hasMainAdmin = admins.some((a) => a.email === mainAdminEmail);
+  if (!hasMainAdmin) {
+    admins.unshift({
+      email: mainAdminEmail,
+      name: "Главный администратор",
+      role: "main_admin",
+      createdAt: new Date("2024-01-01").toISOString(),
+      updatedAt: new Date("2024-01-01").toISOString(),
+    });
+  }
+
+  return NextResponse.json(admins);
 }
 
 export async function POST(request: NextRequest) {
