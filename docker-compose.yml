@@ -6,10 +6,13 @@ services:
       - "8000:8000"
     command: "-jar DynamoDBLocal.jar -sharedDb"
     healthcheck:
-      test: ["CMD-SHELL", "curl -s -o /dev/null http://localhost:8000/ || exit 1"]
+      test:
+        ["CMD-SHELL", "curl -s -o /dev/null http://localhost:8000/ || exit 1"]
       interval: 2s
       timeout: 5s
       retries: 10
+    volumes:
+      - dynamodb-data:/home/dynamodblocal/
 
   app:
     build:
@@ -30,4 +33,5 @@ services:
       dynamodb-local:
         condition: service_healthy
 
-
+volumes:
+  dynamodb-data:
