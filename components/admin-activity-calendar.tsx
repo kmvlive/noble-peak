@@ -54,6 +54,11 @@ function formatDate(year: number, month: number, day: number): string {
   return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
 
+function isTodayOrFuture(dateStr: string): boolean {
+  const today = new Date().toISOString().split("T")[0];
+  return dateStr >= today;
+}
+
 const HOUR_PRESETS = [
   "08:00",
   "09:00",
@@ -85,6 +90,7 @@ export function AdminActivityCalendar({
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [editingHours, setEditingHours] = useState<string[]>([]);
   const [newHour, setNewHour] = useState("");
+  const [lastClickedDate, setLastClickedDate] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCalendar = async () => {
@@ -158,13 +164,66 @@ export function AdminActivityCalendar({
     setNewHour("");
   };
 
-  const toggleHourPreset = (hour: string) => {
-    setEditingHours((prev) => {
-      if (prev.includes(hour)) {
-        return prev.filter((h) => h !== hour);
+  const selectDateRange = (start: string, end: string) => {
+    const [rangeStart, rangeEnd] = [start, end].sort();
+    const range: string[] = [];
+    const current = new Date(rangeStart + "T00:00:00Z");
+    const endDate = new Date(rangeEnd + "T00:00:00Z");
+
+    while (current <= endDate) {
+      const dateStr = current.toISOString().split("T")[0];
+      if (isTodayOrFuture(dateStr)) {
+        range.push(dateStr);
       }
-      return [...prev, hour].sort();
+      current.setUTCDate(current.getUTCDate() + 1);
+    }
+
+    setDates((prev) => {
+      const next = { ...prev };
+      range.forEach((dateStr) => {
+        next[dateStr] = { available: true };
+      });
+      return next;
     });
+  };
+
+  const handleDateClick = (
+    dateStr: string,
+    _day: number,
+    e: React.MouseEvent
+  ) => {
+    if (!isTodayOrFuture(dateStr)) return;
+
+    if (e.shiftKey && lastClickedDate && lastClickedDate !== dateStr) {
+      selectDateRange(lastClickedDate, dateStr);
+      return;
+    }
+
+    setLastClickedDate(dateStr);
+
+    if (dates[dateStr]?.available) {
+      selectDate(dateStr);
+    } else {
+      toggleDate(dateStr);
+    }
+  };
+
+  const toggleHourPreset = (hour: string) => {
+    if (!selectedDate) return;
+
+    const newHours = editingHours.includes(hour)
+      ? editingHours.filter((h) => h !== hour)
+      : [...editingHours, hour].sort();
+
+    setEditingHours(newHours);
+
+    setDates((prev) => ({
+      ...prev,
+      [selectedDate]: {
+        available: true,
+        hours: newHours.length > 0 ? newHours : undefined,
+      },
+    }));
   };
 
   const addCustomHour = () => {
@@ -175,21 +234,20 @@ export function AdminActivityCalendar({
       return;
     }
     if (editingHours.includes(trimmed)) return;
-    setEditingHours((prev) => [...prev, trimmed].sort());
-    setNewHour("");
-  };
 
-  const applyHoursToDate = () => {
-    if (!selectedDate) return;
-    setDates((prev) => ({
-      ...prev,
-      [selectedDate]: {
-        available: true,
-        hours: editingHours.length > 0 ? editingHours : undefined,
-      },
-    }));
-    setSelectedDate(null);
-    setEditingHours([]);
+    const updated = [...editingHours, trimmed].sort();
+    setEditingHours(updated);
+    setNewHour("");
+
+    if (selectedDate) {
+      setDates((prev) => ({
+        ...prev,
+        [selectedDate]: {
+          available: true,
+          hours: updated.length > 0 ? updated : undefined,
+        },
+      }));
+    }
   };
 
   const monthDays = getMonthDays(year, month);
@@ -279,32 +337,33 @@ export function AdminActivityCalendar({
           const isSelected = selectedDate === dateStr;
           const hasHours =
             isAvailable && entry?.hours && entry.hours.length > 0;
+          const isPast = !isTodayOrFuture(dateStr);
+          const isBlocked = isPast;
 
           return (
             <button
               key={dateStr}
               type="button"
-              onClick={() => {
-                if (isAvailable) {
-                  selectDate(dateStr);
-                } else {
-                  toggleDate(dateStr);
-                }
-              }}
-              className={`relative bg-background p-2 text-center text-sm transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
-                isSelected ? "ring-2 ring-primary ring-inset" : ""
-              }`}
+              onClick={(e) => handleDateClick(dateStr, day, e)}
+              disabled={isBlocked}
+              className={`relative bg-background p-2 text-center text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
+                isBlocked
+                  ? "cursor-not-allowed opacity-30"
+                  : "hover:bg-accent/50"
+              } ${isSelected ? "ring-2 ring-primary ring-inset" : ""}`}
             >
               <span
                 className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-xs ${
-                  isAvailable
-                    ? "bg-primary text-primary-foreground font-medium"
-                    : "text-foreground"
+                  isBlocked
+                    ? "text-muted-foreground"
+                    : isAvailable
+                      ? "bg-primary text-primary-foreground font-medium"
+                      : "text-foreground"
                 }`}
               >
                 {day}
               </span>
-              {hasHours && (
+              {hasHours && !isBlocked && (
                 <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2">
                   <Clock className="h-2.5 w-2.5 text-muted-foreground" />
                 </span>
@@ -327,33 +386,36 @@ export function AdminActivityCalendar({
           <span className="inline-block h-3 w-3 rounded-full border bg-background" />
           Недоступно
         </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block h-3 w-3 rounded-full bg-muted opacity-30" />
+          Прошедшие
+        </span>
       </div>
+
+      <p className="text-xs text-muted-foreground">
+        Shift+клик — выбрать диапазон дат. Клик на дату — выбрать/отметить часы.
+      </p>
 
       {selectedDate && (
         <div className="rounded-lg border p-4 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold">Часы для {selectedDate}</h3>
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setDates((prev) => {
-                    const next = { ...prev };
-                    delete next[selectedDate];
-                    return next;
-                  });
-                  setSelectedDate(null);
-                  setEditingHours([]);
-                }}
-              >
-                <X className="mr-1 h-3 w-3" />
-                Убрать дату
-              </Button>
-              <Button variant="outline" size="sm" onClick={applyHoursToDate}>
-                Применить
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setDates((prev) => {
+                  const next = { ...prev };
+                  delete next[selectedDate];
+                  return next;
+                });
+                setSelectedDate(null);
+                setEditingHours([]);
+              }}
+            >
+              <X className="mr-1 h-3 w-3" />
+              Убрать дату
+            </Button>
           </div>
 
           <p className="text-xs text-muted-foreground">
