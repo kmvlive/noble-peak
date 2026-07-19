@@ -65,6 +65,7 @@ function ActivityCard({
   price,
   imageGradient,
   likes,
+  images,
 }: {
   _id: string;
   title: string;
@@ -73,15 +74,31 @@ function ActivityCard({
   price: number;
   imageGradient: string;
   likes: number;
+  images: string[];
 }) {
+  const firstImage = images?.[0];
+  const hasRealImage =
+    firstImage &&
+    (firstImage.startsWith("http") || firstImage.startsWith("/uploads/"));
+
   return (
     <Link href={`/activities/${_id}`}>
       <Card className="min-w-[260px] snap-start card-hover">
-        <div
-          className={`flex h-32 items-center justify-center bg-gradient-to-br ${imageGradient}`}
-        >
-          <Compass className="h-10 w-10 text-white/80" />
-        </div>
+        {hasRealImage ? (
+          <div className="h-32 overflow-hidden rounded-t-lg">
+            <img
+              src={firstImage}
+              alt={title}
+              className="h-full w-full object-cover"
+            />
+          </div>
+        ) : (
+          <div
+            className={`flex h-32 items-center justify-center bg-gradient-to-br ${imageGradient}`}
+          >
+            <Compass className="h-10 w-10 text-white/80" />
+          </div>
+        )}
         <CardHeader>
           <div className="flex items-center justify-between">
             <Badge variant="secondary">
