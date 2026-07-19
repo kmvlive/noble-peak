@@ -28,22 +28,38 @@ const sectionIcons: Record<string, React.ReactNode> = {
 function SectionCard({
   section,
   activityCount,
+  randomImage,
 }: {
   section: SectionRecord;
   activityCount: number;
+  randomImage: string | null;
 }) {
+  const hasRealImage =
+    randomImage &&
+    (randomImage.startsWith("http") || randomImage.startsWith("/uploads/"));
+
   return (
     <Link href={`/sections/${section.id}`}>
       <Card className="min-w-[180px] snap-start card-hover">
-        <div
-          className={`flex h-24 items-center justify-center rounded-t-lg bg-gradient-to-br ${section.imageGradient}`}
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/30 backdrop-blur-sm">
-            {sectionIcons[section.icon] || (
-              <Compass className="h-6 w-6 text-white" />
-            )}
+        {hasRealImage ? (
+          <div className="h-24 overflow-hidden rounded-t-lg">
+            <img
+              src={randomImage!}
+              alt={section.name}
+              className="h-full w-full object-cover"
+            />
           </div>
-        </div>
+        ) : (
+          <div
+            className={`flex h-24 items-center justify-center rounded-t-lg bg-gradient-to-br ${section.imageGradient}`}
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/30 backdrop-blur-sm">
+              {sectionIcons[section.icon] || (
+                <Compass className="h-6 w-6 text-white" />
+              )}
+            </div>
+          </div>
+        )}
         <CardHeader className="p-3">
           <CardTitle className="text-sm">{section.name}</CardTitle>
         </CardHeader>
@@ -175,6 +191,27 @@ export default async function HomePage() {
     );
   }
 
+  const sectionPhotosMap = new Map<string, string[]>();
+  for (const a of activities) {
+    const validImages = (a.images || []).filter(
+      (img) => img.startsWith("http") || img.startsWith("/uploads/")
+    );
+    if (validImages.length > 0) {
+      const existing = sectionPhotosMap.get(a.section) || [];
+      sectionPhotosMap.set(a.section, [...existing, ...validImages]);
+    }
+  }
+
+  const sectionRandomPhoto = new Map<string, string | null>();
+  for (const [sectionId, photos] of sectionPhotosMap) {
+    let randomPhoto: string | null = null;
+    if (photos.length > 0) {
+      // eslint-disable-next-line react-hooks/purity
+      randomPhoto = photos[Math.floor(Math.random() * photos.length)];
+    }
+    sectionRandomPhoto.set(sectionId, randomPhoto);
+  }
+
   const latest = [...activities]
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .slice(0, 5)
@@ -221,6 +258,7 @@ export default async function HomePage() {
                 key={section.id}
                 section={section}
                 activityCount={activityCountBySection.get(section.id) || 0}
+                randomImage={sectionRandomPhoto.get(section.id) ?? null}
               />
             ))}
           </div>
