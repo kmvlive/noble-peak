@@ -32,8 +32,9 @@ export async function isDatabaseAvailable(): Promise<boolean> {
     return false;
   }
 
-  if (globalForDbAvailable._dbAvailable != null) {
-    return globalForDbAvailable._dbAvailable;
+  // Only cache successful results; always retry on failure
+  if (globalForDbAvailable._dbAvailable === true) {
+    return true;
   }
 
   if (globalForDbAvailable._dbAvailablePromise) {
@@ -47,7 +48,7 @@ export async function isDatabaseAvailable(): Promise<boolean> {
       return true;
     } catch {
       console.warn("Database is not available. Running in static mode.");
-      globalForDbAvailable._dbAvailable = false;
+      globalForDbAvailable._dbAvailablePromise = null;
       return false;
     }
   })();
