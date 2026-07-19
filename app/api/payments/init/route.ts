@@ -5,6 +5,7 @@ import {
   createBooking,
   updateBookingPayment,
   getActivityById,
+  removeBookedSlotFromCalendar,
 } from "@/lib/models";
 import { getClientEmailFromRequest } from "@/lib/client-auth";
 import { initPayment } from "@/lib/payment";
@@ -74,6 +75,10 @@ export async function POST(request: NextRequest) {
         price: amount,
       },
       true
+    );
+
+    removeBookedSlotFromCalendar(activity.id, date, time).catch((e) =>
+      console.error("Ошибка обновления календаря после бронирования:", e)
     );
 
     const amountKopecks = Math.round(amount * 100);

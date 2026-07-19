@@ -437,6 +437,31 @@ export async function setActivityCalendar(
   return record;
 }
 
+export async function removeBookedSlotFromCalendar(
+  activityId: string,
+  date: string,
+  time: string | null
+): Promise<void> {
+  const calendar = await getActivityCalendar(activityId);
+  if (!calendar) return;
+
+  const entry = calendar.dates[date];
+  if (!entry || !entry.available) return;
+
+  if (time && entry.hours && entry.hours.includes(time)) {
+    const updatedHours = entry.hours.filter((h) => h !== time);
+    if (updatedHours.length === 0) {
+      delete calendar.dates[date];
+    } else {
+      calendar.dates[date] = { available: true, hours: updatedHours };
+    }
+  } else {
+    delete calendar.dates[date];
+  }
+
+  await setActivityCalendar(activityId, calendar.dates);
+}
+
 export interface BookingRecord {
   id: string;
   clientEmail: string;

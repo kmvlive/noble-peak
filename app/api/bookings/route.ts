@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { isDatabaseAvailable } from "@/lib/db";
-import { createBooking } from "@/lib/models";
+import { createBooking, removeBookedSlotFromCalendar } from "@/lib/models";
 import { getClientEmailFromRequest } from "@/lib/client-auth";
 import { sendEmail } from "@/lib/email";
 import { appName } from "@/lib/app-name";
@@ -68,6 +68,10 @@ export async function POST(request: NextRequest) {
         price,
       },
       false
+    );
+
+    removeBookedSlotFromCalendar(activityId, date, time).catch((e) =>
+      console.error("Ошибка обновления календаря после бронирования:", e)
     );
 
     const adminEmail = getMainAdminEmail();
