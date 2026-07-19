@@ -27,6 +27,7 @@ services:
     volumes:
       - .:/app
       - /app/.next
+      - uploads-data:/app/public/uploads
     ports:
       - "8080:8080"
     depends_on:
@@ -35,3 +36,4 @@ services:
 
 volumes:
   dynamodb-data:
+  uploads-data:
