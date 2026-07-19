@@ -18,6 +18,7 @@ import type { Activity } from "@/lib/data";
 import { ActivityBookingCalendar } from "@/components/activity-booking-calendar";
 import { BookingForm } from "@/components/booking-form";
 import { AgeVerificationOverlay } from "@/components/age-verification-overlay";
+import { PhotoLightbox } from "@/components/photo-lightbox";
 
 export function ActivityPageContent({ activity }: { activity: Activity }) {
   const [likes, setLikes] = useState(activity.likes);
@@ -29,6 +30,8 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
     name: string;
     phone: string;
   } | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const isImageUrl = (url: string) => {
     return url.startsWith("http") || url.startsWith("/uploads/");
@@ -137,6 +140,29 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
         </div>
       </div>
 
+      {activity.images.filter((src) => isImageUrl(src)).length > 0 && (
+        <div className="mt-3 flex gap-2 overflow-x-auto px-4 pb-2 sm:px-6">
+          {activity.images.map((src, i) =>
+            isImageUrl(src) ? (
+              <button
+                key={i}
+                onClick={() => {
+                  setLightboxIndex(i);
+                  setLightboxOpen(true);
+                }}
+                className="shrink-0 overflow-hidden rounded-md ring-offset-background transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <img
+                  src={src}
+                  alt={`Фото ${i + 1}`}
+                  className="h-16 w-16 object-cover sm:h-20 sm:w-20"
+                />
+              </button>
+            ) : null
+          )}
+        </div>
+      )}
+
       <div className="space-y-6 px-4 py-6 sm:px-6">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-2">
@@ -238,6 +264,15 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
           </Link>
         </div>
       </div>
+
+      {lightboxOpen && (
+        <PhotoLightbox
+          images={activity.images}
+          currentIndex={lightboxIndex}
+          onClose={() => setLightboxOpen(false)}
+          onNavigate={(index) => setLightboxIndex(index)}
+        />
+      )}
     </div>
   );
 }
