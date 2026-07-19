@@ -180,7 +180,7 @@ export default async function HomePage() {
 
   const sectionNameMap = new Map<string, string>();
   for (const s of sections) {
-    sectionNameMap.set(s.id, s.name);
+    sectionNameMap.set(s.category, s.name);
   }
 
   const activityCountBySection = new Map<string, number>();
@@ -257,8 +257,10 @@ export default async function HomePage() {
               <SectionCard
                 key={section.id}
                 section={section}
-                activityCount={activityCountBySection.get(section.id) || 0}
-                randomImage={sectionRandomPhoto.get(section.id) ?? null}
+                activityCount={
+                  activityCountBySection.get(section.category) || 0
+                }
+                randomImage={sectionRandomPhoto.get(section.category) ?? null}
               />
             ))}
           </div>
