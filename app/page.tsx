@@ -42,16 +42,16 @@ function SectionCard({
     <Link href={`/sections/${section.id}`}>
       <Card className="min-w-[180px] snap-start card-hover">
         {hasRealImage ? (
-          <div className="h-24 overflow-hidden rounded-t-lg">
+          <div>
             <img
               src={randomImage!}
               alt={section.name}
-              className="h-full w-full object-cover"
+              className="w-full rounded-t-lg"
             />
           </div>
         ) : (
           <div
-            className={`flex h-24 items-center justify-center rounded-t-lg bg-gradient-to-br ${section.imageGradient}`}
+            className={`flex aspect-video items-center justify-center rounded-t-lg bg-gradient-to-br ${section.imageGradient}`}
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/30 backdrop-blur-sm">
               {sectionIcons[section.icon] || (
@@ -101,16 +101,12 @@ function ActivityCard({
     <Link href={`/activities/${_id}`}>
       <Card className="min-w-[260px] snap-start card-hover">
         {hasRealImage ? (
-          <div className="h-32 overflow-hidden rounded-t-lg">
-            <img
-              src={firstImage}
-              alt={title}
-              className="h-full w-full object-cover"
-            />
+          <div>
+            <img src={firstImage} alt={title} className="w-full rounded-t-lg" />
           </div>
         ) : (
           <div
-            className={`flex h-32 items-center justify-center bg-gradient-to-br ${imageGradient}`}
+            className={`flex aspect-video items-center justify-center bg-gradient-to-br ${imageGradient}`}
           >
             <Compass className="h-10 w-10 text-white/80" />
           </div>
