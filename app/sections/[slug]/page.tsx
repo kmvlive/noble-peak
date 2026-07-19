@@ -3,11 +3,9 @@ import { notFound } from "next/navigation";
 import { Heart, ChevronLeft, MapPin, Compass } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { sections, getSectionBySlug, activities } from "@/lib/data";
+import type { SectionRecord, ActivityRecord } from "@/lib/models";
 
-export function generateStaticParams() {
-  return sections.map((s) => ({ slug: s.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export default async function SectionPage({
   params,
@@ -15,12 +13,20 @@ export default async function SectionPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const section = getSectionBySlug(slug);
+  const baseUrl = process.env.BASE_URL || "http://localhost:8080";
+
+  const [sectionsRes, activitiesRes] = await Promise.all([
+    fetch(`${baseUrl}/api/sections`, { cache: "no-store" }),
+    fetch(`${baseUrl}/api/activities`, { cache: "no-store" }),
+  ]);
+
+  const sections: SectionRecord[] = await sectionsRes.json();
+  const activities: ActivityRecord[] = await activitiesRes.json();
+
+  const section = sections.find((s) => s.id === slug);
   if (!section) notFound();
 
-  const categoryActivities = activities.filter(
-    (a) => a.category.toLowerCase() === section.category.toLowerCase()
-  );
+  const categoryActivities = activities.filter((a) => a.section === section.id);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:py-12">
@@ -62,40 +68,58 @@ export default async function SectionPage({
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {categoryActivities.map((activity) => (
-            <Link key={activity.id} href={`/activities/${activity.id}`}>
-              <Card className="h-full card-hover">
-                <div
-                  className={`flex h-28 items-center justify-center bg-gradient-to-br ${activity.imageGradient}`}
-                >
-                  <Compass className="h-8 w-8 text-white/70" />
-                </div>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <Badge variant="secondary">
-                      <MapPin className="mr-0.5 h-3 w-3" />
-                      {activity.category}
-                    </Badge>
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Heart className="h-3 w-3" />
-                      {activity.likes}
-                    </span>
-                  </div>
-                  <CardTitle className="mt-1 text-base">
-                    {activity.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {activity.shortDescription}
-                  </p>
-                  <p className="mt-3 text-lg font-semibold text-primary">
-                    {activity.price.toLocaleString("ru-RU")} ₽
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+          {categoryActivities.map((activity) => {
+            const firstImage = activity.images?.[0];
+            const hasRealImage =
+              firstImage &&
+              (firstImage.startsWith("http") ||
+                firstImage.startsWith("/uploads/"));
+
+            return (
+              <Link key={activity.id} href={`/activities/${activity.id}`}>
+                <Card className="h-full card-hover">
+                  {hasRealImage ? (
+                    <div className="h-28 overflow-hidden rounded-t-lg">
+                      <img
+                        src={firstImage!}
+                        alt={activity.title}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      className={`flex h-28 items-center justify-center bg-gradient-to-br ${activity.imageGradient}`}
+                    >
+                      <Compass className="h-8 w-8 text-white/70" />
+                    </div>
+                  )}
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <Badge variant="secondary">
+                        <MapPin className="mr-0.5 h-3 w-3" />
+                        {section.name}
+                      </Badge>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Heart className="h-3 w-3" />
+                        {activity.likes}
+                      </span>
+                    </div>
+                    <CardTitle className="mt-1 text-base">
+                      {activity.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {activity.shortDescription}
+                    </p>
+                    <p className="mt-3 text-lg font-semibold text-primary">
+                      {activity.price.toLocaleString("ru-RU")} ₽
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
