@@ -42,11 +42,11 @@ function SectionCard({
     <Link href={`/sections/${section.id}`}>
       <Card className="min-w-[180px] snap-start card-hover">
         {hasRealImage ? (
-          <div>
+          <div className="bg-muted">
             <img
               src={randomImage!}
               alt={section.name}
-              className="w-full rounded-t-lg"
+              className="w-full rounded-t-lg max-h-32 object-contain"
             />
           </div>
         ) : (
@@ -101,8 +101,12 @@ function ActivityCard({
     <Link href={`/activities/${_id}`}>
       <Card className="min-w-[260px] snap-start card-hover">
         {hasRealImage ? (
-          <div>
-            <img src={firstImage} alt={title} className="w-full rounded-t-lg" />
+          <div className="bg-muted">
+            <img
+              src={firstImage}
+              alt={title}
+              className="w-full rounded-t-lg max-h-48 object-contain"
+            />
           </div>
         ) : (
           <div
