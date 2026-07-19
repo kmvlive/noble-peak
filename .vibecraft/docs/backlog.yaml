@@ -31,8 +31,7 @@ tasks:
   - id: task-002
     phase: mvp
     title: Страница активности с фото, описанием, ценой и лайком
-    description:
-      "Создать отдельную страницу для каждой активности с уникальным URL.
+    description: "Создать отдельную страницу для каждой активности с уникальным URL.
       На странице: фотографии, название, описание (WYSIWYG), цена, кнопка лайка.
       Данные пока статические-заглушки."
     priority: high
@@ -78,8 +77,7 @@ tasks:
   - id: task-004
     phase: mvp
     title: "Админ-панель: вход и управление активностями"
-    description:
-      "Создать отдельную страницу входа для администратора по отдельному
+    description: "Создать отдельную страницу входа для администратора по отдельному
       URL. После входа: CRUD для активностей (название, описание в
       WYSIWYG-редакторе, загрузка фотографий, цена, выбор раздела, ползунок
       «оплата / форма заказа»)."
@@ -96,8 +94,7 @@ tasks:
       - task-003
     related_feature: Админ-панель
     status: completed
-    summary:
-      "Реализована админ-панель с отдельной страницей входа (/admin/login,
+    summary: "Реализована админ-панель с отдельной страницей входа (/admin/login,
       проверка email/пароля, токен в localStorage). Дашборд (/admin) со списком
       активностей, поиском, созданием, редактированием и удалением. Форма
       создания/редактирования включает: WYSIWYG-редактор (TipTap), загрузку
@@ -110,8 +107,7 @@ tasks:
   - id: task-005
     phase: mvp
     title: "Админ-панель: управление разделами и календарём"
-    description:
-      "Добавить в админ-панель: создание и удаление разделов, управление
+    description: "Добавить в админ-панель: создание и удаление разделов, управление
       календарём доступных дат и часов для каждой активности."
     priority: high
     acceptance_criteria:
@@ -138,8 +134,7 @@ tasks:
   - id: task-006
     phase: mvp
     title: "Личный кабинет клиента: регистрация и вход"
-    description:
-      "Создать отдельную страницу входа/регистрации клиента по отдельному
+    description: "Создать отдельную страницу входа/регистрации клиента по отдельному
       URL. Регистрация: имя, телефон, email, пароль. Вход по email и паролю.
       После регистрации письмо с данными на email."
     priority: high
@@ -152,8 +147,7 @@ tasks:
       - task-003
     related_feature: Личный кабинет клиента
     status: completed
-    summary:
-      "Реализована страница входа/регистрации клиента (/client/login) с двумя
+    summary: "Реализована страница входа/регистрации клиента (/client/login) с двумя
       режимами: вход (email + пароль) и регистрация (имя, телефон, email,
       пароль). Добавлена таблица clients в DynamoDB, модель ClientRecord, API
       /api/client/register (с валидацией zod, хешированием пароля через crypto),
@@ -163,8 +157,7 @@ tasks:
   - id: task-007
     phase: mvp
     title: Календарь на странице активности и выбор даты/времени
-    description:
-      На странице активности отобразить календарь с доступными датами (из
+    description: На странице активности отобразить календарь с доступными датами (из
       админ-панели). Если для даты отмечены часы — показать их для выбора. Если
       нет — доступен весь день.
     priority: high
@@ -178,8 +171,7 @@ tasks:
       - task-006
     related_feature: Календарь и бронирование
     status: completed
-    summary:
-      На странице активности (/activities/[id]) добавлен календарь с выбором
+    summary: На странице активности (/activities/[id]) добавлен календарь с выбором
       даты и времени. Данные берутся из админ-панели через публичный API GET
       /api/activities/[id]/calendar. Компонент ActivityBookingCalendar
       отображает месяц с доступными датами (из админ-панели), при клике на дату
@@ -237,8 +229,7 @@ tasks:
   - id: task-010
     phase: mvp
     title: Интеграция с платёжной системой Т-банка
-    description:
-      Реализовать страницу оплаты с интеграцией Т-банка. После успешной
+    description: Реализовать страницу оплаты с интеграцией Т-банка. После успешной
       оплаты бронирование подтверждается. При ошибке — сообщение об ошибке.
     priority: medium
     acceptance_criteria:
@@ -249,8 +240,7 @@ tasks:
       - task-008
     related_feature: Оплата через Т-банк
     status: completed
-    summary:
-      "Реализована интеграция с платёжной системой Т-банка (Tinkoff). Создан
+    summary: "Реализована интеграция с платёжной системой Т-банка (Tinkoff). Создан
       клиент T-Bank API (lib/payment.ts) с функциями Init, GetState,
       верификацией токена и проверкой статуса. API-маршруты: POST
       /api/payments/init (создание брони + инициация платежа), POST
@@ -275,8 +265,7 @@ tasks:
     depends_on: []
     related_feature: Админ-панель
     status: completed
-    summary:
-      "Заменены учётные данные администратора: логин admin@magazin-tour.ru →
+    summary: "Заменены учётные данные администратора: логин admin@magazin-tour.ru →
       artkmv1@ya.ru, пароль admin123 → Artkmv11. Изменения внесены в lib/auth.ts
       (fallback credentials), components/admin-login-form.tsx (placeholder) и
       lib/mock-data.ts (email-настройки по умолчанию). typecheck, lint, build
@@ -297,8 +286,7 @@ tasks:
     depends_on: []
     related_feature: Оплата через Т-банк
     status: completed
-    summary:
-      Создана страница /admin/payment-settings в админ-панели для управления
+    summary: Создана страница /admin/payment-settings в админ-панели для управления
       настройками интеграции с Т-банком (TerminalKey, Password, Webhook URL). В
       боковое меню админ-панели добавлен пункт «Платёжная система» с иконкой
       CreditCard. Реализован API GET/PUT /api/admin/payment-settings с
@@ -308,8 +296,7 @@ tasks:
   - id: task-013
     phase: mvp
     title: Метка 18+ при создании активности и плашка на странице активности
-    description:
-      Добавить в форму создания/редактирования активности в админ-панели
+    description: Добавить в форму создания/редактирования активности в админ-панели
       переключатель «18+». Если он включён, на странице активности для клиента
       перед показом содержимого появляется плашка с вопросом «Есть ли вам 18
       лет?» и кнопками Да/Нет. При выборе «Да» плашка скрывается и показывается
@@ -326,8 +313,7 @@ tasks:
     depends_on: []
     related_feature: Просмотр и каталог активностей
     status: completed
-    summary:
-      Добавлен переключатель 18+ в форму создания/редактирования активности в
+    summary: Добавлен переключатель 18+ в форму создания/редактирования активности в
       админ-панели (components/admin-activity-form.tsx). Поле over18 добавлено в
       ActivityRecord (lib/models.ts), Activity (lib/data.ts), mock-данные
       (lib/mock-data.ts), схемы валидации API
@@ -355,8 +341,7 @@ tasks:
     depends_on: []
     related_feature: Просмотр и каталог активностей
     status: completed
-    summary:
-      "Из статических данных (lib/data.ts) удалены все тестовые активности
+    summary: "Из статических данных (lib/data.ts) удалены все тестовые активности
       (10 штук: горный поход, морская прогулка, мастер-класс и др.) и все
       тестовые разделы (7 штук: Водные, Треккинг, Гастрономия и др.). Массивы
       activities и sections заменены на пустые. Интерфейсы Activity, Section и
@@ -367,8 +352,7 @@ tasks:
   - id: task-015
     phase: mvp
     title: Перезапустить dev-сервер для применения изменений
-    description:
-      Перезапустить контейнер с приложением, чтобы подхватились последние
+    description: Перезапустить контейнер с приложением, чтобы подхватились последние
       изменения в lib/auth.ts (новый логин и пароль администратора).
     priority: high
     acceptance_criteria:
@@ -377,8 +361,7 @@ tasks:
     depends_on: []
     related_feature: Админ-панель
     status: completed
-    summary:
-      Контейнер app перезапущен через docker compose up -d --force-recreate
+    summary: Контейнер app перезапущен через docker compose up -d --force-recreate
       app. Сервер отвечает 200 на http://localhost:8080. npm run typecheck,
       lint, build проходят без ошибок. Учётные данные администратора
       (artkmv1@ya.ru / Artkmv11) активны после перезапуска.
@@ -421,8 +404,7 @@ tasks:
     depends_on: []
     related_feature: Админ-панель
     status: completed
-    summary:
-      Реализована автоматическая транслитерация русских букв в латиницу при
+    summary: Реализована автоматическая транслитерация русских букв в латиницу при
       генерации ID разделов и активностей. Добавлена утилита slugify в
       lib/utils.ts с полной таблицей транслитерации (включая ё, й, щ, ъ, ь, э,
       ю, я). generateId в AdminSectionsManager и generateSlug в
@@ -432,8 +414,7 @@ tasks:
   - id: task-018
     phase: mvp
     title: Поле «Город / место» при создании активности
-    description:
-      Добавить в форму создания/редактирования активности в админ-панели
+    description: Добавить в форму создания/редактирования активности в админ-панели
       поле «Город / место». Отображать город/место на странице активности для
       клиента.
     priority: high
@@ -481,8 +462,7 @@ tasks:
   - id: task-020
     phase: mvp
     title: Поле «Цена для партнёра» при создании активности
-    description:
-      Добавить в форму создания/редактирования активности в админ-панели
+    description: Добавить в форму создания/редактирования активности в админ-панели
       поле «Цена для партнёра». Это скрытое поле — клиент его не видит на
       странице активности. Но именно эта цена отправляется на оплату при выборе
       типа оплаты. Цена для клиента остаётся как отдельное поле и показывается
@@ -497,8 +477,7 @@ tasks:
     depends_on: []
     related_feature: Админ-панель
     status: completed
-    summary:
-      Добавлено поле partnerPrice в ActivityRecord (lib/models.ts) и Activity
+    summary: Добавлено поле partnerPrice в ActivityRecord (lib/models.ts) и Activity
       (lib/data.ts). В форме админ-панели (components/admin-activity-form.tsx)
       добавлено поле «Цена для партнёра» с подсказкой. В zod-схемы POST и PUT
       API (app/api/admin/activities/route.ts, [id]/route.ts) добавлена валидация
@@ -509,8 +488,7 @@ tasks:
   - id: task-021
     phase: mvp
     title: Исправить постоянные обновления и сброс админ-панели
-    description:
-      AdminLayoutClient сейчас перепроверяет токен при каждом изменении
+    description: AdminLayoutClient сейчас перепроверяет токен при каждом изменении
       пути, из-за чего админ-панель постоянно обновляется и сбрасывает
       состояние. Нужно проверять токен только при монтировании компонента, а не
       на каждый pathname.
@@ -549,8 +527,7 @@ tasks:
     depends_on: []
     related_feature: Админ-панель
     status: completed
-    summary:
-      "Реализован раздел «Администраторы» в админ-панели (/admin/admins) с
+    summary: "Реализован раздел «Администраторы» в админ-панели (/admin/admins) с
       CRUD: добавление (email + пароль + имя), редактирование, удаление. Пункт
       меню «Администраторы» и скрытые от доп. администраторов пункты
       («Настройки», «Платёжная система») видны только главному администратору
@@ -574,8 +551,7 @@ tasks:
     depends_on: []
     related_feature: Личный кабинет клиента
     status: completed
-    summary:
-      Реализован раздел «Клиенты» в админ-панели (/admin/clients) со списком
+    summary: Реализован раздел «Клиенты» в админ-панели (/admin/clients) со списком
       зарегистрированных клиентов (имя, телефон, email, дата регистрации).
       Добавлены модели getAllClients, updateClient, deleteClient в
       lib/models.ts, mock-данные mockClients в lib/mock-data.ts, API
@@ -587,8 +563,7 @@ tasks:
   - id: task-024
     phase: mvp
     title: Исправить отображение главного администратора в списке
-    description:
-      "В mock-данных у главного администратора artkmv1@ya.ru стоит role:
+    description: "В mock-данных у главного администратора artkmv1@ya.ru стоит role:
       'admin' вместо 'main_admin'. Из-за этого он не показывается в списке
       администраторов. Исправить роль на 'main_admin'."
     priority: high
@@ -598,8 +573,7 @@ tasks:
     depends_on: []
     related_feature: Админ-панель
     status: completed
-    summary:
-      Исправлена роль artkmv1@ya.ru с admin на main_admin в mock-data.ts:171.
+    summary: Исправлена роль artkmv1@ya.ru с admin на main_admin в mock-data.ts:171.
       Расширен тип role в AdminRecord (lib/models.ts:649) с admin до main_admin
       | admin, чтобы соответствовало типу из auth.ts.
   - id: task-025
@@ -616,15 +590,13 @@ tasks:
     depends_on: []
     related_feature: Админ-панель
     status: completed
-    summary:
-      Контейнер приложения перезапущен (docker compose up -d --force-recreate
+    summary: Контейнер приложения перезапущен (docker compose up -d --force-recreate
       app). Сервер отвечает на порту 8080, health-check OK. Mock-данные содержат
       artkmv1@ya.ru с ролью main_admin. typecheck, lint, build проходят.
   - id: task-026
     phase: mvp
     title: Исправить API администраторов — всегда показывать главного администратора
-    description:
-      API /api/admin/admins не возвращает главного администратора, если
+    description: API /api/admin/admins не возвращает главного администратора, если
       база данных доступна, но таблица admins пуста. Нужно, чтобы главный
       администратор (artkmv1@ya.ru) всегда добавлялся в список, даже если его
       нет в БД.
@@ -701,8 +673,7 @@ tasks:
   - id: task-029
     phase: mvp
     title: Сбросить кеш БД и перезапустить сервер
-    description:
-      isDatabaseAvailable() кеширует результат проверки доступности БД.
+    description: isDatabaseAvailable() кеширует результат проверки доступности БД.
       Если при старте сервера БД была недоступна, все данные читаются из пустых
       mock-данных. Нужно сбросить кеш и перезапустить сервер, чтобы данные из
       DynamoDB снова читались.
@@ -733,8 +704,7 @@ tasks:
     depends_on: []
     related_feature: Просмотр и каталог активностей
     status: completed
-    summary:
-      Страница активности (/activities/[id]) переделана на получение данных
+    summary: Страница активности (/activities/[id]) переделана на получение данных
       через API /api/activities/[id] вместо статических данных из lib/data.ts.
       Создан публичный эндпоинт GET /api/activities/[id]
       (app/api/activities/[id]/route.ts) с фолбэком на mock-данные. В
@@ -775,8 +745,7 @@ tasks:
     depends_on: []
     related_feature: Просмотр и каталог активностей
     status: completed
-    summary:
-      "В ActivityCard (app/page.tsx) добавлена проверка первого элемента из
+    summary: "В ActivityCard (app/page.tsx) добавлена проверка первого элемента из
       images: если это реальный URL (начинается с http или /uploads/),
       отображается <img> с object-cover; иначе показывается прежний градиент с
       иконкой Compass. Поле images пробрасывается через деструктуризацию в
@@ -797,8 +766,7 @@ tasks:
     depends_on: []
     related_feature: Просмотр и каталог активностей
     status: completed
-    summary:
-      В карточку раздела SectionCard (app/page.tsx) добавлен показ случайного
+    summary: В карточку раздела SectionCard (app/page.tsx) добавлен показ случайного
       фото из активностей этого раздела. В HomePage строится map section →
       список валидных URL (http/https или /uploads/), затем на каждый рендер
       выбирается случайное фото через Math.random. Если в разделе нет
@@ -807,8 +775,7 @@ tasks:
   - id: task-034
     phase: mvp
     title: Исправить страницу раздела — загружать данные из БД
-    description:
-      Страница раздела (/sections/[slug]) использует статические данные
+    description: Страница раздела (/sections/[slug]) использует статические данные
       из lib/data.ts, которые пусты. Нужно переделать на получение данных через
       API /api/sections и /api/activities, чтобы разделы и активности из БД
       отображались. Также исправить счётчик активностей на главной.
@@ -832,8 +799,7 @@ tasks:
   - id: task-035
     phase: mvp
     title: Исправить счётчик активностей и отображение фото на главной
-    description:
-      Счётчик активностей на главной не работает, потому что в активности
+    description: Счётчик активностей на главной не работает, потому что в активности
       поле section хранит название раздела (category), а не id. Нужно
       сопоставлять a.section с section.category. Также исправить отображение
       фотографий в карточках активностей и случайное фото в карточках разделов.
@@ -854,8 +820,7 @@ tasks:
   - id: task-036
     phase: mvp
     title: Расширить WYSIWYG-редактор описания активности
-    description:
-      "Добавить в редактор TipTap больше возможностей: заголовки H1-H4,
+    description: "Добавить в редактор TipTap больше возможностей: заголовки H1-H4,
       цитаты, разделители, ссылки, выделение (маркер), подчёркивание,
       зачёркивание, очистка форматирования. Улучшить панель инструментов с分组ми и
       иконками."
@@ -890,16 +855,14 @@ tasks:
     depends_on: []
     related_feature: Просмотр и каталог активностей
     status: completed
-    summary:
-      Убрана фиксированная высота (h-24, h-32) и overflow-hidden у карточек
+    summary: Убрана фиксированная высота (h-24, h-32) и overflow-hidden у карточек
       SectionCard и ActivityCard на главной странице (app/page.tsx). Фото теперь
       отображаются в полную ширину с сохранением естественных пропорций. Для
       заглушек без фото добавлен aspect-video.
   - id: task-038
     phase: mvp
     title: Уменьшить размер превью на главной без обрезки
-    description:
-      Сейчас фото в карточках активностей и разделов отображаются на всю
+    description: Сейчас фото в карточках активностей и разделов отображаются на всю
       ширину без ограничения. Нужно добавить max-height с object-contain, чтобы
       фото было компактнее, но не обрезалось.
     priority: medium
@@ -910,4 +873,21 @@ tasks:
     depends_on: []
     related_feature: Просмотр и каталог активностей
     status: completed
-    summary: В app/page.tsx для SectionCard добавлен max-h-32 object-contain, для ActivityCard добавлен max-h-48 object-contain. Фото не обрезаются, сохраняют пропорции. Добавлен bg-muted на родительский div для визуальной согласованности при letterboxing.
+    summary: В app/page.tsx для SectionCard добавлен max-h-32 object-contain, для
+      ActivityCard добавлен max-h-48 object-contain. Фото не обрезаются,
+      сохраняют пропорции. Добавлен bg-muted на родительский div для визуальной
+      согласованности при letterboxing.
+  - id: task-039
+    phase: mvp
+    title: Исправить сохранение данных DynamoDB между перезапусками
+    description: DynamoDB Local не сохраняет данные между перезапусками, потому что
+      не указан параметр -dbPath. Нужно добавить -dbPath /home/dynamodblocal/ в
+      команду запуска, чтобы данные сохранялись в смонтированный volume.
+    priority: high
+    acceptance_criteria:
+      - Данные в DynamoDB сохраняются после перезапуска контейнера
+      - Ранее добавленные активности и разделы не пропадают
+    depends_on: []
+    related_feature: Админ-панель
+    status: pending
+    summary: null
