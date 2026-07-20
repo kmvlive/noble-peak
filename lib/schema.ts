@@ -15,6 +15,7 @@ export const TableName = {
   PAYMENT_SETTINGS: "payment_settings",
   ADMINS: "admins",
   PARTNERS: "partners",
+  PASSWORD_RESETS: "password_resets",
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];
@@ -106,6 +107,11 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
     name: TableName.PARTNERS,
     keySchema: [{ AttributeName: "email", KeyType: "HASH" }],
     attributeDefinitions: [{ AttributeName: "email", AttributeType: "S" }],
+  },
+  [TableName.PASSWORD_RESETS]: {
+    name: TableName.PASSWORD_RESETS,
+    keySchema: [{ AttributeName: "token", KeyType: "HASH" }],
+    attributeDefinitions: [{ AttributeName: "token", AttributeType: "S" }],
   },
 };
 

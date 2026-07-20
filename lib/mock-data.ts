@@ -9,6 +9,7 @@ import type {
   AdminRecord,
   ClientRecord,
   PartnerRecord,
+  PasswordResetRecord,
 } from "./models";
 import {
   activities as staticActivities,
@@ -382,3 +383,5 @@ export const mockPendingActivities: ActivityRecord[] = [
     updatedAt: new Date("2024-08-01").toISOString(),
   },
 ];
+
+export const mockPasswordResets: PasswordResetRecord[] = [];

@@ -20,7 +20,8 @@ export async function verifyCredentials(
     const { getAdminByEmail } = await import("./models");
     const admin = await getAdminByEmail(email);
     if (admin && admin.password === password) {
-      return { email, role: "admin" };
+      const role = email === MAIN_ADMIN_EMAIL ? "main_admin" : admin.role;
+      return { email, role };
     }
   } catch {}
 

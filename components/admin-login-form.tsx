@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Lock, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { setToken } from "./admin-layout-client";
+import Link from "next/link";
 
 export function AdminLoginForm() {
   const router = useRouter();
@@ -89,6 +90,14 @@ export function AdminLoginForm() {
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Вход..." : "Войти"}
       </Button>
+      <div className="text-center">
+        <Link
+          href="/admin/forgot-password"
+          className="text-sm text-muted-foreground hover:text-primary"
+        >
+          Забыли пароль?
+        </Link>
+      </div>
     </form>
   );
 }

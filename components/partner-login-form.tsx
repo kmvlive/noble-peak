@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mail, Lock, User, Phone } from "lucide-react";
 import { toast } from "sonner";
+import Link from "next/link";
 
 export function PartnerLoginForm() {
   const router = useRouter();
@@ -161,6 +162,14 @@ export function PartnerLoginForm() {
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Вход..." : "Войти"}
           </Button>
+          <div className="text-center">
+            <Link
+              href="/partner/forgot-password"
+              className="text-sm text-muted-foreground hover:text-primary"
+            >
+              Забыли пароль?
+            </Link>
+          </div>
         </form>
       ) : (
         <form onSubmit={handleRegister} className="space-y-4">

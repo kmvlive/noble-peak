@@ -920,3 +920,59 @@ export async function deletePartner(email: string): Promise<void> {
     })
   );
 }
+
+export interface PasswordResetRecord {
+  token: string;
+  email: string;
+  role: "admin" | "client" | "partner";
+  expiresAt: string;
+  used: boolean;
+}
+
+export async function createPasswordResetToken(
+  email: string,
+  role: "admin" | "client" | "partner"
+): Promise<string> {
+  const token = randomUUID();
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+  const record: PasswordResetRecord = {
+    token,
+    email,
+    role,
+    expiresAt,
+    used: false,
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.PASSWORD_RESETS,
+      Item: record,
+    })
+  );
+
+  return token;
+}
+
+export async function getPasswordResetToken(
+  token: string
+): Promise<PasswordResetRecord | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TableName.PASSWORD_RESETS,
+      Key: { token },
+    })
+  );
+  return (result.Item as PasswordResetRecord) ?? null;
+}
+
+export async function markPasswordResetTokenUsed(token: string): Promise<void> {
+  await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.PASSWORD_RESETS,
+      Key: { token },
+      UpdateExpression: "set #used = :used",
+      ExpressionAttributeNames: { "#used": "used" },
+      ExpressionAttributeValues: { ":used": true },
+    })
+  );
+}
