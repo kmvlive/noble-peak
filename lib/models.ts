@@ -32,6 +32,7 @@ export interface ActivityRecord {
   section: string;
   price: number;
   partnerPrice?: number;
+  partnerPricePercent?: number;
   likes: number;
   isPopular: boolean;
   over18: boolean;

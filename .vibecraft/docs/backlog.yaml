@@ -1096,8 +1096,8 @@ tasks:
     depends_on:
       - task-045
     related_feature: Админ-панель
-    status: pending
-    summary: null
+    status: completed
+    summary: "Реализован раздел «Новые активности» в админ-панели (/admin/activities/pending) с модерацией. Администратор видит активности от партнёров со статусом pending. Кнопка «Одобрить» открывает диалог с полем ввода процента от цены клиента — при одобрении вычисляется partnerPrice (price * percent / 100) и статус меняется на active. Кнопка «Отклонить» с подтверждением меняет статус на rejected. В ActivityRecord добавлено поле partnerPricePercent, в API PUT /api/admin/activities/[id] добавлена логика расчёта partnerPrice. Основная реализация: app/admin/activities/pending/page.tsx, app/api/admin/activities/[id]/route.ts, lib/models.ts."
   - id: task-047
     phase: mvp
     title: "Кабинет партнёра: мои активности, заказы и календарь"

@@ -12,6 +12,7 @@ const updateActivitySchema = z.object({
   section: z.string().min(1, "Раздел обязателен").optional(),
   price: z.number().min(0).optional(),
   partnerPrice: z.number().min(0).optional(),
+  partnerPricePercent: z.number().min(0).max(100).optional(),
   likes: z.number().min(0).optional(),
   isPopular: z.boolean().optional(),
   over18: z.boolean().optional(),
@@ -98,7 +99,21 @@ export async function PUT(
       );
     }
 
-    const activity = await updateActivity(id, parsed.data);
+    const updateData = { ...parsed.data };
+
+    if (
+      updateData.status === "active" &&
+      updateData.partnerPricePercent !== undefined
+    ) {
+      const current = await getActivityById(id);
+      if (current) {
+        updateData.partnerPrice = Math.round(
+          current.price * (updateData.partnerPricePercent / 100)
+        );
+      }
+    }
+
+    const activity = await updateActivity(id, updateData);
     return NextResponse.json(activity);
   } catch (error) {
     console.error("Ошибка обновления активности:", error);
