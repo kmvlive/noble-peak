@@ -37,8 +37,8 @@ export default function AdminPendingActivitiesPage() {
   useEffect(() => {
     fetch("/api/admin/activities/pending")
       .then((res) => res.json())
-      .then((data: ActivityRecord[]) => {
-        setActivities(data);
+      .then((data) => {
+        setActivities(Array.isArray(data) ? data : []);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
