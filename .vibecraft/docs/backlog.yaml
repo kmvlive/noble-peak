@@ -1114,5 +1114,21 @@ tasks:
     depends_on:
       - task-045
     related_feature: Кабинет партнёра
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Реализованы разделы «Мои активности» (/partner/activities),
+      «Заказы» (/partner/orders) и «Календарь» (/partner/calendar) в кабинете
+      партнёра. Мои активности отображают список активностей партнёра с
+      баджем статуса (на модерации/одобрена/отклонена), поиском по названию
+      и городу. Заказы показывают список бронирований на активности партнёра
+      с информацией о клиенте, дате, времени и сумме. Календарь отображает
+      месячную сетку с точками на датах с активными заказами и блоком
+      ближайших заказов. Добавлены API GET /api/partner/activities и GET
+      /api/partner/orders с аутентификацией и фолбэком на мок-данные,
+      модели getActivitiesByPartnerEmail и getBookingsByActivityIds.
+      Основная реализация: app/partner/activities/page.tsx,
+      app/partner/orders/page.tsx, app/partner/calendar/page.tsx,
+      app/api/partner/activities/route.ts, app/api/partner/orders/route.ts,
+      components/partner-activities-list.tsx,
+      components/partner-orders-list.tsx,
+      components/partner-calendar.tsx, lib/models.ts, lib/mock-data.ts.

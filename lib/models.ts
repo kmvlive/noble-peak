@@ -503,6 +503,35 @@ export interface BookingRecord {
   createdAt: string;
 }
 
+export async function getBookingsByActivityIds(
+  activityIds: string[]
+): Promise<BookingRecord[]> {
+  if (activityIds.length === 0) return [];
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.BOOKINGS,
+    })
+  );
+  const all = (result.Items as BookingRecord[]) ?? [];
+  const idSet = new Set(activityIds);
+  return all.filter((b) => idSet.has(b.activityId));
+}
+
+export async function getActivitiesByPartnerEmail(
+  partnerEmail: string
+): Promise<ActivityRecord[]> {
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.ACTIVITIES,
+      FilterExpression: "partnerEmail = :partnerEmail",
+      ExpressionAttributeValues: {
+        ":partnerEmail": partnerEmail,
+      },
+    })
+  );
+  return (result.Items as ActivityRecord[]) ?? [];
+}
+
 export async function createBooking(
   data: Omit<
     BookingRecord,
