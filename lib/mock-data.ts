@@ -10,6 +10,7 @@ import type {
   ClientRecord,
   PartnerRecord,
   PasswordResetRecord,
+  MenuItemRecord,
 } from "./models";
 import {
   activities as staticActivities,
@@ -385,3 +386,60 @@ export const mockPendingActivities: ActivityRecord[] = [
 ];
 
 export const mockPasswordResets: PasswordResetRecord[] = [];
+
+export const mockMenuItems: MenuItemRecord[] = [
+  {
+    id: "mock-admin-dashboard",
+    menuType: "admin",
+    name: "Дашборд",
+    url: "/admin",
+    order: 1,
+    createdAt: new Date("2024-01-01").toISOString(),
+    updatedAt: new Date("2024-01-01").toISOString(),
+  },
+  {
+    id: "mock-admin-activities",
+    menuType: "admin",
+    name: "Активности",
+    url: "/admin",
+    order: 2,
+    createdAt: new Date("2024-01-01").toISOString(),
+    updatedAt: new Date("2024-01-01").toISOString(),
+  },
+  {
+    id: "mock-client-home",
+    menuType: "client",
+    name: "Главная",
+    url: "/",
+    order: 1,
+    createdAt: new Date("2024-01-01").toISOString(),
+    updatedAt: new Date("2024-01-01").toISOString(),
+  },
+  {
+    id: "mock-client-bookings",
+    menuType: "client",
+    name: "Мои бронирования",
+    url: "/client/bookings",
+    order: 2,
+    createdAt: new Date("2024-01-01").toISOString(),
+    updatedAt: new Date("2024-01-01").toISOString(),
+  },
+  {
+    id: "mock-partner-dashboard",
+    menuType: "partner",
+    name: "Дашборд",
+    url: "/partner",
+    order: 1,
+    createdAt: new Date("2024-01-01").toISOString(),
+    updatedAt: new Date("2024-01-01").toISOString(),
+  },
+  {
+    id: "mock-partner-activities",
+    menuType: "partner",
+    name: "Мои активности",
+    url: "/partner/activities",
+    order: 2,
+    createdAt: new Date("2024-01-01").toISOString(),
+    updatedAt: new Date("2024-01-01").toISOString(),
+  },
+];

@@ -16,6 +16,7 @@ import {
   Shield,
   Users,
   Clock,
+  Navigation,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -98,6 +99,17 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
       icon: Clock,
     },
     { href: "/admin/sections", label: "Разделы", icon: FolderOpen },
+    { href: "/admin/menu/admin", label: "Меню админов", icon: Navigation },
+    {
+      href: "/admin/menu/client",
+      label: "Меню клиентов",
+      icon: Navigation,
+    },
+    {
+      href: "/admin/menu/partner",
+      label: "Меню партнёров",
+      icon: Navigation,
+    },
     { href: "/admin/clients", label: "Клиенты", icon: Users },
     { href: "/admin/admins", label: "Администраторы", icon: Shield },
     {

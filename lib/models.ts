@@ -976,3 +976,124 @@ export async function markPasswordResetTokenUsed(token: string): Promise<void> {
     })
   );
 }
+
+export interface MenuItemRecord {
+  id: string;
+  menuType: "admin" | "client" | "partner";
+  name: string;
+  url: string;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function getMenuItems(
+  menuType: "admin" | "client" | "partner"
+): Promise<MenuItemRecord[]> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.MENU_ITEMS,
+      KeyConditionExpression: "menuType = :menuType",
+      ExpressionAttributeValues: {
+        ":menuType": menuType,
+      },
+    })
+  );
+  const items = (result.Items as MenuItemRecord[]) ?? [];
+  return items.sort((a, b) => a.order - b.order);
+}
+
+export async function getMenuItem(
+  menuType: string,
+  id: string
+): Promise<MenuItemRecord | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TableName.MENU_ITEMS,
+      Key: { menuType, id },
+    })
+  );
+  return (result.Item as MenuItemRecord) ?? null;
+}
+
+export async function createMenuItem(
+  data: Omit<MenuItemRecord, "createdAt" | "updatedAt">
+): Promise<MenuItemRecord> {
+  const now = new Date().toISOString();
+  const menuItem: MenuItemRecord = {
+    ...data,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.MENU_ITEMS,
+      Item: menuItem,
+    })
+  );
+
+  return menuItem;
+}
+
+export async function updateMenuItem(
+  menuType: string,
+  id: string,
+  data: Partial<Pick<MenuItemRecord, "name" | "url" | "order">>
+): Promise<MenuItemRecord> {
+  const updateExpr: string[] = [];
+  const exprValues: Record<string, unknown> = {};
+  const exprNames: Record<string, string> = {};
+
+  if (data.name !== undefined) {
+    updateExpr.push("#name = :name");
+    exprValues[":name"] = data.name;
+    exprNames["#name"] = "name";
+  }
+
+  if (data.url !== undefined) {
+    updateExpr.push("#url = :url");
+    exprValues[":url"] = data.url;
+    exprNames["#url"] = "url";
+  }
+
+  if (data.order !== undefined) {
+    updateExpr.push("#order = :order");
+    exprValues[":order"] = data.order;
+    exprNames["#order"] = "order";
+  }
+
+  if (updateExpr.length === 0) {
+    const existing = await getMenuItem(menuType, id);
+    if (!existing) throw new Error("Menu item not found");
+    return existing;
+  }
+
+  updateExpr.push("updatedAt = :updatedAt");
+  exprValues[":updatedAt"] = new Date().toISOString();
+
+  const result = await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.MENU_ITEMS,
+      Key: { menuType, id },
+      UpdateExpression: `set ${updateExpr.join(", ")}`,
+      ExpressionAttributeValues: exprValues,
+      ExpressionAttributeNames: exprNames,
+      ReturnValues: "ALL_NEW",
+    })
+  );
+
+  return result.Attributes as MenuItemRecord;
+}
+
+export async function deleteMenuItem(
+  menuType: string,
+  id: string
+): Promise<void> {
+  await docClient.send(
+    new DeleteCommand({
+      TableName: TableName.MENU_ITEMS,
+      Key: { menuType, id },
+    })
+  );
+}
