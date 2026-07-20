@@ -770,3 +770,101 @@ export async function deleteAdmin(email: string): Promise<void> {
     })
   );
 }
+
+export interface PartnerRecord {
+  email: string;
+  name: string;
+  phone: string;
+  passwordHash: string;
+  createdAt: string;
+}
+
+export async function getPartnerByEmail(
+  email: string
+): Promise<PartnerRecord | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TableName.PARTNERS,
+      Key: { email },
+    })
+  );
+  return (result.Item as PartnerRecord) ?? null;
+}
+
+export async function createPartner(
+  data: Omit<PartnerRecord, "createdAt">
+): Promise<PartnerRecord> {
+  const now = new Date().toISOString();
+  const partner: PartnerRecord = {
+    ...data,
+    createdAt: now,
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.PARTNERS,
+      Item: partner,
+      ConditionExpression: "attribute_not_exists(email)",
+    })
+  );
+
+  return partner;
+}
+
+export async function getAllPartners(): Promise<PartnerRecord[]> {
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.PARTNERS,
+    })
+  );
+  return (result.Items as PartnerRecord[]) ?? [];
+}
+
+export async function updatePartner(
+  email: string,
+  data: Partial<Pick<PartnerRecord, "name" | "phone">>
+): Promise<PartnerRecord> {
+  const updateExpr: string[] = [];
+  const exprValues: Record<string, unknown> = {};
+  const exprNames: Record<string, string> = {};
+
+  if (data.name !== undefined) {
+    updateExpr.push("#name = :name");
+    exprValues[":name"] = data.name;
+    exprNames["#name"] = "name";
+  }
+
+  if (data.phone !== undefined) {
+    updateExpr.push("#phone = :phone");
+    exprValues[":phone"] = data.phone;
+    exprNames["#phone"] = "phone";
+  }
+
+  if (updateExpr.length === 0) {
+    const existing = await getPartnerByEmail(email);
+    if (!existing) throw new Error("Partner not found");
+    return existing;
+  }
+
+  const result = await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.PARTNERS,
+      Key: { email },
+      UpdateExpression: `set ${updateExpr.join(", ")}`,
+      ExpressionAttributeValues: exprValues,
+      ExpressionAttributeNames: exprNames,
+      ReturnValues: "ALL_NEW",
+    })
+  );
+
+  return result.Attributes as PartnerRecord;
+}
+
+export async function deletePartner(email: string): Promise<void> {
+  await docClient.send(
+    new DeleteCommand({
+      TableName: TableName.PARTNERS,
+      Key: { email },
+    })
+  );
+}

@@ -8,6 +8,7 @@ import type {
   PaymentSettingsRecord,
   AdminRecord,
   ClientRecord,
+  PartnerRecord,
 } from "./models";
 import {
   activities as staticActivities,
@@ -195,5 +196,15 @@ export const mockClients: ClientRecord[] = [
     phone: "+7 (999) 777-88-99",
     passwordHash: "hash789",
     createdAt: new Date("2024-05-20").toISOString(),
+  },
+];
+
+export const mockPartners: PartnerRecord[] = [
+  {
+    email: "partner@example.com",
+    name: "Партнёр Иванов",
+    phone: "+7 (999) 000-11-22",
+    passwordHash: "hash:partner",
+    createdAt: new Date("2024-06-01").toISOString(),
   },
 ];
