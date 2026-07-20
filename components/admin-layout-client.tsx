@@ -182,6 +182,34 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
           Админ-панель
         </Link>
         <div className="flex-1" />
+        {menuLoading ? (
+          <div className="hidden md:flex items-center gap-1">
+            <Skeleton className="h-7 w-16" />
+            <Skeleton className="h-7 w-20" />
+          </div>
+        ) : (
+          menuItems
+            .sort((a, b) => a.order - b.order)
+            .map((item) => {
+              const isActive =
+                item.url === "/admin"
+                  ? pathname === "/admin"
+                  : pathname.startsWith(item.url);
+              return (
+                <Link
+                  key={item.id}
+                  href={item.url}
+                  className={`whitespace-nowrap rounded-md px-2.5 py-1 text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              );
+            })
+        )}
         <Button variant="ghost" size="sm" onClick={handleLogout}>
           <LogOut className="mr-1.5 h-4 w-4" />
           Выйти
@@ -196,38 +224,6 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
           }`}
         >
           <nav className="flex flex-col gap-1 p-3">
-            {menuLoading ? (
-              <div className="space-y-1 px-3 py-2">
-                <Skeleton className="h-9 w-full" />
-                <Skeleton className="h-9 w-full" />
-                <Skeleton className="h-9 w-full" />
-              </div>
-            ) : (
-              menuItems
-                .sort((a, b) => a.order - b.order)
-                .map((item) => {
-                  const isActive =
-                    item.url === "/admin"
-                      ? pathname === "/admin"
-                      : pathname.startsWith(item.url);
-                  return (
-                    <Link
-                      key={item.id}
-                      href={item.url}
-                      onClick={() => setSidebarOpen(false)}
-                      className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                        isActive
-                          ? "bg-primary/10 text-primary"
-                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                      }`}
-                    >
-                      <Navigation className="h-4 w-4" />
-                      {item.name}
-                    </Link>
-                  );
-                })
-            )}
-            <div className="my-2 border-t" />
             {navItems.map((item) => {
               const isActive =
                 item.href === "/admin"
