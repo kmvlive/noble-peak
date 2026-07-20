@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Menu, X, Sparkles, Navigation } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface MenuItem {
@@ -21,7 +20,6 @@ export function ClientLayoutClient({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [menuLoading, setMenuLoading] = useState(true);
 
@@ -55,73 +53,48 @@ export function ClientLayoutClient({
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-background">
       <header className="flex h-14 shrink-0 items-center border-b px-4 gap-3">
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="md:hidden"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-        >
-          {sidebarOpen ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <Menu className="h-5 w-5" />
-          )}
-        </Button>
         <Link
           href="/"
-          className="flex items-center gap-2 text-base font-semibold tracking-tight"
+          className="flex items-center gap-2 text-base font-semibold tracking-tight shrink-0"
         >
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <Sparkles className="h-3.5 w-3.5" />
           </div>
           Личный кабинет
         </Link>
+        <div className="flex items-center gap-1 overflow-x-auto">
+          {menuLoading ? (
+            <>
+              <Skeleton className="h-7 w-16" />
+              <Skeleton className="h-7 w-20" />
+            </>
+          ) : (
+            menuItems
+              .sort((a, b) => a.order - b.order)
+              .map((item) => {
+                const isActive =
+                  item.url === "/"
+                    ? pathname === "/"
+                    : pathname.startsWith(item.url);
+                return (
+                  <Link
+                    key={item.id}
+                    href={item.url}
+                    className={`whitespace-nowrap rounded-md px-2.5 py-1 text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    }`}
+                  >
+                    {item.name}
+                  </Link>
+                );
+              })
+          )}
+        </div>
         <div className="flex-1" />
       </header>
-      <div className="flex flex-1 overflow-hidden">
-        <aside
-          className={`w-56 shrink-0 border-r bg-muted/30 overflow-y-auto ${
-            sidebarOpen
-              ? "fixed inset-0 top-14 z-40 block bg-background/95 md:static md:block"
-              : "hidden md:block"
-          }`}
-        >
-          <nav className="flex flex-col gap-1 p-3">
-            {menuLoading ? (
-              <div className="space-y-1 px-3 py-2">
-                <Skeleton className="h-9 w-full" />
-                <Skeleton className="h-9 w-full" />
-                <Skeleton className="h-9 w-full" />
-              </div>
-            ) : (
-              menuItems
-                .sort((a, b) => a.order - b.order)
-                .map((item) => {
-                  const isActive =
-                    item.url === "/"
-                      ? pathname === "/"
-                      : pathname.startsWith(item.url);
-                  return (
-                    <Link
-                      key={item.id}
-                      href={item.url}
-                      onClick={() => setSidebarOpen(false)}
-                      className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                        isActive
-                          ? "bg-primary/10 text-primary"
-                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                      }`}
-                    >
-                      <Navigation className="h-4 w-4" />
-                      {item.name}
-                    </Link>
-                  );
-                })
-            )}
-          </nav>
-        </aside>
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
-      </div>
+      <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
     </div>
   );
 }
