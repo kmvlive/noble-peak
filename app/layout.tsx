@@ -3,7 +3,6 @@ import Link from "next/link";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
-import { Sparkles } from "lucide-react";
 import { BridgeProvider } from "@/components/bridge-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { sections } from "@/lib/data";
@@ -32,7 +31,11 @@ export default function RootLayout({
               className="flex items-center gap-2 text-lg font-semibold tracking-tight shrink-0"
             >
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Sparkles className="h-4 w-4" />
+                <img
+                  src="/assets/2026-07-20_11-32-13.png"
+                  alt={appName}
+                  className="h-5 w-5"
+                />
               </div>
               {appName}
             </Link>
