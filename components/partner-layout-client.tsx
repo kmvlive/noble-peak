@@ -6,6 +6,7 @@ import Link from "next/link";
 import { HelpCircle, LogOut, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { FooterMenu } from "@/components/footer-menu";
 
 interface MenuItem {
   id: string;
@@ -145,6 +146,7 @@ export function PartnerLayoutClient({
         </Button>
       </header>
       <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
+      <FooterMenu />
     </div>
   );
 }

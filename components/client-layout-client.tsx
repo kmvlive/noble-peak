@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { FooterMenu } from "@/components/footer-menu";
 
 interface MenuItem {
   id: string;
@@ -95,6 +96,7 @@ export function ClientLayoutClient({
         <div className="flex-1" />
       </header>
       <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
+      <FooterMenu />
     </div>
   );
 }

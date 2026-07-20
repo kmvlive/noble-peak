@@ -7,7 +7,7 @@ import { z } from "zod";
 import { randomUUID } from "node:crypto";
 
 const createMenuItemSchema = z.object({
-  menuType: z.enum(["admin", "client", "partner"]),
+  menuType: z.enum(["admin", "client", "partner", "footer"]),
   name: z.string().min(1).max(200),
   url: z.string().min(1).max(500),
   order: z.number().int().min(0).default(0),
@@ -31,7 +31,10 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const menuType = searchParams.get("type");
 
-  if (!menuType || !["admin", "client", "partner"].includes(menuType)) {
+  if (
+    !menuType ||
+    !["admin", "client", "partner", "footer"].includes(menuType)
+  ) {
     return NextResponse.json(
       { error: "Некорректный тип меню" },
       { status: 400 }
@@ -43,7 +46,7 @@ export async function GET(request: NextRequest) {
   if (dbAvailable) {
     try {
       const items = await getMenuItems(
-        menuType as "admin" | "client" | "partner"
+        menuType as "admin" | "client" | "partner" | "footer"
       );
       return NextResponse.json(items);
     } catch (error) {

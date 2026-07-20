@@ -17,9 +17,11 @@ import {
   Users,
   Clock,
   Navigation,
+  ArrowDownFromLine,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { FooterMenu } from "@/components/footer-menu";
 
 interface MenuItem {
   id: string;
@@ -137,6 +139,11 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
       label: "Меню партнёров",
       icon: Navigation,
     },
+    {
+      href: "/admin/menu/footer",
+      label: "Нижнее меню",
+      icon: ArrowDownFromLine,
+    },
     { href: "/admin/clients", label: "Клиенты", icon: Users },
     { href: "/admin/admins", label: "Администраторы", icon: Shield },
     {
@@ -249,6 +256,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
         </aside>
         <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
       </div>
+      <FooterMenu />
     </div>
   );
 }

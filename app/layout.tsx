@@ -7,6 +7,7 @@ import { BridgeProvider } from "@/components/bridge-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { sections } from "@/lib/data";
 import { appName } from "@/lib/app-name";
+import { FooterMenu } from "@/components/footer-menu";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -53,11 +54,7 @@ export default function RootLayout({
           </nav>
         </header>
         <main className="flex-1">{children}</main>
-        <footer className="border-t">
-          <div className="container mx-auto px-4 py-6 text-center text-xs text-muted-foreground">
-            © {new Date().getFullYear()} {appName}
-          </div>
-        </footer>
+        <FooterMenu />
         <Toaster richColors position="top-right" />
       </body>
     </html>

@@ -42,7 +42,10 @@ export async function PUT(
     const { searchParams } = new URL(request.url);
     const menuType = searchParams.get("menuType");
 
-    if (!menuType || !["admin", "client", "partner"].includes(menuType)) {
+    if (
+      !menuType ||
+      !["admin", "client", "partner", "footer"].includes(menuType)
+    ) {
       return NextResponse.json(
         { error: "Некорректный тип меню" },
         { status: 400 }
@@ -94,7 +97,10 @@ export async function DELETE(
     const { searchParams } = new URL(request.url);
     const menuType = searchParams.get("menuType");
 
-    if (!menuType || !["admin", "client", "partner"].includes(menuType)) {
+    if (
+      !menuType ||
+      !["admin", "client", "partner", "footer"].includes(menuType)
+    ) {
       return NextResponse.json(
         { error: "Некорректный тип меню" },
         { status: 400 }

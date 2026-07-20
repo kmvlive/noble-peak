@@ -979,7 +979,7 @@ export async function markPasswordResetTokenUsed(token: string): Promise<void> {
 
 export interface MenuItemRecord {
   id: string;
-  menuType: "admin" | "client" | "partner";
+  menuType: "admin" | "client" | "partner" | "footer";
   name: string;
   url: string;
   order: number;
@@ -988,7 +988,7 @@ export interface MenuItemRecord {
 }
 
 export async function getMenuItems(
-  menuType: "admin" | "client" | "partner"
+  menuType: "admin" | "client" | "partner" | "footer"
 ): Promise<MenuItemRecord[]> {
   const result = await docClient.send(
     new QueryCommand({

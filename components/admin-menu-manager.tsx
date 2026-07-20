@@ -9,14 +9,14 @@ import { getToken } from "./admin-layout-client";
 
 interface MenuItem {
   id: string;
-  menuType: "admin" | "client" | "partner";
+  menuType: "admin" | "client" | "partner" | "footer";
   name: string;
   url: string;
   order: number;
 }
 
 interface AdminMenuManagerProps {
-  menuType: "admin" | "client" | "partner";
+  menuType: "admin" | "client" | "partner" | "footer";
   title: string;
   description: string;
 }
