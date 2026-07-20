@@ -19,6 +19,15 @@ import {
   Navigation,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+
+interface MenuItem {
+  id: string;
+  menuType: "admin" | "client" | "partner";
+  name: string;
+  url: string;
+  order: number;
+}
 
 const TOKEN_KEY = "admin_token";
 const TOKEN_PREFIX = "magazin_tour_admin_v1:";
@@ -64,6 +73,8 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [menuLoading, setMenuLoading] = useState(true);
   const redirectedRef = useRef(false);
 
   useEffect(() => {
@@ -72,6 +83,22 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
       router.replace("/admin/login");
     }
   }, [router]);
+
+  useEffect(() => {
+    fetchMenuItems();
+  }, []);
+
+  const fetchMenuItems = async () => {
+    try {
+      const res = await fetch("/api/menu?type=admin");
+      const data = await res.json();
+      setMenuItems(Array.isArray(data) ? data : []);
+    } catch {
+      console.error("Ошибка загрузки пунктов меню");
+    } finally {
+      setMenuLoading(false);
+    }
+  };
 
   const isAuthed = hasToken();
 
@@ -169,6 +196,38 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
           }`}
         >
           <nav className="flex flex-col gap-1 p-3">
+            {menuLoading ? (
+              <div className="space-y-1 px-3 py-2">
+                <Skeleton className="h-9 w-full" />
+                <Skeleton className="h-9 w-full" />
+                <Skeleton className="h-9 w-full" />
+              </div>
+            ) : (
+              menuItems
+                .sort((a, b) => a.order - b.order)
+                .map((item) => {
+                  const isActive =
+                    item.url === "/admin"
+                      ? pathname === "/admin"
+                      : pathname.startsWith(item.url);
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.url}
+                      onClick={() => setSidebarOpen(false)}
+                      className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                        isActive
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      }`}
+                    >
+                      <Navigation className="h-4 w-4" />
+                      {item.name}
+                    </Link>
+                  );
+                })
+            )}
+            <div className="my-2 border-t" />
             {navItems.map((item) => {
               const isActive =
                 item.href === "/admin"
