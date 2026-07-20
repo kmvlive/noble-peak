@@ -18,6 +18,7 @@ const updateActivitySchema = z.object({
   orderType: z.enum(["payment", "order_form"]).optional(),
   imageGradient: z.string().optional(),
   location: z.string().max(200).optional(),
+  status: z.enum(["active", "pending", "rejected"]).optional(),
 });
 
 function getTokenFromRequest(request: NextRequest): string | null {

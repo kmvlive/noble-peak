@@ -1069,8 +1069,15 @@ tasks:
     depends_on:
       - task-044
     related_feature: Кабинет партнёра
-    status: pending
-    summary: null
+    status: completed
+    summary: "Реализована форма добавления активности в кабинете партнёра
+      (/partner/activities/new). Форма включает: название, описание (WYSIWYG),
+      фото (URL/загрузка с компьютера), цену для клиента, город/место, раздел,
+      метку 18+. Без поля «Цена для партнёра». API POST /api/partner/activities
+      создаёт активность со статусом pending и partnerEmail. В админ-панель
+      добавлен раздел «Новые активности» (/admin/activities/pending) с API
+      GET /api/admin/activities/pending. Добавлены поля status и partnerEmail в
+      ActivityRecord в DynamoDB. typecheck, lint (0 ошибок), build проходят."
   - id: task-046
     phase: mvp
     title: "Админ-панель: раздел «Новые активности» с модерацией"

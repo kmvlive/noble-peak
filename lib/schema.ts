@@ -45,7 +45,17 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
   [TableName.ACTIVITIES]: {
     name: TableName.ACTIVITIES,
     keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
-    attributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
+    attributeDefinitions: [
+      { AttributeName: "id", AttributeType: "S" },
+      { AttributeName: "status", AttributeType: "S" },
+    ],
+    globalSecondaryIndexes: [
+      {
+        IndexName: "status-index",
+        KeySchema: [{ AttributeName: "status", KeyType: "HASH" }],
+        Projection: { ProjectionType: "ALL" },
+      },
+    ],
   },
   [TableName.SECTIONS]: {
     name: TableName.SECTIONS,
@@ -104,6 +114,7 @@ export const TABLE_NAMES: TableName[] = Object.values(TableName);
 export const IndexName = {
   SERVICES_STATUS: "status-index",
   BOOKINGS_CLIENT_EMAIL: "clientEmail-index",
+  ACTIVITIES_STATUS: "status-index",
 } as const;
 
 export type IndexName = (typeof IndexName)[keyof typeof IndexName];

@@ -20,6 +20,10 @@ const createActivitySchema = z.object({
   orderType: z.enum(["payment", "order_form"]).optional().default("order_form"),
   imageGradient: z.string().optional().default("from-blue-400 to-indigo-500"),
   location: z.string().max(200).optional().default(""),
+  status: z
+    .enum(["active", "pending", "rejected"])
+    .optional()
+    .default("active"),
 });
 
 function getTokenFromRequest(request: NextRequest): string | null {

@@ -21,6 +21,7 @@ export interface Service {
 }
 
 export type OrderType = "payment" | "order_form";
+export type ActivityStatus = "active" | "pending" | "rejected";
 
 export interface ActivityRecord {
   id: string;
@@ -37,6 +38,8 @@ export interface ActivityRecord {
   orderType: OrderType;
   imageGradient: string;
   location?: string;
+  status: ActivityStatus;
+  partnerEmail?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -160,6 +163,25 @@ export async function getAllActivities(): Promise<ActivityRecord[]> {
   const result = await docClient.send(
     new ScanCommand({
       TableName: TableName.ACTIVITIES,
+    })
+  );
+  return (result.Items as ActivityRecord[]) ?? [];
+}
+
+export async function getActivitiesByStatus(
+  status: ActivityStatus
+): Promise<ActivityRecord[]> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.ACTIVITIES,
+      IndexName: IndexName.ACTIVITIES_STATUS,
+      KeyConditionExpression: "#status = :status",
+      ExpressionAttributeNames: {
+        "#status": "status",
+      },
+      ExpressionAttributeValues: {
+        ":status": status,
+      },
     })
   );
   return (result.Items as ActivityRecord[]) ?? [];
