@@ -122,7 +122,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
 
   const allNavItems = [
     { href: "/admin", label: "Дашборд", icon: LayoutDashboard },
-    { href: "/admin", label: "Активности", icon: List },
+    { href: "/admin/activities", label: "Активности", icon: List },
     {
       href: "/admin/activities/pending",
       label: "Новые активности",
