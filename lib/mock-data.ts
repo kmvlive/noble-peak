@@ -11,6 +11,7 @@ import type {
   PartnerRecord,
   PasswordResetRecord,
   MenuItemRecord,
+  AnalyticsCounterRecord,
 } from "./models";
 import {
   activities as staticActivities,
@@ -470,3 +471,5 @@ export const mockMenuItems: MenuItemRecord[] = [
     updatedAt: new Date("2024-01-01").toISOString(),
   },
 ];
+
+export const mockAnalyticsCounters: AnalyticsCounterRecord[] = [];

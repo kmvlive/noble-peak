@@ -18,6 +18,7 @@ import {
   Clock,
   Navigation,
   ArrowDownFromLine,
+  BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -152,6 +153,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
       icon: CreditCard,
     },
     { href: "/admin/settings", label: "Настройки", icon: Settings },
+    { href: "/admin/analytics", label: "Статистика", icon: BarChart3 },
   ];
 
   const mainOnlyItems = [

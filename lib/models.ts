@@ -1097,3 +1097,51 @@ export async function deleteMenuItem(
     })
   );
 }
+
+export interface AnalyticsCounterRecord {
+  id: string;
+  name: string;
+  code: string;
+  createdAt: string;
+}
+
+export async function getAllAnalyticsCounters(): Promise<
+  AnalyticsCounterRecord[]
+> {
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.ANALYTICS_COUNTERS,
+    })
+  );
+  return (result.Items as AnalyticsCounterRecord[]) ?? [];
+}
+
+export async function createAnalyticsCounter(
+  data: Omit<AnalyticsCounterRecord, "id" | "createdAt">
+): Promise<AnalyticsCounterRecord> {
+  const now = new Date().toISOString();
+  const id = randomUUID();
+  const record: AnalyticsCounterRecord = {
+    id,
+    ...data,
+    createdAt: now,
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.ANALYTICS_COUNTERS,
+      Item: record,
+    })
+  );
+
+  return record;
+}
+
+export async function deleteAnalyticsCounter(id: string): Promise<void> {
+  await docClient.send(
+    new DeleteCommand({
+      TableName: TableName.ANALYTICS_COUNTERS,
+      Key: { id },
+    })
+  );
+}
