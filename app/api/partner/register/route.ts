@@ -58,19 +58,23 @@ export async function POST(request: NextRequest) {
 
     const token = createPartnerToken(email);
 
+    const baseUrl = process.env.BASE_URL ?? "http://localhost:8080";
+
     await sendEmail({
       to: email,
       subject: `Добро пожаловать в кабинет партнёра ${appName}`,
       html: `
         <h1>Добро пожаловать, ${name}!</h1>
-        <p>Вы успешно зарегистрировались в кабинете партнёра ${appName}.</p>
+        <p>Поздравляем! Вы успешно зарегистрировались в кабинете партнёра ${appName}.</p>
         <p>Ваши регистрационные данные:</p>
         <ul>
           <li><strong>Имя:</strong> ${name}</li>
           <li><strong>Телефон:</strong> ${phone}</li>
-          <li><strong>Email:</strong> ${email}</li>
+          <li><strong>Логин (email):</strong> ${email}</li>
           <li><strong>Пароль:</strong> ${password}</li>
         </ul>
+        <p>Для входа в кабинет партнёра перейдите по ссылке: <a href="${baseUrl}/partner/login">${baseUrl}/partner/login</a></p>
+        <p>Ознакомьтесь с <a href="https://magazin-tour.ru/vazhnye-voprosy-i-otvety-dlya-partnyora/">важными вопросами и ответами для партнёра</a>.</p>
         <p>Рекомендуем сменить пароль после первого входа.</p>
         <p>С уважением, команда ${appName}.</p>
       `,
