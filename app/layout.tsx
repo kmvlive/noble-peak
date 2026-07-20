@@ -30,7 +30,7 @@ export default function RootLayout({
               href="/"
               className="flex items-center gap-2 text-lg font-semibold tracking-tight shrink-0"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden">
                 <img
                   src="/assets/2026-07-20_11-32-13.png"
                   alt={appName}
