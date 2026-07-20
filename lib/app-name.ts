@@ -1,1 +1,1 @@
-export const appName = "magazin-tour. Магазин туров и активностей";
+export const appName = "Магазин туров и активностей";
