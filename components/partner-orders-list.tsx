@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import { Search, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -66,6 +67,28 @@ export function PartnerOrdersList() {
       });
   }, [router]);
 
+  const handleExportCSV = async () => {
+    try {
+      const params = new URLSearchParams();
+      params.set("export", "csv");
+      const res = await fetch(`/api/partner/orders?${params}`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (!res.ok) throw new Error("Ошибка экспорта");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `partner-orders-${new Date().toISOString().split("T")[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      console.error("Ошибка экспорта CSV");
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-3">
@@ -109,14 +132,20 @@ export function PartnerOrdersList() {
 
   return (
     <div className="space-y-4">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Поиск по активности, клиенту или дате..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9"
-        />
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Поиск по активности, клиенту или дате..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Button variant="outline" size="sm" onClick={handleExportCSV}>
+          <Download className="h-4 w-4 mr-1" />
+          CSV
+        </Button>
       </div>
 
       {filtered.length === 0 && (

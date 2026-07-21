@@ -14,6 +14,7 @@ import {
   Clock,
   DollarSign,
   Building,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -125,6 +126,27 @@ export function AdminOrdersList() {
     setPage(1);
   };
 
+  const handleExportCSV = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (search) params.set("search", search);
+      params.set("export", "csv");
+      const res = await fetch(`/api/admin/orders?${params}`);
+      if (!res.ok) throw new Error("Ошибка экспорта");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `orders-${new Date().toISOString().split("T")[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      console.error("Ошибка экспорта CSV");
+    }
+  };
+
   const toggleExpand = async (orderId: string) => {
     if (expandedId === orderId) {
       setExpandedId(null);
@@ -173,6 +195,10 @@ export function AdminOrdersList() {
         <Button variant="secondary" size="sm" onClick={handleSearch}>
           <Search className="h-4 w-4 mr-1" />
           Найти
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleExportCSV}>
+          <Download className="h-4 w-4 mr-1" />
+          CSV
         </Button>
       </div>
 

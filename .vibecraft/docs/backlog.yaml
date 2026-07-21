@@ -1574,5 +1574,12 @@ tasks:
       - CSV содержит все поля заказа
     depends_on: []
     related_feature: Кабинет партнёра
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Реализован экспорт заказов в CSV для администратора (раздел «Отчёты») и
+      партнёра (раздел «Заказы»). В API GET /api/admin/orders и GET
+      /api/partner/orders добавлена поддержка параметра export=csv, возвращающего
+      CSV-файл с BOM для Excel. В компоненты AdminOrdersList и PartnerOrdersList
+      добавлена кнопка «CSV» для скачивания. Администратор получает все поля
+      OrderRecord, партнёр — все поля BookingRecord. typecheck, lint, build
+      проходят.
