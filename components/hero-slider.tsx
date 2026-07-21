@@ -35,13 +35,12 @@ export function HeroSlider({ children }: HeroSliderProps) {
     <section className="relative overflow-hidden px-4 py-12 sm:py-16 min-h-[60vh]">
       {images.length > 0 && (
         <>
-          <div className="absolute inset-0 bg-gray-900" style={{ zIndex: 0 }} />
           {images.map((img, index) => (
             <img
               key={img.id}
               src={img.imageUrl}
               alt=""
-              className="absolute inset-0 h-full w-full object-contain transition-opacity duration-1000"
+              className="absolute inset-0 h-full w-full object-cover transition-opacity duration-1000"
               style={{
                 opacity: index === currentIndex ? 1 : 0,
                 zIndex: 0,
