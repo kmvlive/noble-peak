@@ -1512,8 +1512,8 @@ tasks:
       - Результаты отображаются карточками активностей
     depends_on: []
     related_feature: Просмотр и каталог активностей
-    status: pending
-    summary: null
+    status: completed
+    summary: "На главную страницу (app/page.tsx) добавлен поиск активностей по названию, городу (location) и разделу через клиентский компонент ActivitySearch (components/activity-search.tsx). Поле поиска встроено в hero-секцию. Результаты отображаются карточками через переиспользуемый компонент ActivityCard (components/activity-card.tsx). typecheck, lint, build проходят."
   - id: task-064
     phase: mvp
     title: Отзывы и рейтинг на активностях с модерацией
