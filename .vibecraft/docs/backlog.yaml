@@ -1559,8 +1559,8 @@ tasks:
       - Изменения сохраняются в БД
     depends_on: []
     related_feature: Кабинет партнёра
-    status: pending
-    summary: null
+    status: completed
+    summary: "Реализована возможность редактирования профиля партнёра (имя и телефон). Созданы: API GET/PATCH /api/partner/profile (с валидацией zod), страница /partner/profile, клиентский компонент PartnerProfileForm с формой и тостами sonner. Добавлен пункт меню «Профиль» в навигацию кабинета партнёра. Основная реализация: app/api/partner/profile/route.ts, app/partner/profile/page.tsx, components/partner-profile-form.tsx."
   - id: task-067
     phase: mvp
     title: Экспорт заказов для партнёра и админа
