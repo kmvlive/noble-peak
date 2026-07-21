@@ -176,8 +176,8 @@ export default async function HomePage() {
             Найдите приключение по душе
           </h1>
           <p className="mx-auto max-w-xl text-base text-muted-foreground">
-            Трекинг, сплавы, дегустации, квесты и ещё 100+ активностей —
-            выбирайте и бронируйте онлайн
+            Трекинг, сплавы, дегустации, квесты и многое другое — выбирайте и
+            бронируйте онлайн
           </p>
           <div className="mx-auto max-w-xl">
             <ActivitySearch
