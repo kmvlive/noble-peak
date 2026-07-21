@@ -6,6 +6,7 @@ import {
   updateBookingPayment,
   getActivityById,
   removeBookedSlotFromCalendar,
+  createOrder,
 } from "@/lib/models";
 import { getClientEmailFromRequest } from "@/lib/client-auth";
 import { initPayment } from "@/lib/payment";
@@ -76,6 +77,20 @@ export async function POST(request: NextRequest) {
       },
       true
     );
+
+    createOrder({
+      bookingId: booking.id,
+      clientEmail,
+      clientName,
+      clientPhone,
+      activityId: activity.id,
+      activityTitle: activity.title,
+      partnerEmail: activity.partnerEmail ?? null,
+      date,
+      time,
+      price: amount,
+      status: booking.status,
+    }).catch((e) => console.error("Ошибка создания заказа:", e));
 
     removeBookedSlotFromCalendar(activity.id, date, time).catch((e) =>
       console.error("Ошибка обновления календаря после бронирования:", e)

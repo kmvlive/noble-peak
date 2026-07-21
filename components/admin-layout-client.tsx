@@ -19,6 +19,7 @@ import {
   Navigation,
   ArrowDownFromLine,
   BarChart3,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -162,6 +163,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
       icon: ArrowDownFromLine,
     },
     { href: "/admin/clients", label: "Клиенты", icon: Users },
+    { href: "/admin/orders", label: "Отчёты", icon: FileText },
     { href: "/admin/admins", label: "Администраторы", icon: Shield },
     {
       href: "/admin/payment-settings",

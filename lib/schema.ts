@@ -18,6 +18,7 @@ export const TableName = {
   PASSWORD_RESETS: "password_resets",
   MENU_ITEMS: "menu_items",
   ANALYTICS_COUNTERS: "analytics_counters",
+  ORDERS: "orders",
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];
@@ -128,6 +129,11 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
   },
   [TableName.ANALYTICS_COUNTERS]: {
     name: TableName.ANALYTICS_COUNTERS,
+    keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+    attributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
+  },
+  [TableName.ORDERS]: {
+    name: TableName.ORDERS,
     keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
     attributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
   },

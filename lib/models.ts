@@ -1145,3 +1145,95 @@ export async function deleteAnalyticsCounter(id: string): Promise<void> {
     })
   );
 }
+
+export interface OrderRecord {
+  id: string;
+  orderNumber: string;
+  bookingId: string;
+  clientEmail: string;
+  clientName: string;
+  clientPhone: string;
+  activityId: string;
+  activityTitle: string;
+  partnerEmail: string | null;
+  date: string;
+  time: string | null;
+  price: number;
+  status: string;
+  createdAt: string;
+}
+
+export async function getNextOrderNumber(): Promise<string> {
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.ORDERS,
+      ProjectionExpression: "orderNumber",
+    })
+  );
+  const items = (result.Items as { orderNumber: string }[]) ?? [];
+  let max = 0;
+  for (const item of items) {
+    const num = parseInt(item.orderNumber, 10);
+    if (!isNaN(num) && num > max) max = num;
+  }
+  return String(max + 1).padStart(6, "0");
+}
+
+export async function createOrder(
+  data: Omit<OrderRecord, "id" | "orderNumber" | "createdAt">
+): Promise<OrderRecord> {
+  const now = new Date().toISOString();
+  const orderNumber = await getNextOrderNumber();
+  const order: OrderRecord = {
+    ...data,
+    id: randomUUID(),
+    orderNumber,
+    createdAt: now,
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.ORDERS,
+      Item: order,
+    })
+  );
+
+  return order;
+}
+
+export async function getAllOrders(options?: {
+  limit?: number;
+  offset?: number;
+  search?: string;
+}): Promise<{ orders: OrderRecord[]; total: number }> {
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.ORDERS,
+    })
+  );
+  let items = (result.Items as OrderRecord[]) ?? [];
+
+  if (options?.search) {
+    const q = options.search.trim().toLowerCase();
+    items = items.filter((o) => o.orderNumber.toLowerCase().includes(q));
+  }
+
+  items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+
+  const total = items.length;
+  const limit = options?.limit ?? 100;
+  const offset = options?.offset ?? 0;
+  const orders = items.slice(offset, offset + limit);
+
+  return { orders, total };
+}
+
+export async function getOrderById(id: string): Promise<OrderRecord | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TableName.ORDERS,
+      Key: { id },
+    })
+  );
+  return (result.Item as OrderRecord) ?? null;
+}

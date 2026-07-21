@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { isDatabaseAvailable } from "@/lib/db";
-import { createBooking, removeBookedSlotFromCalendar } from "@/lib/models";
+import {
+  createBooking,
+  removeBookedSlotFromCalendar,
+  createOrder,
+  getActivityById,
+} from "@/lib/models";
 import { getClientEmailFromRequest } from "@/lib/client-auth";
 import { sendEmail } from "@/lib/email";
 import { appName } from "@/lib/app-name";
@@ -69,6 +74,21 @@ export async function POST(request: NextRequest) {
       },
       false
     );
+
+    const activity = await getActivityById(activityId);
+    createOrder({
+      bookingId: booking.id,
+      clientEmail,
+      clientName,
+      clientPhone,
+      activityId,
+      activityTitle,
+      partnerEmail: activity?.partnerEmail ?? null,
+      date,
+      time,
+      price,
+      status: booking.status,
+    }).catch((e) => console.error("Ошибка создания заказа:", e));
 
     removeBookedSlotFromCalendar(activityId, date, time).catch((e) =>
       console.error("Ошибка обновления календаря после бронирования:", e)
