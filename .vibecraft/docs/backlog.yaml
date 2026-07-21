@@ -1494,8 +1494,8 @@ tasks:
       - Работает фильтрация по дате
     depends_on: []
     related_feature: Личный кабинет клиента
-    status: pending
-    summary: null
+    status: completed
+    summary: "В компонент ClientBookingsList (components/client-bookings-list.tsx) добавлена фильтрация по статусу (Все, Подтверждённые, Ожидают оплаты, Отменённые) через переключаемые кнопки и фильтрация по дате (Все даты, Предстоящие, Прошедшие) с возможностью сортировки (сначала новые/старые). В mock-данные (lib/mock-data.ts) добавлена тестовая бронь со статусом cancelled. typecheck, lint, build проходят."
   - id: task-063
     phase: mvp
     title: Поиск активностей по названию, городу и разделу

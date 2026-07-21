@@ -153,6 +153,23 @@ export const mockBookings: BookingRecord[] = [
     paymentStatus: "NEW",
     createdAt: new Date().toISOString(),
   },
+  {
+    id: "mock-booking-3",
+    clientEmail: "test@example.com",
+    clientName: "Тест Пользователь",
+    clientPhone: "+7 (999) 123-45-67",
+    activityId: "extreme-rafting",
+    activityTitle: "Рафтинг по горной реке",
+    date: new Date(Date.now() - 86400000 * 30).toISOString().split("T")[0],
+    time: "14:00",
+    details: "Отменили по погодным условиям",
+    price: 5000,
+    status: "cancelled",
+    paymentId: null,
+    paymentUrl: null,
+    paymentStatus: null,
+    createdAt: new Date(Date.now() - 86400000 * 35).toISOString(),
+  },
 ];
 
 export const mockEmailSettings: EmailSettingsRecord = {
