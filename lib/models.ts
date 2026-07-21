@@ -1433,6 +1433,7 @@ export async function deleteNotification(id: string): Promise<void> {
 export interface SliderImage {
   id: string;
   imageUrl: string;
+  position?: "center" | "top" | "bottom";
   createdAt: string;
 }
 
@@ -1470,6 +1471,21 @@ export async function deleteSliderImage(id: string): Promise<void> {
     new DeleteCommand({
       TableName: TableName.SLIDER_IMAGES,
       Key: { id },
+    })
+  );
+}
+
+export async function updateSliderImagePosition(
+  id: string,
+  position: "center" | "top" | "bottom"
+): Promise<void> {
+  await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.SLIDER_IMAGES,
+      Key: { id },
+      UpdateExpression: "SET #pos = :pos",
+      ExpressionAttributeNames: { "#pos": "position" },
+      ExpressionAttributeValues: { ":pos": position },
     })
   );
 }

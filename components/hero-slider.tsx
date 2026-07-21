@@ -36,12 +36,12 @@ export function HeroSlider({ children }: HeroSliderProps) {
       {images.length > 0 && (
         <>
           {images.map((img, index) => (
-            <img
+            <div
               key={img.id}
-              src={img.imageUrl}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover transition-opacity duration-1000"
+              className="absolute inset-0 h-full w-full bg-cover transition-opacity duration-1000"
               style={{
+                backgroundImage: `url(${img.imageUrl})`,
+                backgroundPosition: img.position || "center",
                 opacity: index === currentIndex ? 1 : 0,
                 zIndex: 0,
               }}

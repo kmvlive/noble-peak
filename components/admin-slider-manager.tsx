@@ -4,13 +4,27 @@ import { useState, useEffect, useCallback } from "react";
 import { ImageIcon, Trash2, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import type { SliderImage } from "@/lib/models";
+
+const positionLabels: Record<string, string> = {
+  center: "Центр",
+  top: "Верх",
+  bottom: "Низ",
+};
 
 export function AdminSliderManager() {
   const [images, setImages] = useState<SliderImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const fetchImages = useCallback(async () => {
     try {
@@ -84,6 +98,35 @@ export function AdminSliderManager() {
     }
   }
 
+  async function handlePositionChange(
+    id: string,
+    position: "center" | "top" | "bottom"
+  ) {
+    setUpdatingId(id);
+    try {
+      const token = localStorage.getItem("admin_token");
+      const res = await fetch(`/api/admin/slider/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ position }),
+      });
+
+      if (!res.ok) throw new Error("Ошибка сохранения");
+
+      toast.success("Позиция сохранена");
+      setImages((prev) =>
+        prev.map((img) => (img.id === id ? { ...img, position } : img))
+      );
+    } catch {
+      toast.error("Не удалось сохранить позицию");
+    } finally {
+      setUpdatingId(null);
+    }
+  }
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -142,18 +185,46 @@ export function AdminSliderManager() {
           {images.map((img) => (
             <div
               key={img.id}
-              className="group relative aspect-video overflow-hidden rounded-lg border"
+              className="group relative overflow-hidden rounded-lg border"
             >
-              <img
-                src={img.imageUrl}
-                alt=""
-                className="h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/40">
+              <div className="aspect-video">
+                <img
+                  src={img.imageUrl}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="flex items-center gap-2 border-t p-2">
+                <Select
+                  value={img.position || "center"}
+                  onValueChange={(value) =>
+                    handlePositionChange(
+                      img.id,
+                      value as "center" | "top" | "bottom"
+                    )
+                  }
+                  disabled={updatingId === img.id}
+                >
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="center">
+                      {positionLabels.center}
+                    </SelectItem>
+                    <SelectItem value="top">{positionLabels.top}</SelectItem>
+                    <SelectItem value="bottom">
+                      {positionLabels.bottom}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                {updatingId === img.id && (
+                  <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+                )}
                 <Button
-                  variant="destructive"
+                  variant="ghost"
                   size="icon"
-                  className="opacity-0 transition-opacity group-hover:opacity-100"
+                  className="ml-auto h-8 w-8 shrink-0 text-destructive"
                   onClick={() => handleDelete(img.id)}
                 >
                   <Trash2 className="h-4 w-4" />
