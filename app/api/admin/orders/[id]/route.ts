@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isDatabaseAvailable } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
-import { getOrderById, getActivityById, getPartnerByEmail } from "@/lib/models";
-import {
-  mockOrders,
-  mockPartnerActivities,
-  mockPartners,
-} from "@/lib/mock-data";
+import { getOrderById, getPartnerByEmail } from "@/lib/models";
+import { mockOrders, mockPartners } from "@/lib/mock-data";
 
 function getTokenFromRequest(request: NextRequest): string | null {
   const authHeader = request.headers.get("authorization");
