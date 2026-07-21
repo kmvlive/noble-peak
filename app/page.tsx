@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ActivityRecord, SectionRecord } from "@/lib/models";
 import { ActivityCard } from "@/components/activity-card";
 import { ActivitySearch } from "@/components/activity-search";
+import { HeroSlider } from "@/components/hero-slider";
 
 const sectionIcons: Record<string, React.ReactNode> = {
   Waves: <Waves className="h-6 w-6" />,
@@ -167,15 +168,15 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-[calc(100vh-9rem)]">
-      <section className="gradient-hero-vibrant px-4 py-12 sm:py-16">
+      <HeroSlider>
         <div className="mx-auto max-w-5xl space-y-4 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
           <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/70 backdrop-blur-sm shadow-sm">
             <Compass className="h-7 w-7 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl text-white">
             Найдите приключение по душе
           </h1>
-          <p className="mx-auto max-w-xl text-base text-muted-foreground">
+          <p className="mx-auto max-w-xl text-base text-white/80">
             Трекинг, сплавы, дегустации, квесты и многое другое — выбирайте и
             бронируйте онлайн
           </p>
@@ -186,7 +187,7 @@ export default async function HomePage() {
             />
           </div>
         </div>
-      </section>
+      </HeroSlider>
 
       <div className="mx-auto max-w-5xl space-y-10 px-4 py-8 sm:py-12">
         <section className="space-y-4">

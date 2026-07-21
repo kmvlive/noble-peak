@@ -1429,3 +1429,47 @@ export async function deleteNotification(id: string): Promise<void> {
     })
   );
 }
+
+export interface SliderImage {
+  id: string;
+  imageUrl: string;
+  createdAt: string;
+}
+
+export async function getAllSliderImages(): Promise<SliderImage[]> {
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.SLIDER_IMAGES,
+    })
+  );
+  return (result.Items as SliderImage[]) ?? [];
+}
+
+export async function createSliderImage(
+  imageUrl: string
+): Promise<SliderImage> {
+  const id = randomUUID();
+  const record: SliderImage = {
+    id,
+    imageUrl,
+    createdAt: new Date().toISOString(),
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.SLIDER_IMAGES,
+      Item: record,
+    })
+  );
+
+  return record;
+}
+
+export async function deleteSliderImage(id: string): Promise<void> {
+  await docClient.send(
+    new DeleteCommand({
+      TableName: TableName.SLIDER_IMAGES,
+      Key: { id },
+    })
+  );
+}

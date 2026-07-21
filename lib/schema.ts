@@ -21,6 +21,7 @@ export const TableName = {
   ORDERS: "orders",
   REVIEWS: "reviews",
   NOTIFICATIONS: "notifications",
+  SLIDER_IMAGES: "slider_images",
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];
@@ -173,6 +174,12 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
         Projection: { ProjectionType: "ALL" },
       },
     ],
+  },
+
+  [TableName.SLIDER_IMAGES]: {
+    name: TableName.SLIDER_IMAGES,
+    keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+    attributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
   },
 };
 

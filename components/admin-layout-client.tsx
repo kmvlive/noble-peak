@@ -21,6 +21,7 @@ import {
   BarChart3,
   FileText,
   MessageSquare,
+  Image,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -148,6 +149,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
     },
     { href: "/admin/reviews", label: "Отзывы", icon: MessageSquare },
     { href: "/admin/sections", label: "Разделы", icon: FolderOpen },
+    { href: "/admin/slider", label: "Слайдер", icon: Image },
     { href: "/admin/menu/admin", label: "Меню админов", icon: Navigation },
     {
       href: "/admin/menu/client",

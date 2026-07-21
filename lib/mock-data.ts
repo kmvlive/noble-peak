@@ -20,6 +20,7 @@ import {
   activities as staticActivities,
   sections as staticSections,
 } from "./data";
+import type { SliderImage } from "./models";
 
 export const mockServices: Service[] = [
   {
@@ -650,6 +651,8 @@ export const mockReviews: ReviewRecord[] = [
     createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
   },
 ];
+
+export const mockSliderImages: SliderImage[] = [];
 
 export const mockOrders: OrderRecord[] = [
   {
