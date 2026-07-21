@@ -19,6 +19,7 @@ import { ActivityBookingCalendar } from "@/components/activity-booking-calendar"
 import { BookingForm } from "@/components/booking-form";
 import { AgeVerificationOverlay } from "@/components/age-verification-overlay";
 import { PhotoLightbox } from "@/components/photo-lightbox";
+import { ActivityReviews } from "@/components/activity-reviews";
 
 export function ActivityPageContent({ activity }: { activity: Activity }) {
   const [likes, setLikes] = useState(activity.likes);
@@ -253,6 +254,10 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
             </Link>
           </div>
         )}
+
+        <div className="pt-6">
+          <ActivityReviews activityId={activity.id} />
+        </div>
 
         <div className="pt-2">
           <Link

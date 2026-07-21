@@ -13,6 +13,7 @@ import type {
   MenuItemRecord,
   AnalyticsCounterRecord,
   OrderRecord,
+  ReviewRecord,
 } from "./models";
 import {
   activities as staticActivities,
@@ -491,6 +492,49 @@ export const mockMenuItems: MenuItemRecord[] = [
 ];
 
 export const mockAnalyticsCounters: AnalyticsCounterRecord[] = [];
+
+export const mockReviews: ReviewRecord[] = [
+  {
+    id: "mock-review-1",
+    activityId: "gastronomic-tour",
+    clientEmail: "ivan@example.com",
+    clientName: "Иван Петров",
+    rating: 5,
+    text: "Отличный тур! Всё очень понравилось, особенно дегустация местных вин. Обязательно вернусь ещё.",
+    status: "approved",
+    createdAt: new Date(Date.now() - 86400000 * 10).toISOString(),
+  },
+  {
+    id: "mock-review-2",
+    activityId: "gastronomic-tour",
+    clientEmail: "elena@example.com",
+    clientName: "Елена Смирнова",
+    rating: 4,
+    text: "Хорошая организация, вкусная еда. Немного не хватило времени на дегустацию.",
+    status: "approved",
+    createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+  },
+  {
+    id: "mock-review-3",
+    activityId: "extreme-rafting",
+    clientEmail: "alexey@example.com",
+    clientName: "Алексей Кузнецов",
+    rating: 5,
+    text: "Адреналин зашкаливает! Инструкторы профессионалы, чувствовал себя в безопасности.",
+    status: "approved",
+    createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+  },
+  {
+    id: "mock-review-4",
+    activityId: "gastronomic-tour",
+    clientEmail: "test@example.com",
+    clientName: "Тест Пользователь",
+    rating: 3,
+    text: "Неплохо, но ожидал большего. Есть над чем поработать.",
+    status: "pending",
+    createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+  },
+];
 
 export const mockOrders: OrderRecord[] = [
   {

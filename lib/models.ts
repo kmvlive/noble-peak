@@ -1237,3 +1237,117 @@ export async function getOrderById(id: string): Promise<OrderRecord | null> {
   );
   return (result.Item as OrderRecord) ?? null;
 }
+
+export type ReviewStatus = "pending" | "approved" | "rejected";
+
+export interface ReviewRecord {
+  id: string;
+  activityId: string;
+  clientEmail: string;
+  clientName: string;
+  rating: number;
+  text: string;
+  status: ReviewStatus;
+  createdAt: string;
+}
+
+export async function createReview(
+  data: Omit<ReviewRecord, "id" | "createdAt" | "status">
+): Promise<ReviewRecord> {
+  const review: ReviewRecord = {
+    id: randomUUID(),
+    ...data,
+    status: "pending",
+    createdAt: new Date().toISOString(),
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.REVIEWS,
+      Item: review,
+    })
+  );
+
+  return review;
+}
+
+export async function getApprovedReviewsByActivity(
+  activityId: string
+): Promise<ReviewRecord[]> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.REVIEWS,
+      KeyConditionExpression: "activityId = :activityId",
+      FilterExpression: "#status = :status",
+      ExpressionAttributeNames: {
+        "#status": "status",
+      },
+      ExpressionAttributeValues: {
+        ":activityId": activityId,
+        ":status": "approved",
+      },
+    })
+  );
+  return (result.Items as ReviewRecord[]) ?? [];
+}
+
+export async function getReviewById(
+  activityId: string,
+  id: string
+): Promise<ReviewRecord | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TableName.REVIEWS,
+      Key: { activityId, id },
+    })
+  );
+  return (result.Item as ReviewRecord) ?? null;
+}
+
+export async function getAllReviews(): Promise<ReviewRecord[]> {
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.REVIEWS,
+    })
+  );
+  return (result.Items as ReviewRecord[]) ?? [];
+}
+
+export async function getReviewsByStatus(
+  status: ReviewStatus
+): Promise<ReviewRecord[]> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.REVIEWS,
+      IndexName: IndexName.REVIEWS_STATUS,
+      KeyConditionExpression: "#status = :status",
+      ExpressionAttributeNames: {
+        "#status": "status",
+      },
+      ExpressionAttributeValues: {
+        ":status": status,
+      },
+    })
+  );
+  return (result.Items as ReviewRecord[]) ?? [];
+}
+
+export async function updateReviewStatus(
+  activityId: string,
+  id: string,
+  status: ReviewStatus
+): Promise<void> {
+  await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.REVIEWS,
+      Key: { activityId, id },
+      UpdateExpression: "set #status = :status",
+      ExpressionAttributeNames: {
+        "#status": "status",
+      },
+      ExpressionAttributeValues: {
+        ":status": status,
+      },
+    })
+  );
+}

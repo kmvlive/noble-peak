@@ -1529,8 +1529,8 @@ tasks:
       - На странице активности отображается средний рейтинг и количество отзывов
     depends_on: []
     related_feature: Отзывы и рейтинг
-    status: pending
-    summary: null
+    status: completed
+    summary: "Реализованы отзывы и рейтинг на активностях с модерацией. Добавлена таблица reviews в DynamoDB, модель ReviewRecord и CRUD-функции. API: GET/POST /api/activities/[id]/reviews (получение одобренных отзывов/создание нового с авторизацией клиента), GET/PATCH /api/admin/reviews (модерация с авторизацией админа). На странице активности (components/activity-page-content.tsx) добавлен блок ActivityReviews (components/activity-reviews.tsx) со средним рейтингом (звёзды + число), списком одобренных отзывов и формой отправки для авторизованных клиентов. В админ-панели добавлен раздел «Отзывы» (/admin/reviews) с компонентом AdminReviewsList (components/admin-reviews-list.tsx) и фильтрацией по статусу (на модерации/одобренные/отклонённые/все). typecheck, lint, build проходят."
   - id: task-065
     phase: mvp
     title: Уведомления на сайте для клиента и партнёра

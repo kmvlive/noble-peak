@@ -20,6 +20,7 @@ import {
   ArrowDownFromLine,
   BarChart3,
   FileText,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -145,6 +146,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
       label: "Новые активности",
       icon: Clock,
     },
+    { href: "/admin/reviews", label: "Отзывы", icon: MessageSquare },
     { href: "/admin/sections", label: "Разделы", icon: FolderOpen },
     { href: "/admin/menu/admin", label: "Меню админов", icon: Navigation },
     {
