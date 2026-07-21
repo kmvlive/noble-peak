@@ -1351,3 +1351,81 @@ export async function updateReviewStatus(
     })
   );
 }
+
+export interface NotificationRecord {
+  id: string;
+  recipientEmail: string;
+  type: "booking_status" | "new_order" | "activity_status" | "system";
+  title: string;
+  message: string;
+  link?: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export async function createNotification(
+  data: Omit<NotificationRecord, "id" | "createdAt" | "isRead">
+): Promise<NotificationRecord> {
+  const notification: NotificationRecord = {
+    id: randomUUID(),
+    ...data,
+    isRead: false,
+    createdAt: new Date().toISOString(),
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.NOTIFICATIONS,
+      Item: notification,
+    })
+  );
+
+  return notification;
+}
+
+export async function getNotificationsByRecipient(
+  recipientEmail: string
+): Promise<NotificationRecord[]> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.NOTIFICATIONS,
+      IndexName: IndexName.NOTIFICATIONS_RECIPIENT_EMAIL,
+      KeyConditionExpression: "recipientEmail = :recipientEmail",
+      ExpressionAttributeValues: {
+        ":recipientEmail": recipientEmail,
+      },
+      ScanIndexForward: false,
+    })
+  );
+  return (result.Items as NotificationRecord[]) ?? [];
+}
+
+export async function markNotificationRead(id: string): Promise<void> {
+  await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.NOTIFICATIONS,
+      Key: { id },
+      UpdateExpression: "set isRead = :isRead",
+      ExpressionAttributeValues: {
+        ":isRead": true,
+      },
+    })
+  );
+}
+
+export async function markAllNotificationsRead(
+  recipientEmail: string
+): Promise<void> {
+  const notifications = await getNotificationsByRecipient(recipientEmail);
+  const unread = notifications.filter((n) => !n.isRead);
+  await Promise.all(unread.map((n) => markNotificationRead(n.id)));
+}
+
+export async function deleteNotification(id: string): Promise<void> {
+  await docClient.send(
+    new DeleteCommand({
+      TableName: TableName.NOTIFICATIONS,
+      Key: { id },
+    })
+  );
+}

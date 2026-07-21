@@ -1,5 +1,6 @@
 import { Service } from "./models";
 import type {
+  NotificationRecord,
   ActivityRecord,
   SectionRecord,
   ActivityCalendarRecord,
@@ -445,6 +446,15 @@ export const mockMenuItems: MenuItemRecord[] = [
     updatedAt: new Date("2024-01-01").toISOString(),
   },
   {
+    id: "mock-client-notifications",
+    menuType: "client",
+    name: "Уведомления",
+    url: "/client/notifications",
+    order: 3,
+    createdAt: new Date("2024-01-01").toISOString(),
+    updatedAt: new Date("2024-01-01").toISOString(),
+  },
+  {
     id: "mock-partner-dashboard",
     menuType: "partner",
     name: "Дашборд",
@@ -459,6 +469,24 @@ export const mockMenuItems: MenuItemRecord[] = [
     name: "Мои активности",
     url: "/partner/activities",
     order: 2,
+    createdAt: new Date("2024-01-01").toISOString(),
+    updatedAt: new Date("2024-01-01").toISOString(),
+  },
+  {
+    id: "mock-partner-orders",
+    menuType: "partner",
+    name: "Заказы",
+    url: "/partner/orders",
+    order: 3,
+    createdAt: new Date("2024-01-01").toISOString(),
+    updatedAt: new Date("2024-01-01").toISOString(),
+  },
+  {
+    id: "mock-partner-notifications",
+    menuType: "partner",
+    name: "Уведомления",
+    url: "/partner/notifications",
+    order: 4,
     createdAt: new Date("2024-01-01").toISOString(),
     updatedAt: new Date("2024-01-01").toISOString(),
   },
@@ -492,6 +520,84 @@ export const mockMenuItems: MenuItemRecord[] = [
 ];
 
 export const mockAnalyticsCounters: AnalyticsCounterRecord[] = [];
+
+export const mockNotifications: NotificationRecord[] = [
+  {
+    id: "mock-notif-client-1",
+    recipientEmail: "test@example.com",
+    type: "booking_status",
+    title: "Бронирование подтверждено",
+    message:
+      "Ваше бронирование на «Гастрономический тур» подтверждено. Дата: 12 августа 2025.",
+    link: "/client/bookings/mock-booking-1",
+    isRead: false,
+    createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+  },
+  {
+    id: "mock-notif-client-2",
+    recipientEmail: "test@example.com",
+    type: "booking_status",
+    title: "Ожидает оплаты",
+    message:
+      "Бронирование на «Рафтинг по горной реке» ожидает оплаты. Перейдите к оплате, чтобы завершить бронирование.",
+    link: "/client/bookings/mock-booking-2",
+    isRead: false,
+    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+  },
+  {
+    id: "mock-notif-client-3",
+    recipientEmail: "test@example.com",
+    type: "booking_status",
+    title: "Бронирование отменено",
+    message:
+      "Бронирование на «Рафтинг по горной реке» отменено по погодным условиям.",
+    link: "/client/bookings/mock-booking-3",
+    isRead: true,
+    createdAt: new Date(Date.now() - 86400000 * 35).toISOString(),
+  },
+  {
+    id: "mock-notif-partner-1",
+    recipientEmail: "partner@example.com",
+    type: "new_order",
+    title: "Новый заказ",
+    message: "Иван Петров забронировал «Морское путешествие» на 26 июля 2025.",
+    link: "/partner/orders",
+    isRead: false,
+    createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+  },
+  {
+    id: "mock-notif-partner-2",
+    recipientEmail: "partner@example.com",
+    type: "new_order",
+    title: "Новый заказ",
+    message:
+      "Елена Смирнова забронировала «Морское путешествие» на 2 августа 2025.",
+    link: "/partner/orders",
+    isRead: false,
+    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+  },
+  {
+    id: "mock-notif-partner-3",
+    recipientEmail: "partner@example.com",
+    type: "activity_status",
+    title: "Активность отклонена",
+    message: "Ваша активность «Квест по старому городу» отклонена модератором.",
+    link: "/partner/activities",
+    isRead: true,
+    createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+  },
+  {
+    id: "mock-notif-partner-4",
+    recipientEmail: "partner@example.com",
+    type: "activity_status",
+    title: "Активность на проверке",
+    message:
+      "Ваша активность «Дегустация крымских вин» отправлена на проверку модератору.",
+    link: "/partner/activities",
+    isRead: false,
+    createdAt: new Date(Date.now() - 86400000 * 7).toISOString(),
+  },
+];
 
 export const mockReviews: ReviewRecord[] = [
   {

@@ -20,6 +20,7 @@ export const TableName = {
   ANALYTICS_COUNTERS: "analytics_counters",
   ORDERS: "orders",
   REVIEWS: "reviews",
+  NOTIFICATIONS: "notifications",
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];
@@ -138,6 +139,22 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
     keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
     attributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
   },
+  [TableName.NOTIFICATIONS]: {
+    name: TableName.NOTIFICATIONS,
+    keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+    attributeDefinitions: [
+      { AttributeName: "id", AttributeType: "S" },
+      { AttributeName: "recipientEmail", AttributeType: "S" },
+    ],
+    globalSecondaryIndexes: [
+      {
+        IndexName: "recipientEmail-index",
+        KeySchema: [{ AttributeName: "recipientEmail", KeyType: "HASH" }],
+        Projection: { ProjectionType: "ALL" },
+      },
+    ],
+  },
+
   [TableName.REVIEWS]: {
     name: TableName.REVIEWS,
     keySchema: [
@@ -166,6 +183,7 @@ export const IndexName = {
   BOOKINGS_CLIENT_EMAIL: "clientEmail-index",
   ACTIVITIES_STATUS: "status-index",
   REVIEWS_STATUS: "status-index",
+  NOTIFICATIONS_RECIPIENT_EMAIL: "recipientEmail-index",
 } as const;
 
 export type IndexName = (typeof IndexName)[keyof typeof IndexName];

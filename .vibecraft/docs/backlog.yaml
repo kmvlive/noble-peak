@@ -1545,8 +1545,8 @@ tasks:
       - Уведомления отображаются списком с датой и текстом
     depends_on: []
     related_feature: Уведомления на сайте
-    status: pending
-    summary: null
+    status: completed
+    summary: "Реализован раздел «Уведомления» в личном кабинете клиента (/client/notifications) и кабинете партнёра (/partner/notifications). Добавлены страницы, API-маршруты (GET/PATCH), таблица notifications в DynamoDB, модель NotificationRecord с CRUD-функциями, mock-данные, клиентские компоненты ClientNotificationsList и PartnerNotificationsList с фильтрацией, отметкой прочитанных и пустыми состояниями. Основная реализация: app/client/notifications/page.tsx, app/partner/notifications/page.tsx, app/api/client/notifications/route.ts, app/api/partner/notifications/route.ts, components/client-notifications-list.tsx, components/partner-notifications-list.tsx, lib/models.ts, lib/schema.ts, lib/mock-data.ts."
   - id: task-066
     phase: mvp
     title: "Кабинет партнёра: редактирование профиля"
