@@ -32,6 +32,120 @@ const CITY_QUESTION =
 const BUDGET_QUESTION =
   "Какой бюджет на человека? Например: до 2000 ₽, 3000-5000 ₽, более 10000 ₽ или «не важно».";
 
+const KNOWN_CITIES = [
+  "москва",
+  "санкт-петербург",
+  "питер",
+  "спб",
+  "казань",
+  "сочи",
+  "екатеринбург",
+  "новосибирск",
+  "нижний новгород",
+  "краснодар",
+  "ростов-на-дону",
+  "самара",
+  "уфа",
+  "красноярск",
+  "пермь",
+  "воронеж",
+  "волгоград",
+  "ялта",
+  "севастополь",
+  "балаклава",
+  "симферополь",
+  "алушта",
+  "евпатория",
+  "феодосия",
+  "судак",
+  "коктебель",
+];
+
+const ACTIVITY_TYPE_GROUPS: { keywords: string[]; type: string }[] = [
+  {
+    keywords: [
+      "водные",
+      "дайвинг",
+      "рафтинг",
+      "сплав",
+      "яхта",
+      "катер",
+      "снорклинг",
+      "серфинг",
+      "каяк",
+    ],
+    type: "водные",
+  },
+  {
+    keywords: ["треккинг", "поход", "восхождение", "горный", "пеший", "тропа"],
+    type: "треккинг",
+  },
+  {
+    keywords: [
+      "гастрономия",
+      "дегустация",
+      "вино",
+      "еда",
+      "кулинарный",
+      "ресторан",
+    ],
+    type: "гастрономия",
+  },
+  {
+    keywords: ["экскурсия", "экскурсии", "тур", "обзорный", "гид"],
+    type: "экскурсии",
+  },
+  {
+    keywords: ["активный отдых", "спорт", "вело", "велосипед", "бег"],
+    type: "активный отдых",
+  },
+  {
+    keywords: [
+      "развлечения",
+      "квест",
+      "мастер-класс",
+      "игра",
+      "аттракцион",
+      "кёрлинг",
+      "керлинг",
+      "боулинг",
+      "караоке",
+      "кино",
+    ],
+    type: "развлечения",
+  },
+  {
+    keywords: [
+      "экстрим",
+      "экстремальный",
+      "прыжок",
+      "скалолазание",
+      "зиплайн",
+      "роуп",
+      "банджи",
+    ],
+    type: "экстрим",
+  },
+];
+
+function findCity(text: string): string | null {
+  const lower = text.toLowerCase();
+  for (const city of KNOWN_CITIES) {
+    if (lower.includes(city)) return city;
+  }
+  return null;
+}
+
+function findActivityType(text: string): string | null {
+  const lower = text.toLowerCase();
+  for (const group of ACTIVITY_TYPE_GROUPS) {
+    for (const keyword of group.keywords) {
+      if (lower.includes(keyword)) return group.type;
+    }
+  }
+  return null;
+}
+
 interface SearchResponse {
   activities: ActivityRecord[];
   sectionNameMap: Record<string, string>;
@@ -130,10 +244,31 @@ export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
         addMessage("user", initialQuery);
         setIsProcessing(true);
         setTimeout(() => {
-          setStep("type");
-          setTypeAnswer(initialQuery);
-          setIsProcessing(false);
-          askQuestion(TYPE_QUESTION);
+          const detectedType = findActivityType(initialQuery);
+          const detectedCity = findCity(initialQuery);
+
+          if (detectedType && detectedCity) {
+            setTypeAnswer(detectedType);
+            setCityAnswer(detectedCity);
+            setStep("budget");
+            setIsProcessing(false);
+            askQuestion(BUDGET_QUESTION);
+          } else if (detectedType) {
+            setTypeAnswer(detectedType);
+            setStep("city");
+            setIsProcessing(false);
+            askQuestion(CITY_QUESTION);
+          } else if (detectedCity) {
+            setCityAnswer(detectedCity);
+            setStep("type");
+            setIsProcessing(false);
+            askQuestion(TYPE_QUESTION);
+          } else {
+            setTypeAnswer(initialQuery);
+            setStep("type");
+            setIsProcessing(false);
+            askQuestion(TYPE_QUESTION);
+          }
         }, 600);
       }, 800);
       return () => clearTimeout(timer);
@@ -157,10 +292,15 @@ export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
           askQuestion(TYPE_QUESTION);
           break;
         case "type":
-          setStep("city");
           setTypeAnswer(text);
           setIsProcessing(false);
-          askQuestion(CITY_QUESTION);
+          if (cityAnswer) {
+            setStep("budget");
+            askQuestion(BUDGET_QUESTION);
+          } else {
+            setStep("city");
+            askQuestion(CITY_QUESTION);
+          }
           break;
         case "city":
           setStep("budget");
