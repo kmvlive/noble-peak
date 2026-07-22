@@ -457,7 +457,7 @@ export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
           const resolvedInitial = (initialQuery || "").trim();
 
           const qParam = resolvedInitial || resolvedType;
-          const sectionParam = resolvedType;
+          const sectionParam = findActivityType(resolvedType) || resolvedType;
 
           isSearchingRef.current = true;
 
