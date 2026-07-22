@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
+  ShieldAlert,
   UserPlus,
   Pencil,
   Trash2,
@@ -22,6 +23,13 @@ import {
   Loader2,
   RefreshCw,
 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -34,6 +42,7 @@ import {
 interface Admin {
   email: string;
   name: string;
+  role: "main_admin" | "admin";
   createdAt: string;
   updatedAt: string;
 }
@@ -42,12 +51,14 @@ interface AdminFormData {
   email: string;
   password: string;
   name: string;
+  role: "main_admin" | "admin";
 }
 
 const emptyForm: AdminFormData = {
   email: "",
   password: "",
   name: "",
+  role: "admin",
 };
 
 function AdminFormDialog({
@@ -66,7 +77,12 @@ function AdminFormDialog({
 
   useEffect(() => {
     if (editing) {
-      setForm({ email: editing.email, password: "", name: editing.name });
+      setForm({
+        email: editing.email,
+        password: "",
+        name: editing.name,
+        role: editing.role,
+      });
     } else {
       setForm(emptyForm);
     }
@@ -144,6 +160,28 @@ function AdminFormDialog({
               minLength={4}
             />
           </div>
+          {editing && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Роль</label>
+              <Select
+                value={form.role}
+                onValueChange={(value) =>
+                  setForm({
+                    ...form,
+                    role: (value ?? "admin") as "main_admin" | "admin",
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Администратор</SelectItem>
+                  <SelectItem value="main_admin">Главный</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="flex justify-end gap-2">
             <Button
               type="button"
@@ -220,6 +258,7 @@ export function AdminAdminsManager() {
     const body: Record<string, string> = { email: data.email };
     if (data.password) body.password = data.password;
     if (data.name !== editing?.name) body.name = data.name;
+    if (data.role !== editing?.role) body.role = data.role;
 
     const res = await fetch("/api/admin/admins", {
       method: "PUT",
@@ -337,36 +376,35 @@ export function AdminAdminsManager() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {admin.email === "artkmv1@ya.ru" ? (
+                    {admin.role === "main_admin" ? (
                       <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-                        <Shield className="mr-1 h-3 w-3" />
+                        <ShieldAlert className="mr-1 h-3 w-3" />
                         Главный
                       </span>
                     ) : (
                       <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                        <Shield className="mr-1 h-3 w-3" />
                         Администратор
                       </span>
                     )}
                   </TableCell>
                   <TableCell>
-                    {admin.email !== "artkmv1@ya.ru" && (
-                      <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => openEdit(admin)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => handleDelete(admin)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    )}
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => openEdit(admin)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => handleDelete(admin)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

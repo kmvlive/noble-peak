@@ -58,3 +58,7 @@ export function getMainAdminEmail(): string {
 export function isMainAdminEmail(email: string): boolean {
   return email === MAIN_ADMIN_EMAIL;
 }
+
+export function isMainAdminPayload(payload: TokenPayload): boolean {
+  return payload.role === "main_admin";
+}

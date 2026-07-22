@@ -37,7 +37,6 @@ interface MenuItem {
 
 const TOKEN_KEY = "admin_token";
 const TOKEN_PREFIX = "magazin_tour_admin_v1:";
-const MAIN_ADMIN_EMAIL = "artkmv1@ya.ru";
 
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -58,21 +57,25 @@ function hasToken(): boolean {
   return !!getToken();
 }
 
-function getTokenEmail(): string | null {
+function getTokenPayload(): {
+  email: string;
+  role: "main_admin" | "admin";
+  ts: number;
+} | null {
   const token = getToken();
   if (!token) return null;
   try {
     const decoded = atob(token);
     if (!decoded.startsWith(TOKEN_PREFIX)) return null;
-    const payload = JSON.parse(decoded.slice(TOKEN_PREFIX.length));
-    return payload.email ?? null;
+    return JSON.parse(decoded.slice(TOKEN_PREFIX.length));
   } catch {
     return null;
   }
 }
 
 function isMainAdmin(): boolean {
-  return getTokenEmail() === MAIN_ADMIN_EMAIL;
+  const payload = getTokenPayload();
+  return payload?.role === "main_admin";
 }
 
 export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
@@ -179,9 +182,15 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   ];
 
   const mainOnlyItems = [
+    "/admin/slider",
+    "/admin/menu/admin",
+    "/admin/menu/client",
+    "/admin/menu/partner",
+    "/admin/menu/footer",
     "/admin/admins",
     "/admin/payment-settings",
     "/admin/settings",
+    "/admin/analytics",
   ];
 
   const navItems = isMain

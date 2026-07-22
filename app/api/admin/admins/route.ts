@@ -9,7 +9,7 @@ import {
   deleteAdmin,
 } from "@/lib/models";
 import { mockAdmins } from "@/lib/mock-data";
-import { verifyToken, isMainAdminEmail, getMainAdminEmail } from "@/lib/auth";
+import { verifyToken, isMainAdminPayload, getMainAdminEmail } from "@/lib/auth";
 
 const createAdminSchema = z.object({
   email: z.string().email().max(200),
@@ -21,6 +21,7 @@ const updateAdminSchema = z.object({
   email: z.string().email().max(200),
   password: z.string().min(4).max(200).optional(),
   name: z.string().min(1).max(200).optional(),
+  role: z.enum(["main_admin", "admin"]).optional(),
 });
 
 function getTokenFromRequest(request: NextRequest): string | null {
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Неавторизован" }, { status: 401 });
   }
 
-  if (!isMainAdminEmail(payload.email)) {
+  if (!isMainAdminPayload(payload)) {
     return NextResponse.json({ error: "Доступ запрещён" }, { status: 403 });
   }
 
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Неавторизован" }, { status: 401 });
   }
 
-  if (!isMainAdminEmail(payload.email)) {
+  if (!isMainAdminPayload(payload)) {
     return NextResponse.json({ error: "Доступ запрещён" }, { status: 403 });
   }
 
@@ -165,7 +166,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Неавторизован" }, { status: 401 });
   }
 
-  if (!isMainAdminEmail(payload.email)) {
+  if (!isMainAdminPayload(payload)) {
     return NextResponse.json({ error: "Доступ запрещён" }, { status: 403 });
   }
 
@@ -197,12 +198,19 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const updateData: { password?: string; name?: string } = {};
+    const updateData: {
+      password?: string;
+      name?: string;
+      role?: "main_admin" | "admin";
+    } = {};
     if (parsed.data.password !== undefined) {
       updateData.password = parsed.data.password;
     }
     if (parsed.data.name !== undefined) {
       updateData.name = parsed.data.name;
+    }
+    if (parsed.data.role !== undefined) {
+      updateData.role = parsed.data.role;
     }
 
     const admin = await updateAdmin(parsed.data.email, updateData);
@@ -230,7 +238,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Неавторизован" }, { status: 401 });
   }
 
-  if (!isMainAdminEmail(payload.email)) {
+  if (!isMainAdminPayload(payload)) {
     return NextResponse.json({ error: "Доступ запрещён" }, { status: 403 });
   }
 

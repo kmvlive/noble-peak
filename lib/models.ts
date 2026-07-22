@@ -773,7 +773,7 @@ export async function createAdmin(
 
 export async function updateAdmin(
   email: string,
-  data: Partial<Pick<AdminRecord, "password" | "name">>
+  data: Partial<Pick<AdminRecord, "password" | "name" | "role">>
 ): Promise<AdminRecord> {
   const updateExpr: string[] = [];
   const exprValues: Record<string, unknown> = {};
@@ -789,6 +789,12 @@ export async function updateAdmin(
     updateExpr.push("#name = :name");
     exprValues[":name"] = data.name;
     exprNames["#name"] = "name";
+  }
+
+  if (data.role !== undefined) {
+    updateExpr.push("#role = :role");
+    exprValues[":role"] = data.role;
+    exprNames["#role"] = "role";
   }
 
   if (updateExpr.length === 0) {
