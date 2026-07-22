@@ -14,7 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ActivityRecord, SectionRecord } from "@/lib/models";
 import { ActivityCard } from "@/components/activity-card";
-import { ActivitySearch } from "@/components/activity-search";
+import { HeroSearch } from "@/components/hero-search";
 import { HeroSlider } from "@/components/hero-slider";
 
 const sectionIcons: Record<string, React.ReactNode> = {
@@ -117,11 +117,6 @@ export default async function HomePage() {
     sectionNameMap.set(s.category, s.name);
   }
 
-  const sectionNameRecord: Record<string, string> = {};
-  for (const [key, value] of sectionNameMap) {
-    sectionNameRecord[key] = value;
-  }
-
   const activityCountBySection = new Map<string, number>();
   for (const a of activities) {
     activityCountBySection.set(
@@ -181,10 +176,7 @@ export default async function HomePage() {
             бронируйте онлайн
           </p>
           <div className="mx-auto max-w-xl">
-            <ActivitySearch
-              activities={activities}
-              sectionNameMap={sectionNameRecord}
-            />
+            <HeroSearch />
           </div>
         </div>
       </HeroSlider>
