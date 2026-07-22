@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { ActivityRecord, SectionRecord } from "@/lib/models";
 import { SearchAiAssistant } from "@/components/search-ai-assistant";
 
 export const metadata: Metadata = {
@@ -11,21 +10,6 @@ export default async function SearchPage(props: {
 }) {
   const searchParams = await props.searchParams;
   const initialQuery = searchParams?.q || "";
-
-  const baseUrl = process.env.BASE_URL || "http://localhost:8080";
-
-  const [activitiesRes, sectionsRes] = await Promise.all([
-    fetch(`${baseUrl}/api/activities`, { cache: "no-store" }),
-    fetch(`${baseUrl}/api/sections`, { cache: "no-store" }),
-  ]);
-
-  const activities: ActivityRecord[] = await activitiesRes.json();
-  const sections: SectionRecord[] = await sectionsRes.json();
-
-  const sectionNameMap: Record<string, string> = {};
-  for (const s of sections) {
-    sectionNameMap[s.category] = s.name;
-  }
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-4 py-8 sm:py-12">
@@ -39,11 +23,7 @@ export default async function SearchPage(props: {
         </p>
       </div>
 
-      <SearchAiAssistant
-        activities={activities}
-        sectionNameMap={sectionNameMap}
-        initialQuery={initialQuery}
-      />
+      <SearchAiAssistant initialQuery={initialQuery} />
     </div>
   );
 }

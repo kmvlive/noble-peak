@@ -13,8 +13,6 @@ interface Message {
 }
 
 interface SearchAiAssistantProps {
-  activities: ActivityRecord[];
-  sectionNameMap: Record<string, string>;
   initialQuery?: string;
 }
 
@@ -33,6 +31,11 @@ const CITY_QUESTION =
 
 const BUDGET_QUESTION =
   "Какой бюджет на человека? Например: до 2000 ₽, 3000-5000 ₽, более 10000 ₽ или «не важно».";
+
+interface SearchResponse {
+  activities: ActivityRecord[];
+  sectionNameMap: Record<string, string>;
+}
 
 function parseBudget(budgetText: string): { min?: number; max?: number } {
   const text = budgetText.toLowerCase().replace(/\s/g, "");
@@ -60,72 +63,31 @@ function parseBudget(budgetText: string): { min?: number; max?: number } {
   return {};
 }
 
-function filterActivities(
-  activities: ActivityRecord[],
-  sectionNameMap: Record<string, string>,
-  typeAnswer: string,
-  cityAnswer: string,
-  budgetAnswer: string
-): ActivityRecord[] {
-  const typeLower = typeAnswer.toLowerCase();
-  const cityLower = cityAnswer.toLowerCase();
-  const budgetResult = parseBudget(budgetAnswer);
-  const cityRelevant =
-    cityLower !== "" &&
-    !cityLower.includes("не важно") &&
-    !cityLower.includes("неважн");
+async function searchActivities(params: {
+  q: string;
+  city: string;
+  budgetText: string;
+}): Promise<SearchResponse> {
+  const url = new URL("/api/activities/search", window.location.origin);
+  if (params.q) url.searchParams.set("q", params.q);
+  if (params.city) url.searchParams.set("city", params.city);
 
-  return activities.filter((a) => {
-    const sectionName = (sectionNameMap[a.section] || a.section).toLowerCase();
-    const titleLower = a.title.toLowerCase();
-    const shortDesc = a.shortDescription.toLowerCase();
-    const location = (a.location || "").toLowerCase();
-    const fullText = `${titleLower} ${shortDesc} ${sectionName} ${location}`;
+  const budgetResult = parseBudget(params.budgetText);
+  if (budgetResult.min !== undefined) {
+    url.searchParams.set("budget_min", String(budgetResult.min));
+  }
+  if (budgetResult.max !== undefined) {
+    url.searchParams.set("budget_max", String(budgetResult.max));
+  }
 
-    let typeMatch = true;
-    if (
-      typeLower &&
-      !typeLower.includes("не важно") &&
-      !typeLower.includes("неважн")
-    ) {
-      typeMatch =
-        fullText.includes(typeLower) ||
-        sectionName.includes(typeLower) ||
-        typeLower
-          .split(" ")
-          .some((word) => word.length > 2 && fullText.includes(word));
-    }
-
-    let cityMatch = true;
-    if (cityRelevant) {
-      cityMatch =
-        location.includes(cityLower) ||
-        cityLower
-          .split(" ")
-          .some((word) => word.length > 2 && location.includes(word));
-    }
-
-    let budgetMatch = true;
-    if (budgetResult.min !== undefined || budgetResult.max !== undefined) {
-      if (budgetResult.min !== undefined && budgetResult.max !== undefined) {
-        budgetMatch =
-          a.price >= budgetResult.min && a.price <= budgetResult.max;
-      } else if (budgetResult.min !== undefined) {
-        budgetMatch = a.price >= budgetResult.min;
-      } else if (budgetResult.max !== undefined) {
-        budgetMatch = a.price <= budgetResult.max;
-      }
-    }
-
-    return typeMatch && cityMatch && budgetMatch;
-  });
+  const res = await fetch(url.toString(), { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error("Ошибка поиска");
+  }
+  return res.json();
 }
 
-export function SearchAiAssistant({
-  activities,
-  sectionNameMap,
-  initialQuery,
-}: SearchAiAssistantProps) {
+export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: GREETING_MESSAGE },
   ]);
@@ -135,10 +97,15 @@ export function SearchAiAssistant({
   const [typeAnswer, setTypeAnswer] = useState("");
   const [cityAnswer, setCityAnswer] = useState("");
   const [results, setResults] = useState<ActivityRecord[]>([]);
+  const [sectionNameMap, setSectionNameMap] = useState<Record<string, string>>(
+    {}
+  );
   const [showResults, setShowResults] = useState(false);
+  const [searchError, setSearchError] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const processedInitialRef = useRef(false);
+  const isSearchingRef = useRef(false);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -173,7 +140,7 @@ export function SearchAiAssistant({
 
   const handleSend = () => {
     const text = inputValue.trim();
-    if (!text || isProcessing) return;
+    if (!text || isProcessing || isSearchingRef.current) return;
 
     setInputValue("");
     addMessage("user", text);
@@ -199,35 +166,56 @@ export function SearchAiAssistant({
           setIsProcessing(false);
           askQuestion(BUDGET_QUESTION);
           break;
-        case "budget":
+        case "budget": {
           setStep("done");
           setIsProcessing(false);
 
-          const filtered = filterActivities(
-            activities,
-            sectionNameMap,
-            typeAnswer || text,
-            cityAnswer || text,
-            text
-          );
+          const resolvedType = typeAnswer || text;
+          const resolvedCity = cityAnswer || text;
 
-          setResults(filtered);
-          setShowResults(true);
+          isSearchingRef.current = true;
 
-          if (filtered.length === 0) {
-            addMessage(
-              "assistant",
-              "К сожалению, по вашему запросу ничего не найдено. Попробуйте изменить критерии поиска."
-            );
-          } else {
-            addMessage(
-              "assistant",
-              `Отлично! Я нашёл ${filtered.length} ${
-                filtered.length === 1 ? "активность" : "активностей"
-              }, которые могут вам подойти:`
-            );
-          }
+          searchActivities({
+            q: resolvedType,
+            city: resolvedCity,
+            budgetText: text,
+          })
+            .then((response) => {
+              setResults(response.activities);
+              setSectionNameMap(response.sectionNameMap);
+              setShowResults(true);
+              setSearchError(false);
+
+              if (response.activities.length === 0) {
+                addMessage(
+                  "assistant",
+                  "К сожалению, по вашему запросу ничего не найдено. Попробуйте изменить критерии поиска."
+                );
+              } else {
+                addMessage(
+                  "assistant",
+                  `Отлично! Я нашёл ${response.activities.length} ${
+                    response.activities.length === 1
+                      ? "активность"
+                      : "активностей"
+                  }, которые могут вам подойти:`
+                );
+              }
+            })
+            .catch(() => {
+              setSearchError(true);
+              setShowResults(true);
+              addMessage(
+                "assistant",
+                "Произошла ошибка при поиске. Пожалуйста, попробуйте ещё раз."
+              );
+            })
+            .finally(() => {
+              isSearchingRef.current = false;
+            });
+
           break;
+        }
       }
     }, 600);
   };
@@ -237,7 +225,9 @@ export function SearchAiAssistant({
     setTypeAnswer("");
     setCityAnswer("");
     setResults([]);
+    setSectionNameMap({});
     setShowResults(false);
+    setSearchError(false);
     setMessages([{ role: "assistant", content: GREETING_MESSAGE }]);
   };
 
@@ -341,7 +331,7 @@ export function SearchAiAssistant({
         )}
       </div>
 
-      {showResults && results.length > 0 && (
+      {showResults && results.length > 0 && !searchError && (
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
@@ -373,13 +363,27 @@ export function SearchAiAssistant({
         </div>
       )}
 
-      {showResults && results.length === 0 && (
+      {showResults && results.length === 0 && !searchError && (
         <div className="flex flex-col items-center gap-3 py-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
             <Search className="h-6 w-6 text-muted-foreground" />
           </div>
           <p className="text-sm text-muted-foreground">
             Ничего не найдено. Попробуйте изменить критерии поиска.
+          </p>
+          <Button variant="outline" size="sm" onClick={resetDialog}>
+            Начать заново
+          </Button>
+        </div>
+      )}
+
+      {showResults && searchError && (
+        <div className="flex flex-col items-center gap-3 py-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+            <Search className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Произошла ошибка при поиске. Пожалуйста, попробуйте ещё раз.
           </p>
           <Button variant="outline" size="sm" onClick={resetDialog}>
             Начать заново
