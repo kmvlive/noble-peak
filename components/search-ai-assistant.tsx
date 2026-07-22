@@ -353,7 +353,6 @@ export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
   const [searchError, setSearchError] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const processedInitialRef = useRef(false);
   const isSearchingRef = useRef(false);
 
   useEffect(() => {
@@ -371,41 +370,50 @@ export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
   };
 
   useEffect(() => {
-    if (initialQuery && !processedInitialRef.current) {
-      processedInitialRef.current = true;
-      const timer = setTimeout(() => {
-        addMessage("user", initialQuery);
-        setIsProcessing(true);
-        setTimeout(() => {
-          const detectedType = findActivityType(initialQuery);
-          const detectedCity = extractCity(initialQuery);
+    if (!initialQuery) return;
 
-          if (detectedType && detectedCity) {
-            setTypeAnswer(detectedType);
-            setCityAnswer(detectedCity);
-            setStep("budget");
-            setIsProcessing(false);
-            askQuestion(BUDGET_QUESTION);
-          } else if (detectedType) {
-            setTypeAnswer(detectedType);
-            setStep("city");
-            setIsProcessing(false);
-            askQuestion(CITY_QUESTION);
-          } else if (detectedCity) {
-            setCityAnswer(detectedCity);
-            setStep("type");
-            setIsProcessing(false);
-            askQuestion(TYPE_QUESTION);
-          } else {
-            setTypeAnswer(initialQuery);
-            setStep("type");
-            setIsProcessing(false);
-            askQuestion(TYPE_QUESTION);
-          }
-        }, 600);
-      }, 800);
-      return () => clearTimeout(timer);
-    }
+    const timer = setTimeout(() => {
+      setMessages([
+        { role: "assistant", content: GREETING_MESSAGE },
+        { role: "user", content: initialQuery },
+      ]);
+      setIsProcessing(true);
+      setStep("greeting");
+      setTypeAnswer("");
+      setCityAnswer("");
+      setResults([]);
+      setShowResults(false);
+      setSearchError(false);
+
+      setTimeout(() => {
+        const detectedType = findActivityType(initialQuery);
+        const detectedCity = extractCity(initialQuery);
+
+        if (detectedType && detectedCity) {
+          setTypeAnswer(detectedType);
+          setCityAnswer(detectedCity);
+          setStep("budget");
+          setIsProcessing(false);
+          askQuestion(BUDGET_QUESTION);
+        } else if (detectedType) {
+          setTypeAnswer(detectedType);
+          setStep("city");
+          setIsProcessing(false);
+          askQuestion(CITY_QUESTION);
+        } else if (detectedCity) {
+          setCityAnswer(detectedCity);
+          setStep("type");
+          setIsProcessing(false);
+          askQuestion(TYPE_QUESTION);
+        } else {
+          setTypeAnswer(initialQuery);
+          setStep("type");
+          setIsProcessing(false);
+          askQuestion(TYPE_QUESTION);
+        }
+      }, 600);
+    }, 800);
+    return () => clearTimeout(timer);
   }, [initialQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSend = () => {
