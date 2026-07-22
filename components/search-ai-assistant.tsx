@@ -59,6 +59,85 @@ const KNOWN_CITIES = [
   "феодосия",
   "судак",
   "коктебель",
+  "пятигорск",
+  "кисловодск",
+  "железноводск",
+  "ессентуки",
+  "минводы",
+  "ставрополь",
+  "нальчик",
+  "майкоп",
+  "черкесск",
+  "анапа",
+  "геленджик",
+  "новороссийск",
+  "туапсе",
+  "адлер",
+  "архыз",
+  "домбай",
+  "теберда",
+  "приэльбрусье",
+  "астрахань",
+  "саратов",
+  "белгород",
+  "калининград",
+  "тула",
+  "ярославль",
+  "владимир",
+  "рязань",
+  "липецк",
+  "тамбов",
+  "петрозаводск",
+  "мурманск",
+  "архангельск",
+  "псков",
+  "смоленск",
+  "тверь",
+  "калуга",
+  "кострома",
+  "иваново",
+  "киров",
+  "чебоксары",
+  "ижевск",
+  "ульяновск",
+  "саранск",
+  "пенза",
+  "оренбург",
+  "тольятти",
+  "тюмень",
+  "сургут",
+  "челябинск",
+  "магнитогорск",
+  "нижний тагил",
+  "курган",
+  "омск",
+  "томск",
+  "кемерово",
+  "новокузнецк",
+  "барнаул",
+  "иркутск",
+  "братск",
+  "улан-удэ",
+  "чита",
+  "владивосток",
+  "хабаровск",
+  "благовещенск",
+  "петропавловск-камчатский",
+  "магадан",
+  "южно-сахалинск",
+  "набережные челны",
+  "дмитров",
+  "сергиев посад",
+  "коломна",
+  "звенигород",
+  "переславль-залесский",
+  "суздаль",
+  "владикавказ",
+  "грозный",
+  "махачкала",
+  "дербент",
+  "назрань",
+  "элиста",
 ];
 
 const ACTIVITY_TYPE_GROUPS: { keywords: string[]; type: string }[] = [
@@ -128,11 +207,67 @@ const ACTIVITY_TYPE_GROUPS: { keywords: string[]; type: string }[] = [
   },
 ];
 
-function findCity(text: string): string | null {
+const COMMON_NON_CITY_WORDS = new Set([
+  "поиске",
+  "интересует",
+  "активности",
+  "активность",
+  "развлечения",
+  "отдых",
+  "поход",
+  "экскурсии",
+  "экскурсия",
+  "водные",
+  "треккинг",
+  "гастрономия",
+  "экстрим",
+  "спорт",
+  "горный",
+  "пеший",
+  "трофа",
+  "ресторан",
+  "квест",
+  "игра",
+  "кино",
+  "тур",
+  "гид",
+]);
+
+function extractCity(text: string): string | null {
   const lower = text.toLowerCase();
-  for (const city of KNOWN_CITIES) {
+
+  const sortedByLength = [...KNOWN_CITIES].sort((a, b) => b.length - a.length);
+  for (const city of sortedByLength) {
     if (lower.includes(city)) return city;
   }
+
+  const words = lower.split(/[\s,]+/).filter((w) => w.length > 2);
+
+  for (const word of words) {
+    if (
+      (word.endsWith("ск") ||
+        word.endsWith("град") ||
+        word.endsWith("бург") ||
+        word.endsWith("поль") ||
+        word.endsWith("горск") ||
+        word.endsWith("цк")) &&
+      !COMMON_NON_CITY_WORDS.has(word)
+    ) {
+      return word;
+    }
+  }
+
+  const LOCATION_PREPOSITIONS = ["в", "во", "на", "из", "под"];
+  for (let i = 1; i < words.length; i++) {
+    if (
+      LOCATION_PREPOSITIONS.includes(words[i - 1]) &&
+      words[i].length > 3 &&
+      !COMMON_NON_CITY_WORDS.has(words[i])
+    ) {
+      return words[i];
+    }
+  }
+
   return null;
 }
 
@@ -245,7 +380,7 @@ export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
         setIsProcessing(true);
         setTimeout(() => {
           const detectedType = findActivityType(initialQuery);
-          const detectedCity = findCity(initialQuery);
+          const detectedCity = extractCity(initialQuery);
 
           if (detectedType && detectedCity) {
             setTypeAnswer(detectedType);
@@ -285,12 +420,17 @@ export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
 
     setTimeout(() => {
       switch (step) {
-        case "greeting":
+        case "greeting": {
+          const greetingCity = extractCity(text);
+          if (greetingCity) {
+            setCityAnswer(greetingCity);
+          }
           setStep("type");
           setTypeAnswer(text);
           setIsProcessing(false);
           askQuestion(TYPE_QUESTION);
           break;
+        }
         case "type":
           setTypeAnswer(text);
           setIsProcessing(false);
