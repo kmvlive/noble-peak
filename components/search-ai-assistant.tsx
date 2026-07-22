@@ -315,13 +315,11 @@ function parseBudget(budgetText: string): { min?: number; max?: number } {
 async function searchActivities(params: {
   q: string;
   city: string;
-  section: string;
   budgetText: string;
 }): Promise<SearchResponse> {
   const url = new URL("/api/activities/search", window.location.origin);
   if (params.q) url.searchParams.set("q", params.q);
   if (params.city) url.searchParams.set("city", params.city);
-  if (params.section) url.searchParams.set("section", params.section);
 
   const budgetResult = parseBudget(params.budgetText);
   if (budgetResult.min !== undefined) {
@@ -456,15 +454,14 @@ export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
           const resolvedCity = (cityAnswer || "").trim();
           const resolvedInitial = (initialQuery || "").trim();
 
-          const qParam = resolvedInitial || resolvedType;
-          const sectionParam = findActivityType(resolvedType) || resolvedType;
+          const qParts = [resolvedInitial, resolvedType].filter(Boolean);
+          const qParam = qParts.join(" ");
 
           isSearchingRef.current = true;
 
           searchActivities({
             q: qParam,
             city: resolvedCity,
-            section: sectionParam,
             budgetText: text,
           })
             .then((response) => {
