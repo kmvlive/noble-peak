@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Save, Upload, ImageIcon } from "lucide-react";
+import { Save, Upload, ImageIcon, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { getToken } from "./partner-layout-client";
 import { WysiwygEditor } from "./wysiwyg-editor";
-import type { SectionRecord } from "@/lib/models";
+import type { SectionRecord, ActivityType } from "@/lib/models";
 
 const gradientOptions = [
   "from-emerald-400 to-cyan-500",
@@ -39,6 +39,7 @@ export function PartnerActivityForm() {
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [over18, setOver18] = useState(false);
+  const [activityType, setActivityType] = useState<ActivityType>("individual");
   const [location, setLocation] = useState("");
 
   useEffect(() => {
@@ -75,6 +76,7 @@ export function PartnerActivityForm() {
       section,
       price: Number(price),
       over18,
+      activityType,
       imageGradient,
       location: location.trim(),
     };
@@ -121,11 +123,24 @@ export function PartnerActivityForm() {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    const remaining = 30 - imageUrls.length;
+    if (remaining <= 0) {
+      toast.error("Максимум 30 фотографий");
+      return;
+    }
+
     setUploading(true);
     const token = getToken();
     const formData = new FormData();
-    for (const file of Array.from(files)) {
+    const filesToUpload = Array.from(files).slice(0, remaining);
+    for (const file of filesToUpload) {
       formData.append("file", file);
+    }
+
+    if (filesToUpload.length < files.length) {
+      toast.info(
+        `Выбрано ${files.length}, загружено ${filesToUpload.length} (максимум 30)`
+      );
     }
 
     try {
@@ -280,8 +295,8 @@ export function PartnerActivityForm() {
             </div>
           )}
           <p className="text-xs text-muted-foreground">
-            Можно загрузить фото с компьютера, указать CSS-градиенты или URL
-            изображений
+            Максимум 30 фотографий. Можно загрузить фото с компьютера, указать
+            CSS-градиенты или URL изображений
           </p>
         </div>
 
@@ -353,6 +368,27 @@ export function PartnerActivityForm() {
           <div
             className={`mt-1 h-8 w-full rounded-md bg-gradient-to-br ${imageGradient}`}
           />
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Users className="h-4 w-4 text-muted-foreground" />
+          <label className="text-sm font-medium">Тип активности</label>
+          <label className="relative inline-flex cursor-pointer items-center ml-auto">
+            <input
+              type="checkbox"
+              className="peer sr-only"
+              checked={activityType === "group"}
+              onChange={() =>
+                setActivityType(
+                  activityType === "group" ? "individual" : "group"
+                )
+              }
+            />
+            <div className="peer h-6 w-11 rounded-full border bg-input after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:bg-background after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus:ring-2 peer-focus:ring-ring peer-focus:ring-offset-2" />
+            <span className="ml-3 text-sm font-medium">
+              {activityType === "individual" ? "Индивидуальная" : "Групповая"}
+            </span>
+          </label>
         </div>
 
         <div className="flex items-center gap-3">

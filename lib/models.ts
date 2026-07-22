@@ -21,6 +21,7 @@ export interface Service {
 }
 
 export type OrderType = "payment" | "order_form";
+export type ActivityType = "individual" | "group";
 export type ActivityStatus = "active" | "pending" | "rejected";
 
 export interface ActivityRecord {
@@ -36,6 +37,7 @@ export interface ActivityRecord {
   likes: number;
   isPopular: boolean;
   over18: boolean;
+  activityType: ActivityType;
   orderType: OrderType;
   imageGradient: string;
   location?: string;

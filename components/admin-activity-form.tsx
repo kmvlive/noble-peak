@@ -2,7 +2,14 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, CalendarDays, Upload, ImageIcon } from "lucide-react";
+import {
+  ArrowLeft,
+  Save,
+  CalendarDays,
+  Upload,
+  ImageIcon,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { getToken } from "./admin-layout-client";
 import { WysiwygEditor } from "./wysiwyg-editor";
-import type { OrderType, SectionRecord } from "@/lib/models";
+import type { OrderType, ActivityType, SectionRecord } from "@/lib/models";
 import { AdminActivityCalendar } from "./admin-activity-calendar";
 import { slugify } from "@/lib/utils";
 
@@ -27,6 +34,7 @@ interface AdminActivityFormProps {
     likes: number;
     isPopular: boolean;
     over18: boolean;
+    activityType: ActivityType;
     orderType: OrderType;
     imageGradient: string;
     location?: string;
@@ -63,6 +71,9 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
   );
   const [orderType, setOrderType] = useState<OrderType>(
     activity?.orderType ?? "order_form"
+  );
+  const [activityType, setActivityType] = useState<ActivityType>(
+    activity?.activityType ?? "individual"
   );
   const [likes, setLikes] = useState(String(activity?.likes ?? 0));
   const [isPopular, setIsPopular] = useState(activity?.isPopular ?? false);
@@ -126,6 +137,7 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
       likes: Number(likes),
       isPopular,
       over18,
+      activityType,
       orderType,
       imageGradient,
       location: location.trim(),
@@ -177,11 +189,24 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    const remaining = 30 - imageUrls.length;
+    if (remaining <= 0) {
+      toast.error("Максимум 30 фотографий");
+      return;
+    }
+
     setUploading(true);
     const token = getToken();
     const formData = new FormData();
-    for (const file of Array.from(files)) {
+    const filesToUpload = Array.from(files).slice(0, remaining);
+    for (const file of filesToUpload) {
       formData.append("file", file);
+    }
+
+    if (filesToUpload.length < files.length) {
+      toast.info(
+        `Выбрано ${files.length}, загружено ${filesToUpload.length} (максимум 30)`
+      );
     }
 
     try {
@@ -364,8 +389,8 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
             </div>
           )}
           <p className="text-xs text-muted-foreground">
-            Можно загрузить фото с компьютера, указать CSS-градиенты или URL
-            изображений
+            Максимум 30 фотографий. Можно загрузить фото с компьютера, указать
+            CSS-градиенты или URL изображений
           </p>
         </div>
 
@@ -473,6 +498,29 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
               className={`mt-1 h-8 w-full rounded-md bg-gradient-to-br ${imageGradient}`}
             />
           </div>
+        </div>
+
+        <div className="flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-muted-foreground" />
+            <p className="text-sm font-medium">Тип активности</p>
+          </div>
+          <label className="relative inline-flex cursor-pointer items-center">
+            <input
+              type="checkbox"
+              className="peer sr-only"
+              checked={activityType === "group"}
+              onChange={() =>
+                setActivityType(
+                  activityType === "group" ? "individual" : "group"
+                )
+              }
+            />
+            <div className="peer h-6 w-11 rounded-full border bg-input after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:bg-background after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus:ring-2 peer-focus:ring-ring peer-focus:ring-offset-2" />
+            <span className="ml-3 text-sm font-medium">
+              {activityType === "individual" ? "Индивидуальная" : "Групповая"}
+            </span>
+          </label>
         </div>
 
         <div className="flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">
