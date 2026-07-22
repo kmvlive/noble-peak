@@ -21,6 +21,7 @@ export const TableName = {
   ORDERS: "orders",
   REVIEWS: "reviews",
   NOTIFICATIONS: "notifications",
+  CHAT_MESSAGES: "chat_messages",
   SLIDER_IMAGES: "slider_images",
 } as const;
 
@@ -156,6 +157,43 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
     ],
   },
 
+  [TableName.CHAT_MESSAGES]: {
+    name: TableName.CHAT_MESSAGES,
+    keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+    attributeDefinitions: [
+      { AttributeName: "id", AttributeType: "S" },
+      { AttributeName: "orderId", AttributeType: "S" },
+      { AttributeName: "clientEmail", AttributeType: "S" },
+      { AttributeName: "partnerEmail", AttributeType: "S" },
+    ],
+    globalSecondaryIndexes: [
+      {
+        IndexName: "orderId-index",
+        KeySchema: [
+          { AttributeName: "orderId", KeyType: "HASH" },
+          { AttributeName: "id", KeyType: "RANGE" },
+        ],
+        Projection: { ProjectionType: "ALL" },
+      },
+      {
+        IndexName: "clientEmail-index",
+        KeySchema: [
+          { AttributeName: "clientEmail", KeyType: "HASH" },
+          { AttributeName: "id", KeyType: "RANGE" },
+        ],
+        Projection: { ProjectionType: "ALL" },
+      },
+      {
+        IndexName: "partnerEmail-index",
+        KeySchema: [
+          { AttributeName: "partnerEmail", KeyType: "HASH" },
+          { AttributeName: "id", KeyType: "RANGE" },
+        ],
+        Projection: { ProjectionType: "ALL" },
+      },
+    ],
+  },
+
   [TableName.REVIEWS]: {
     name: TableName.REVIEWS,
     keySchema: [
@@ -191,6 +229,9 @@ export const IndexName = {
   ACTIVITIES_STATUS: "status-index",
   REVIEWS_STATUS: "status-index",
   NOTIFICATIONS_RECIPIENT_EMAIL: "recipientEmail-index",
+  CHAT_MESSAGES_ORDER_ID: "orderId-index",
+  CHAT_MESSAGES_CLIENT_EMAIL: "clientEmail-index",
+  CHAT_MESSAGES_PARTNER_EMAIL: "partnerEmail-index",
 } as const;
 
 export type IndexName = (typeof IndexName)[keyof typeof IndexName];

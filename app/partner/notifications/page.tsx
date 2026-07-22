@@ -9,9 +9,11 @@ export default function PartnerNotificationsPage() {
           <Bell className="h-5 w-5" />
         </div>
         <div>
-          <h1 className="text-xl font-bold tracking-tight">Уведомления</h1>
+          <h1 className="text-xl font-bold tracking-tight">
+            Уведомления и чат
+          </h1>
           <p className="text-sm text-muted-foreground">
-            Уведомления о заказах и статусе активностей
+            Уведомления о заказах, статусе активностей и чаты с клиентами
           </p>
         </div>
       </div>

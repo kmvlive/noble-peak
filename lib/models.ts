@@ -1489,3 +1489,84 @@ export async function updateSliderImagePosition(
     })
   );
 }
+
+export interface ChatMessageRecord {
+  id: string;
+  orderId: string;
+  senderEmail: string;
+  senderRole: "client" | "partner";
+  text: string;
+  clientEmail: string;
+  partnerEmail: string;
+  createdAt: string;
+}
+
+export async function sendChatMessage(
+  data: Omit<ChatMessageRecord, "id" | "createdAt">
+): Promise<ChatMessageRecord> {
+  const message: ChatMessageRecord = {
+    id: randomUUID(),
+    ...data,
+    createdAt: new Date().toISOString(),
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.CHAT_MESSAGES,
+      Item: message,
+    })
+  );
+
+  return message;
+}
+
+export async function getChatMessagesByOrder(
+  orderId: string
+): Promise<ChatMessageRecord[]> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.CHAT_MESSAGES,
+      IndexName: IndexName.CHAT_MESSAGES_ORDER_ID,
+      KeyConditionExpression: "orderId = :orderId",
+      ExpressionAttributeValues: {
+        ":orderId": orderId,
+      },
+      ScanIndexForward: true,
+    })
+  );
+  return (result.Items as ChatMessageRecord[]) ?? [];
+}
+
+export async function getChatThreadsForClient(
+  clientEmail: string
+): Promise<ChatMessageRecord[]> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.CHAT_MESSAGES,
+      IndexName: IndexName.CHAT_MESSAGES_CLIENT_EMAIL,
+      KeyConditionExpression: "clientEmail = :clientEmail",
+      ExpressionAttributeValues: {
+        ":clientEmail": clientEmail,
+      },
+      ScanIndexForward: false,
+    })
+  );
+  return (result.Items as ChatMessageRecord[]) ?? [];
+}
+
+export async function getChatThreadsForPartner(
+  partnerEmail: string
+): Promise<ChatMessageRecord[]> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.CHAT_MESSAGES,
+      IndexName: IndexName.CHAT_MESSAGES_PARTNER_EMAIL,
+      KeyConditionExpression: "partnerEmail = :partnerEmail",
+      ExpressionAttributeValues: {
+        ":partnerEmail": partnerEmail,
+      },
+      ScanIndexForward: false,
+    })
+  );
+  return (result.Items as ChatMessageRecord[]) ?? [];
+}

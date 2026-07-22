@@ -15,6 +15,7 @@ import type {
   AnalyticsCounterRecord,
   OrderRecord,
   ReviewRecord,
+  ChatMessageRecord,
 } from "./models";
 import {
   activities as staticActivities,
@@ -449,7 +450,7 @@ export const mockMenuItems: MenuItemRecord[] = [
   {
     id: "mock-client-notifications",
     menuType: "client",
-    name: "Уведомления",
+    name: "Уведомления и чат",
     url: "/client/notifications",
     order: 3,
     createdAt: new Date("2024-01-01").toISOString(),
@@ -494,7 +495,7 @@ export const mockMenuItems: MenuItemRecord[] = [
   {
     id: "mock-partner-notifications",
     menuType: "partner",
-    name: "Уведомления",
+    name: "Уведомления и чат",
     url: "/partner/notifications",
     order: 5,
     createdAt: new Date("2024-01-01").toISOString(),
@@ -606,6 +607,59 @@ export const mockNotifications: NotificationRecord[] = [
     link: "/partner/activities",
     isRead: false,
     createdAt: new Date(Date.now() - 86400000 * 7).toISOString(),
+  },
+];
+
+export const mockChatMessages: ChatMessageRecord[] = [
+  {
+    id: "mock-chat-1",
+    orderId: "mock-order-3",
+    senderEmail: "ivan@example.com",
+    senderRole: "client",
+    text: "Здравствуйте! Хотел уточнить, где именно происходит сбор перед морской прогулкой?",
+    clientEmail: "ivan@example.com",
+    partnerEmail: "partner@example.com",
+    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+  },
+  {
+    id: "mock-chat-2",
+    orderId: "mock-order-3",
+    senderEmail: "partner@example.com",
+    senderRole: "partner",
+    text: "Здравствуйте! Сбор на причале №5 в Севастополе, бухта Артиллерийская. За 15 минут до начала.",
+    clientEmail: "ivan@example.com",
+    partnerEmail: "partner@example.com",
+    createdAt: new Date(Date.now() - 86400000 * 2 + 3600000).toISOString(),
+  },
+  {
+    id: "mock-chat-3",
+    orderId: "mock-order-3",
+    senderEmail: "ivan@example.com",
+    senderRole: "client",
+    text: "Спасибо! А что нужно брать с собой?",
+    clientEmail: "ivan@example.com",
+    partnerEmail: "partner@example.com",
+    createdAt: new Date(Date.now() - 86400000).toISOString(),
+  },
+  {
+    id: "mock-chat-4",
+    orderId: "mock-order-3",
+    senderEmail: "partner@example.com",
+    senderRole: "partner",
+    text: "Возьмите головной убор, крем от загара и воду. Остальное предоставим мы.",
+    clientEmail: "ivan@example.com",
+    partnerEmail: "partner@example.com",
+    createdAt: new Date(Date.now() - 86400000 + 1800000).toISOString(),
+  },
+  {
+    id: "mock-chat-5",
+    orderId: "mock-order-4",
+    senderEmail: "elena@example.com",
+    senderRole: "client",
+    text: "Добрый день! Можно ли перенести прогулку на день раньше?",
+    clientEmail: "elena@example.com",
+    partnerEmail: "partner@example.com",
+    createdAt: new Date(Date.now() - 3600000).toISOString(),
   },
 ];
 

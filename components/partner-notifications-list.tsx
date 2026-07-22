@@ -11,9 +11,11 @@ import {
   AlertTriangle,
   Info,
   ExternalLink,
+  MessageSquare,
 } from "lucide-react";
 import Link from "next/link";
 import { getToken } from "@/components/partner-layout-client";
+import { ChatWidget } from "@/components/chat-widget";
 
 interface Notification {
   id: string;
@@ -69,6 +71,7 @@ export function PartnerNotificationsList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [unreadOnly, setUnreadOnly] = useState(false);
+  const [tab, setTab] = useState<"notifications" | "chat">("notifications");
 
   useEffect(() => {
     const token = getToken();
@@ -134,150 +137,169 @@ export function PartnerNotificationsList() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-3">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-20 w-full rounded-xl" />
-        ))}
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center text-red-600">
-        Ошибка загрузки: {error}
-      </div>
-    );
-  }
-
-  if (notifications.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-16 text-center">
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-          <Bell className="h-6 w-6 text-muted-foreground" />
-        </div>
-        <h3 className="mb-1 font-medium">Уведомлений пока нет</h3>
-        <p className="text-sm text-muted-foreground">
-          Уведомления о новых заказах и изменении статуса активностей будут
-          появляться здесь
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setUnreadOnly(false)}
-            className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-              !unreadOnly
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-accent"
-            }`}
-          >
-            Все
-          </button>
-          <button
-            onClick={() => setUnreadOnly(true)}
-            className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-              unreadOnly
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-accent"
-            }`}
-          >
-            Непрочитанные{unreadCount > 0 && ` (${unreadCount})`}
-          </button>
-        </div>
-        {unreadCount > 0 && (
-          <button
-            onClick={handleMarkAllRead}
-            className="flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <CheckCheck className="h-3.5 w-3.5" />
-            Прочитать все
-          </button>
-        )}
+      <div className="flex items-center gap-2 border-b pb-2">
+        <button
+          onClick={() => setTab("notifications")}
+          className={`flex items-center gap-1.5 rounded-t-md px-3 py-2 text-sm font-medium transition-colors ${
+            tab === "notifications"
+              ? "border-b-2 border-primary text-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Bell className="h-4 w-4" />
+          Уведомления
+        </button>
+        <button
+          onClick={() => setTab("chat")}
+          className={`flex items-center gap-1.5 rounded-t-md px-3 py-2 text-sm font-medium transition-colors ${
+            tab === "chat"
+              ? "border-b-2 border-primary text-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <MessageSquare className="h-4 w-4" />
+          Чаты
+        </button>
       </div>
 
-      {displayed.length === 0 ? (
-        <div className="rounded-xl border p-8 text-center">
-          <Bell className="mx-auto h-6 w-6 text-muted-foreground" />
-          <p className="mt-2 text-sm text-muted-foreground">
-            Нет непрочитанных уведомлений
+      {tab === "chat" ? (
+        <ChatWidget userRole="partner" userEmail="" apiBase="/api/partner" />
+      ) : loading ? (
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-20 w-full rounded-xl" />
+          ))}
+        </div>
+      ) : error ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center text-red-600">
+          Ошибка загрузки: {error}
+        </div>
+      ) : notifications.length === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-16 text-center">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+            <Bell className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <h3 className="mb-1 font-medium">Уведомлений пока нет</h3>
+          <p className="text-sm text-muted-foreground">
+            Уведомления о новых заказах и изменении статуса активностей будут
+            появляться здесь
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {displayed.map((notification) => {
-            const Icon = getTypeIcon(notification.type);
-            return (
-              <div
-                key={notification.id}
-                className={`rounded-xl border bg-card p-4 transition-colors ${
-                  !notification.isRead
-                    ? "bg-accent/30 border-accent"
-                    : "hover:bg-accent/30"
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setUnreadOnly(false)}
+                className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                  !unreadOnly
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:bg-accent"
                 }`}
               >
-                <div className="flex items-start gap-3">
+                Все
+              </button>
+              <button
+                onClick={() => setUnreadOnly(true)}
+                className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                  unreadOnly
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:bg-accent"
+                }`}
+              >
+                Непрочитанные{unreadCount > 0 && ` (${unreadCount})`}
+              </button>
+            </div>
+            {unreadCount > 0 && (
+              <button
+                onClick={handleMarkAllRead}
+                className="flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <CheckCheck className="h-3.5 w-3.5" />
+                Прочитать все
+              </button>
+            )}
+          </div>
+
+          {displayed.length === 0 ? (
+            <div className="rounded-xl border p-8 text-center">
+              <Bell className="mx-auto h-6 w-6 text-muted-foreground" />
+              <p className="mt-2 text-sm text-muted-foreground">
+                Нет непрочитанных уведомлений
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {displayed.map((notification) => {
+                const Icon = getTypeIcon(notification.type);
+                return (
                   <div
-                    className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                    key={notification.id}
+                    className={`rounded-xl border bg-card p-4 transition-colors ${
                       !notification.isRead
-                        ? "bg-primary/10 text-primary"
-                        : "bg-muted text-muted-foreground"
+                        ? "bg-accent/30 border-accent"
+                        : "hover:bg-accent/30"
                     }`}
                   >
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h3
-                          className={`text-sm ${
-                            !notification.isRead
-                              ? "font-semibold"
-                              : "font-medium text-muted-foreground"
-                          }`}
-                        >
-                          {notification.title}
-                        </h3>
-                        <p className="mt-0.5 text-xs text-muted-foreground">
-                          {notification.message}
-                        </p>
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                          !notification.isRead
+                            ? "bg-primary/10 text-primary"
+                            : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" />
                       </div>
-                      <div className="flex shrink-0 items-center gap-1.5">
-                        <span className="whitespace-nowrap text-[10px] text-muted-foreground">
-                          {formatDate(notification.createdAt)}
-                        </span>
-                        {!notification.isRead && (
-                          <button
-                            onClick={() => handleMarkRead(notification.id)}
-                            className="rounded p-0.5 text-muted-foreground hover:text-foreground transition-colors"
-                            title="Отметить прочитанным"
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h3
+                              className={`text-sm ${
+                                !notification.isRead
+                                  ? "font-semibold"
+                                  : "font-medium text-muted-foreground"
+                              }`}
+                            >
+                              {notification.title}
+                            </h3>
+                            <p className="mt-0.5 text-xs text-muted-foreground">
+                              {notification.message}
+                            </p>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-1.5">
+                            <span className="whitespace-nowrap text-[10px] text-muted-foreground">
+                              {formatDate(notification.createdAt)}
+                            </span>
+                            {!notification.isRead && (
+                              <button
+                                onClick={() => handleMarkRead(notification.id)}
+                                className="rounded p-0.5 text-muted-foreground hover:text-foreground transition-colors"
+                                title="Отметить прочитанным"
+                              >
+                                <CheckCheck className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        {notification.link && (
+                          <Link
+                            href={notification.link}
+                            className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
                           >
-                            <CheckCheck className="h-3.5 w-3.5" />
-                          </button>
+                            Подробнее
+                            <ExternalLink className="h-3 w-3" />
+                          </Link>
                         )}
                       </div>
                     </div>
-                    {notification.link && (
-                      <Link
-                        href={notification.link}
-                        className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-                      >
-                        Подробнее
-                        <ExternalLink className="h-3 w-3" />
-                      </Link>
-                    )}
                   </div>
-                </div>
-              </div>
-            );
-          })}
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
     </div>

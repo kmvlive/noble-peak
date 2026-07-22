@@ -5,7 +5,7 @@ import { appName } from "@/lib/app-name";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: `Уведомления — ${appName}`,
+  title: `Уведомления и чат — ${appName}`,
 };
 
 export default function ClientNotificationsPage() {
@@ -21,7 +21,7 @@ export default function ClientNotificationsPage() {
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
           <Bell className="h-4 w-4" />
         </div>
-        <h1 className="text-xl font-bold tracking-tight">Уведомления</h1>
+        <h1 className="text-xl font-bold tracking-tight">Уведомления и чат</h1>
       </div>
       <ClientNotificationsList />
       <div className="flex justify-center">
