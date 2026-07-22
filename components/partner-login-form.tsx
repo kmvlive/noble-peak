@@ -45,6 +45,7 @@ export function PartnerLoginForm() {
       }
 
       toast.success("Добро пожаловать в кабинет партнёра!");
+      localStorage.setItem("partner_token", data.token);
       router.replace("/partner");
     } catch {
       toast.error("Ошибка соединения с сервером");
@@ -82,6 +83,7 @@ export function PartnerLoginForm() {
       }
 
       toast.success("Регистрация прошла успешно! Проверьте вашу почту.");
+      localStorage.setItem("partner_token", data.token);
       router.replace("/partner");
     } catch {
       toast.error("Ошибка соединения с сервером");

@@ -10,6 +10,7 @@ import { appName } from "@/lib/app-name";
 import { FooterMenu } from "@/components/footer-menu";
 import { AnalyticsInjector } from "@/components/analytics-injector";
 import { NotificationPoller } from "@/components/notification-poller";
+import { HeaderAuth } from "@/components/header-auth";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -44,20 +45,7 @@ export default function RootLayout({
               </div>
               {appName}
             </Link>
-            <div className="ml-auto flex items-center gap-2">
-              <Link
-                href="/partner/login"
-                className="shrink-0 rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-              >
-                Вход для партнёров
-              </Link>
-              <Link
-                href="/client/login"
-                className="shrink-0 rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-              >
-                Вход для клиентов
-              </Link>
-            </div>
+            <HeaderAuth />
           </div>
           <nav className="container mx-auto flex gap-1 overflow-x-auto px-4 pb-2 scrollbar-none">
             {sections.map((section) => (
