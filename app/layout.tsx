@@ -9,6 +9,7 @@ import { sections } from "@/lib/data";
 import { appName } from "@/lib/app-name";
 import { FooterMenu } from "@/components/footer-menu";
 import { AnalyticsInjector } from "@/components/analytics-injector";
+import { NotificationPoller } from "@/components/notification-poller";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -27,6 +28,7 @@ export default function RootLayout({
       <body className="antialiased min-h-screen bg-background flex flex-col">
         <BridgeProvider />
         <AnalyticsInjector />
+        <NotificationPoller />
         <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
           <div className="container mx-auto px-4 h-14 flex items-center">
             <Link
