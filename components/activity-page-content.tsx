@@ -187,7 +187,7 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
               <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
                 <User className="h-4 w-4" />
                 <Link
-                  href={`/partners/${encodeURIComponent(activity.partnerEmail)}`}
+                  href={`/partners/${encodeURIComponent(activity.partnerSlug || activity.partnerEmail)}`}
                   className="text-primary hover:underline"
                 >
                   Страница партнёра

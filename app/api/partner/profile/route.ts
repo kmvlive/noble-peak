@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { isDatabaseAvailable } from "@/lib/db";
-import { getPartnerByEmail, updatePartner } from "@/lib/models";
+import { getPartnerByEmail, updatePartner, isSlugTaken } from "@/lib/models";
 import { getPartnerEmailFromRequest } from "@/lib/partner-auth";
 import { mockPartners } from "@/lib/mock-data";
 
@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
         email: partner.email,
         photo: partner.photo ?? "",
         description: partner.description ?? "",
+        slug: partner.slug ?? "",
       });
     } catch (error) {
       console.error("Ошибка получения профиля партнёра:", error);
@@ -48,6 +49,7 @@ export async function GET(request: NextRequest) {
     email: mock.email,
     photo: mock.photo ?? "",
     description: mock.description ?? "",
+    slug: mock.slug ?? "",
   });
 }
 
@@ -56,6 +58,11 @@ const updateProfileSchema = z.object({
   phone: z.string().min(1).max(30).optional(),
   photo: z.string().max(5000).optional(),
   description: z.string().max(50000).optional(),
+  slug: z
+    .string()
+    .max(100)
+    .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Только латиница, цифры и дефисы")
+    .optional(),
 });
 
 export async function PATCH(request: NextRequest) {
@@ -83,6 +90,16 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    if (parsed.data.slug !== undefined) {
+      const taken = await isSlugTaken(parsed.data.slug, partnerEmail);
+      if (taken) {
+        return NextResponse.json(
+          { error: "Этот slug уже занят другим партнёром" },
+          { status: 409 }
+        );
+      }
+    }
+
     const updated = await updatePartner(partnerEmail, parsed.data);
 
     return NextResponse.json({
@@ -91,6 +108,7 @@ export async function PATCH(request: NextRequest) {
       email: updated.email,
       photo: updated.photo ?? "",
       description: updated.description ?? "",
+      slug: updated.slug ?? "",
     });
   } catch (error) {
     console.error("Ошибка обновления профиля партнёра:", error);

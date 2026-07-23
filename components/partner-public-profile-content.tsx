@@ -19,6 +19,7 @@ interface PartnerPublicData {
   name: string;
   photo: string;
   description: string;
+  slug: string;
   activities: PartnerActivity[];
 }
 
@@ -30,7 +31,7 @@ export function PartnerPublicProfileContent({
   const profileUrl =
     typeof window !== "undefined"
       ? window.location.href
-      : `/partners/${encodeURIComponent(partner.email)}`;
+      : `/partners/${encodeURIComponent(partner.slug || partner.email)}`;
 
   const hasPhoto = partner.photo && partner.photo.length > 0;
 

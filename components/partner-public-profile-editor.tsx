@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { User, Loader2, ExternalLink, Camera } from "lucide-react";
+import { User, Loader2, ExternalLink, Camera, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,7 @@ interface ProfileData {
   email: string;
   photo: string;
   description: string;
+  slug: string;
 }
 
 export function PartnerPublicProfileEditor() {
@@ -27,6 +28,7 @@ export function PartnerPublicProfileEditor() {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [photo, setPhoto] = useState("");
   const [description, setDescription] = useState("");
+  const [slug, setSlug] = useState("");
 
   useEffect(() => {
     const token = getToken();
@@ -46,6 +48,7 @@ export function PartnerPublicProfileEditor() {
         setProfile(data);
         setPhoto(data.photo || "");
         setDescription(data.description || "");
+        setSlug(data.slug || "");
       })
       .catch(() => {
         toast.error("Не удалось загрузить профиль");
@@ -67,7 +70,7 @@ export function PartnerPublicProfileEditor() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ photo, description }),
+        body: JSON.stringify({ photo, description, slug }),
       });
 
       if (!res.ok) {
@@ -79,6 +82,7 @@ export function PartnerPublicProfileEditor() {
       setProfile(data);
       setPhoto(data.photo || "");
       setDescription(data.description || "");
+      setSlug(data.slug || "");
       toast.success("Готово", { id });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Ошибка сохранения", {
@@ -108,8 +112,8 @@ export function PartnerPublicProfileEditor() {
   }
 
   const publicProfileUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/partners/${encodeURIComponent(profile.email)}`
+    typeof window !== "undefined" && slug
+      ? `${window.location.origin}/partners/${encodeURIComponent(slug)}`
       : "";
 
   return (
@@ -142,6 +146,25 @@ export function PartnerPublicProfileEditor() {
           Открыть публичный профиль
         </Link>
       )}
+
+      <div className="space-y-2">
+        <Label htmlFor="slug">Адрес страницы (slug)</Label>
+        <div className="flex items-center gap-2">
+          <Globe className="h-4 w-4 text-muted-foreground shrink-0" />
+          <Input
+            id="slug"
+            value={slug}
+            onChange={(e) =>
+              setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))
+            }
+            placeholder="partner-ivanov"
+          />
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Только латиница, цифры и дефисы. Адрес страницы: /partners/
+          {slug || "slug"}
+        </p>
+      </div>
 
       <div className="space-y-2">
         <Label htmlFor="photo">Ссылка на фото профиля</Label>

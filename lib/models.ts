@@ -838,6 +838,7 @@ export interface PartnerRecord {
   passwordHash: string;
   photo?: string;
   description?: string;
+  slug?: string;
   createdAt: string;
 }
 
@@ -851,6 +852,32 @@ export async function getPartnerByEmail(
     })
   );
   return (result.Item as PartnerRecord) ?? null;
+}
+
+export async function getPartnerBySlug(
+  slug: string
+): Promise<PartnerRecord | null> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.PARTNERS,
+      IndexName: IndexName.PARTNERS_SLUG,
+      KeyConditionExpression: "#slug = :slug",
+      ExpressionAttributeNames: { "#slug": "slug" },
+      ExpressionAttributeValues: { ":slug": slug },
+    })
+  );
+  const items = result.Items as PartnerRecord[];
+  return items.length > 0 ? items[0] : null;
+}
+
+export async function isSlugTaken(
+  slug: string,
+  excludeEmail?: string
+): Promise<boolean> {
+  const existing = await getPartnerBySlug(slug);
+  if (!existing) return false;
+  if (excludeEmail && existing.email === excludeEmail) return false;
+  return true;
 }
 
 export async function createPartner(
@@ -884,7 +911,9 @@ export async function getAllPartners(): Promise<PartnerRecord[]> {
 
 export async function updatePartner(
   email: string,
-  data: Partial<Pick<PartnerRecord, "name" | "phone" | "photo" | "description">>
+  data: Partial<
+    Pick<PartnerRecord, "name" | "phone" | "photo" | "description" | "slug">
+  >
 ): Promise<PartnerRecord> {
   const updateExpr: string[] = [];
   const exprValues: Record<string, unknown> = {};
@@ -912,6 +941,12 @@ export async function updatePartner(
     updateExpr.push("#description = :description");
     exprValues[":description"] = data.description;
     exprNames["#description"] = "description";
+  }
+
+  if (data.slug !== undefined) {
+    updateExpr.push("#slug = :slug");
+    exprValues[":slug"] = data.slug;
+    exprNames["#slug"] = "slug";
   }
 
   if (updateExpr.length === 0) {

@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { isDatabaseAvailable } from "@/lib/db";
-import { getAllActivities, getAllSections } from "@/lib/models";
-import { mockActivities, mockSections } from "@/lib/mock-data";
+import { getAllActivities, getAllSections, getAllPartners } from "@/lib/models";
+import { mockActivities, mockSections, mockPartners } from "@/lib/mock-data";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.BASE_URL ?? "https://magazin-tour.ru";
@@ -10,6 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   let activities = mockActivities;
   let sections = mockSections;
+  let partners = mockPartners;
 
   if (dbAvailable) {
     try {
@@ -21,6 +22,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       sections = await getAllSections();
     } catch (error) {
       console.error("Sitemap: failed to fetch sections", error);
+    }
+    try {
+      partners = await getAllPartners();
+    } catch (error) {
+      console.error("Sitemap: failed to fetch partners", error);
     }
   }
 
@@ -49,5 +55,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...sectionPages, ...activityPages];
+  const partnerPages: MetadataRoute.Sitemap = partners
+    .filter((p) => p.slug)
+    .map((partner) => ({
+      url: `${baseUrl}/partners/${partner.slug}`,
+      changeFrequency: "weekly",
+      priority: 0.6,
+    }));
+
+  return [...staticPages, ...sectionPages, ...activityPages, ...partnerPages];
 }

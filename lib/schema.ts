@@ -113,7 +113,17 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
   [TableName.PARTNERS]: {
     name: TableName.PARTNERS,
     keySchema: [{ AttributeName: "email", KeyType: "HASH" }],
-    attributeDefinitions: [{ AttributeName: "email", AttributeType: "S" }],
+    attributeDefinitions: [
+      { AttributeName: "email", AttributeType: "S" },
+      { AttributeName: "slug", AttributeType: "S" },
+    ],
+    globalSecondaryIndexes: [
+      {
+        IndexName: "slug-index",
+        KeySchema: [{ AttributeName: "slug", KeyType: "HASH" }],
+        Projection: { ProjectionType: "ALL" },
+      },
+    ],
   },
   [TableName.PASSWORD_RESETS]: {
     name: TableName.PASSWORD_RESETS,
@@ -232,6 +242,7 @@ export const IndexName = {
   CHAT_MESSAGES_ORDER_ID: "orderId-index",
   CHAT_MESSAGES_CLIENT_EMAIL: "clientEmail-index",
   CHAT_MESSAGES_PARTNER_EMAIL: "partnerEmail-index",
+  PARTNERS_SLUG: "slug-index",
 } as const;
 
 export type IndexName = (typeof IndexName)[keyof typeof IndexName];

@@ -2,6 +2,8 @@ import {
   DynamoDBClient,
   CreateTableCommand,
   ListTablesCommand,
+  DescribeTableCommand,
+  UpdateTableCommand,
   waitUntilTableExists,
 } from "@aws-sdk/client-dynamodb";
 import { TABLE_SCHEMAS, TABLE_NAMES } from "../lib/schema";
@@ -25,6 +27,37 @@ async function migrate() {
   for (const table of TABLES) {
     if (TableNames.includes(table.name)) {
       console.log(`  ✓ Таблица существует: ${table.name}`);
+
+      if (table.globalSecondaryIndexes?.length) {
+        const desc = await client.send(
+          new DescribeTableCommand({ TableName: table.name })
+        );
+        const existingIndexes =
+          desc.Table?.GlobalSecondaryIndexes?.map((i) => i.IndexName) ?? [];
+
+        for (const gsi of table.globalSecondaryIndexes) {
+          if (!existingIndexes.includes(gsi.IndexName)) {
+            console.log(`    Добавление индекса ${gsi.IndexName}...`);
+            await client.send(
+              new UpdateTableCommand({
+                TableName: table.name,
+                AttributeDefinitions: table.attributeDefinitions,
+                GlobalSecondaryIndexUpdates: [
+                  {
+                    Create: {
+                      IndexName: gsi.IndexName,
+                      KeySchema: gsi.KeySchema,
+                      Projection: gsi.Projection,
+                    },
+                  },
+                ],
+              })
+            );
+            console.log(`    ✓ Индекс ${gsi.IndexName} добавлен`);
+          }
+        }
+      }
+
       continue;
     }
 

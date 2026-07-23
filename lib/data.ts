@@ -14,6 +14,7 @@ export interface Activity {
   orderType: "order_form" | "payment";
   location?: string;
   partnerEmail?: string;
+  partnerSlug?: string;
 }
 
 export interface Section {

@@ -7,8 +7,8 @@ export default function PartnerPublicProfilePage() {
         Публичный профиль
       </h1>
       <p className="text-sm text-muted-foreground mb-6">
-        Настройте публичную страницу, которую увидят клиенты. Страница будет
-        доступна по уникальной ссылке.
+        Настройте публичную страницу, которую увидят клиенты. Укажите адрес
+        страницы (slug) и она будет доступна по ссылке /partners/ваш-slug.
       </p>
       <PartnerPublicProfileEditor />
     </div>

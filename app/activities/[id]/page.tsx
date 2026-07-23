@@ -3,6 +3,9 @@ import type { Metadata } from "next";
 import { ActivityPageContent } from "@/components/activity-page-content";
 import type { Activity } from "@/lib/data";
 import { appName } from "@/lib/app-name";
+import { isDatabaseAvailable } from "@/lib/db";
+import { getPartnerByEmail } from "@/lib/models";
+import { mockPartners } from "@/lib/mock-data";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +17,19 @@ async function fetchActivity(id: string): Promise<Activity | null> {
     });
     if (!res.ok) return null;
     const data = await res.json();
+
+    let partnerSlug: string | undefined;
+    if (data.partnerEmail) {
+      const dbAvailable = await isDatabaseAvailable();
+      if (dbAvailable) {
+        const partner = await getPartnerByEmail(data.partnerEmail);
+        if (partner?.slug) partnerSlug = partner.slug;
+      } else {
+        const mock = mockPartners.find((p) => p.email === data.partnerEmail);
+        if (mock?.slug) partnerSlug = mock.slug;
+      }
+    }
+
     return {
       id: data.id,
       title: data.title,
@@ -30,6 +46,7 @@ async function fetchActivity(id: string): Promise<Activity | null> {
       orderType: data.orderType,
       location: data.location,
       partnerEmail: data.partnerEmail,
+      partnerSlug,
     };
   } catch {
     return null;

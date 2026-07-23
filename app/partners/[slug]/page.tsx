@@ -10,6 +10,7 @@ interface PartnerPublicData {
   name: string;
   photo: string;
   description: string;
+  slug: string;
   activities: {
     id: string;
     title: string;
@@ -22,12 +23,12 @@ interface PartnerPublicData {
 }
 
 async function fetchPartnerProfile(
-  email: string
+  slug: string
 ): Promise<PartnerPublicData | null> {
   const baseUrl = process.env.BASE_URL || "http://localhost:8080";
   try {
     const res = await fetch(
-      `${baseUrl}/api/partners/${encodeURIComponent(email)}`,
+      `${baseUrl}/api/partners/${encodeURIComponent(slug)}`,
       {
         cache: "no-store",
       }
@@ -42,10 +43,10 @@ async function fetchPartnerProfile(
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ email: string }>;
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { email } = await params;
-  const data = await fetchPartnerProfile(email);
+  const { slug } = await params;
+  const data = await fetchPartnerProfile(slug);
 
   if (!data) {
     return { title: appName };
@@ -62,10 +63,10 @@ export async function generateMetadata({
 export default async function PartnerPublicProfilePage({
   params,
 }: {
-  params: Promise<{ email: string }>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { email } = await params;
-  const data = await fetchPartnerProfile(email);
+  const { slug } = await params;
+  const data = await fetchPartnerProfile(slug);
 
   if (!data) notFound();
 
