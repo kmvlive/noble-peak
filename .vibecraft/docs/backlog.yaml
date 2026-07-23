@@ -2252,5 +2252,5 @@ tasks:
       - Иконки корректно отображаются на домашнем экране Android и iOS
     depends_on: []
     related_feature: SEO и производительность
-    status: pending
-    summary: null
+    status: completed
+    summary: "PWA настроен: manifest.json с иконками 192x192 и 512x512 в public/; service worker (sw.js) кэширует статику и обеспечивает офлайн-режим; компонент InstallPrompt обрабатывает beforeinstallprompt для Android и показывает iOS-подсказку «Добавить на экран «Домой»; в layout.tsx добавлены manifest-ссылка и Apple-мета-теги."

@@ -11,12 +11,23 @@ import { FooterMenu } from "@/components/footer-menu";
 import { AnalyticsInjector } from "@/components/analytics-injector";
 import { NotificationPoller } from "@/components/notification-poller";
 import { HeaderAuth } from "@/components/header-auth";
+import { InstallPrompt } from "@/components/install-prompt";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: appName,
   description: appName,
+  manifest: "/manifest.json",
+  icons: {
+    apple: "/icons/apple-touch-icon.png",
+  },
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
+    "apple-mobile-web-app-title": appName,
+    "format-detection": "telephone=no",
+  },
 };
 
 export default function RootLayout({
@@ -61,6 +72,7 @@ export default function RootLayout({
         </header>
         <main className="flex-1">{children}</main>
         <FooterMenu />
+        <InstallPrompt />
         <Toaster richColors position="top-right" />
       </body>
     </html>
