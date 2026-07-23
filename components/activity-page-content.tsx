@@ -178,10 +178,13 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
               {activity.title}
             </h1>
             {activity.location && (
-              <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Link
+                href={`/locations/${encodeURIComponent(activity.location)}`}
+                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
                 <Map className="h-4 w-4 shrink-0" />
                 <span className="truncate">{activity.location}</span>
-              </p>
+              </Link>
             )}
             {activity.partnerEmail && (
               <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
