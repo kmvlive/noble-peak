@@ -839,6 +839,7 @@ export interface PartnerRecord {
   photo?: string;
   description?: string;
   slug?: string;
+  orderFormEnabled?: boolean;
   createdAt: string;
 }
 
@@ -912,7 +913,10 @@ export async function getAllPartners(): Promise<PartnerRecord[]> {
 export async function updatePartner(
   email: string,
   data: Partial<
-    Pick<PartnerRecord, "name" | "phone" | "photo" | "description" | "slug">
+    Pick<
+      PartnerRecord,
+      "name" | "phone" | "photo" | "description" | "slug" | "orderFormEnabled"
+    >
   >
 ): Promise<PartnerRecord> {
   const updateExpr: string[] = [];
@@ -947,6 +951,12 @@ export async function updatePartner(
     updateExpr.push("#slug = :slug");
     exprValues[":slug"] = data.slug;
     exprNames["#slug"] = "slug";
+  }
+
+  if (data.orderFormEnabled !== undefined) {
+    updateExpr.push("#orderFormEnabled = :orderFormEnabled");
+    exprValues[":orderFormEnabled"] = data.orderFormEnabled;
+    exprNames["#orderFormEnabled"] = "orderFormEnabled";
   }
 
   if (updateExpr.length === 0) {

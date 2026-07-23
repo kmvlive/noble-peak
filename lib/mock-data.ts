@@ -237,6 +237,7 @@ export const mockPartners: PartnerRecord[] = [
     slug: "partner-ivanov",
     description:
       "<p>Профессиональный организатор активного отдыха в Крыму. Более 5 лет опыта проведения морских прогулок, треккинга и экскурсий.</p>",
+    orderFormEnabled: true,
     createdAt: new Date("2024-06-01").toISOString(),
   },
 ];
