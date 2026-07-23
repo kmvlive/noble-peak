@@ -120,25 +120,27 @@ export function ClientBookingsList() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
-        {STATUS_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            onClick={() => setStatusFilter(opt.value)}
-            className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-              statusFilter === opt.value
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
-        <div className="ml-auto flex items-center gap-2">
+        <SlidersHorizontal className="h-4 w-4 text-muted-foreground shrink-0" />
+        <div className="flex flex-wrap gap-1.5">
+          {STATUS_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => setStatusFilter(opt.value)}
+              className={`min-h-9 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                statusFilter === opt.value
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        <div className="ml-auto flex items-center gap-2 max-sm:w-full max-sm:ml-0">
           <select
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value as DateFilter)}
-            className="rounded-md border bg-background px-2 py-1 text-xs text-muted-foreground"
+            className="min-h-9 flex-1 rounded-md border bg-background px-3 py-1.5 text-xs text-muted-foreground"
           >
             <option value="all">Все даты</option>
             <option value="upcoming">Предстоящие</option>
@@ -146,9 +148,9 @@ export function ClientBookingsList() {
           </select>
           <button
             onClick={() => setSortAsc((v) => !v)}
-            className="flex items-center gap-1 rounded-md border bg-background px-2 py-1 text-xs text-muted-foreground hover:bg-accent transition-colors"
+            className="min-h-9 flex items-center gap-1.5 rounded-md border bg-background px-3 py-1.5 text-xs text-muted-foreground hover:bg-accent transition-colors"
           >
-            <ArrowUpDown className="h-3 w-3" />
+            <ArrowUpDown className="h-3.5 w-3.5" />
             {sortAsc ? "сначала новые" : "сначала старые"}
           </button>
         </div>

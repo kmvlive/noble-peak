@@ -124,11 +124,11 @@ export function ClientNotificationsList() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col min-h-0">
       <div className="flex items-center gap-2 border-b pb-2">
         <button
           onClick={() => setTab("notifications")}
-          className={`flex items-center gap-1.5 rounded-t-md px-3 py-2 text-sm font-medium transition-colors ${
+          className={`flex items-center gap-1.5 rounded-t-md px-4 py-2.5 text-sm font-medium transition-colors min-h-10 ${
             tab === "notifications"
               ? "border-b-2 border-primary text-foreground"
               : "text-muted-foreground hover:text-foreground"
@@ -139,7 +139,7 @@ export function ClientNotificationsList() {
         </button>
         <button
           onClick={() => setTab("chat")}
-          className={`flex items-center gap-1.5 rounded-t-md px-3 py-2 text-sm font-medium transition-colors ${
+          className={`flex items-center gap-1.5 rounded-t-md px-4 py-2.5 text-sm font-medium transition-colors min-h-10 ${
             tab === "chat"
               ? "border-b-2 border-primary text-foreground"
               : "text-muted-foreground hover:text-foreground"
@@ -151,9 +151,11 @@ export function ClientNotificationsList() {
       </div>
 
       {tab === "chat" ? (
-        <ChatWidget userRole="client" userEmail="" apiBase="/api/client" />
+        <div className="flex flex-1 flex-col min-h-0">
+          <ChatWidget userRole="client" userEmail="" apiBase="/api/client" />
+        </div>
       ) : loading ? (
-        <div className="space-y-3">
+        <div className="space-y-3 mt-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="rounded-lg border p-4 space-y-2">
               <div className="flex items-center gap-2">
@@ -165,7 +167,7 @@ export function ClientNotificationsList() {
           ))}
         </div>
       ) : notifications.length === 0 ? (
-        <div className="rounded-lg border p-8 text-center space-y-3">
+        <div className="rounded-lg border p-8 text-center space-y-3 mt-4">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted">
             <Bell className="h-6 w-6 text-muted-foreground" />
           </div>
@@ -174,18 +176,18 @@ export function ClientNotificationsList() {
           </p>
           <Link
             href="/"
-            className="inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+            className="inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
           >
             Выбрать активность
           </Link>
         </div>
       ) : (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+        <div className="space-y-4 mt-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5">
               <button
                 onClick={() => setUnreadOnly(false)}
-                className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                className={`min-h-9 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                   !unreadOnly
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground hover:bg-accent"
@@ -195,7 +197,7 @@ export function ClientNotificationsList() {
               </button>
               <button
                 onClick={() => setUnreadOnly(true)}
-                className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                className={`min-h-9 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                   unreadOnly
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground hover:bg-accent"
@@ -207,7 +209,7 @@ export function ClientNotificationsList() {
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllRead}
-                className="flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="min-h-9 flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
                 <CheckCheck className="h-3.5 w-3.5" />
                 Прочитать все
