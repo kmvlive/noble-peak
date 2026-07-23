@@ -1,0 +1,73 @@
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { PartnerPublicProfileContent } from "@/components/partner-public-profile-content";
+import { appName } from "@/lib/app-name";
+
+export const dynamic = "force-dynamic";
+
+interface PartnerPublicData {
+  email: string;
+  name: string;
+  photo: string;
+  description: string;
+  activities: {
+    id: string;
+    title: string;
+    shortDescription: string;
+    price: number;
+    location?: string;
+    imageGradient: string;
+    section: string;
+  }[];
+}
+
+async function fetchPartnerProfile(
+  email: string
+): Promise<PartnerPublicData | null> {
+  const baseUrl = process.env.BASE_URL || "http://localhost:8080";
+  try {
+    const res = await fetch(
+      `${baseUrl}/api/partners/${encodeURIComponent(email)}`,
+      {
+        cache: "no-store",
+      }
+    );
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ email: string }>;
+}): Promise<Metadata> {
+  const { email } = await params;
+  const data = await fetchPartnerProfile(email);
+
+  if (!data) {
+    return { title: appName };
+  }
+
+  return {
+    title: `${data.name} | ${appName}`,
+    description: data.description
+      ? data.description.replace(/<[^>]*>/g, "").slice(0, 160)
+      : `Профиль партнёра — ${data.name}`,
+  };
+}
+
+export default async function PartnerPublicProfilePage({
+  params,
+}: {
+  params: Promise<{ email: string }>;
+}) {
+  const { email } = await params;
+  const data = await fetchPartnerProfile(email);
+
+  if (!data) notFound();
+
+  return <PartnerPublicProfileContent partner={data} />;
+}

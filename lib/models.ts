@@ -836,6 +836,8 @@ export interface PartnerRecord {
   name: string;
   phone: string;
   passwordHash: string;
+  photo?: string;
+  description?: string;
   createdAt: string;
 }
 
@@ -882,7 +884,7 @@ export async function getAllPartners(): Promise<PartnerRecord[]> {
 
 export async function updatePartner(
   email: string,
-  data: Partial<Pick<PartnerRecord, "name" | "phone">>
+  data: Partial<Pick<PartnerRecord, "name" | "phone" | "photo" | "description">>
 ): Promise<PartnerRecord> {
   const updateExpr: string[] = [];
   const exprValues: Record<string, unknown> = {};
@@ -898,6 +900,18 @@ export async function updatePartner(
     updateExpr.push("#phone = :phone");
     exprValues[":phone"] = data.phone;
     exprNames["#phone"] = "phone";
+  }
+
+  if (data.photo !== undefined) {
+    updateExpr.push("#photo = :photo");
+    exprValues[":photo"] = data.photo;
+    exprNames["#photo"] = "photo";
+  }
+
+  if (data.description !== undefined) {
+    updateExpr.push("#description = :description");
+    exprValues[":description"] = data.description;
+    exprNames["#description"] = "description";
   }
 
   if (updateExpr.length === 0) {

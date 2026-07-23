@@ -1,0 +1,177 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { User, Loader2, ExternalLink, Camera } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { WysiwygEditor } from "@/components/wysiwyg-editor";
+import { toast } from "sonner";
+import { getToken } from "@/components/partner-layout-client";
+import Link from "next/link";
+
+interface ProfileData {
+  name: string;
+  phone: string;
+  email: string;
+  photo: string;
+  description: string;
+}
+
+export function PartnerPublicProfileEditor() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [photo, setPhoto] = useState("");
+  const [description, setDescription] = useState("");
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      router.replace("/partner/login");
+      return;
+    }
+
+    fetch("/api/partner/profile", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Ошибка загрузки");
+        return res.json();
+      })
+      .then((data: ProfileData) => {
+        setProfile(data);
+        setPhoto(data.photo || "");
+        setDescription(data.description || "");
+      })
+      .catch(() => {
+        toast.error("Не удалось загрузить профиль");
+      })
+      .finally(() => setLoading(false));
+  }, [router]);
+
+  const handleSave = async () => {
+    const token = getToken();
+    if (!token) return;
+
+    setSaving(true);
+    const id = toast.loading("Сохраняем...");
+
+    try {
+      const res = await fetch("/api/partner/profile", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ photo, description }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Ошибка сохранения");
+      }
+
+      const data = await res.json();
+      setProfile(data);
+      setPhoto(data.photo || "");
+      setDescription(data.description || "");
+      toast.success("Готово", { id });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Ошибка сохранения", {
+        id,
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-10 w-32" />
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        Не удалось загрузить профиль
+      </div>
+    );
+  }
+
+  const publicProfileUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/partners/${encodeURIComponent(profile.email)}`
+      : "";
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4 mb-6">
+        {photo ? (
+          <img
+            src={photo}
+            alt="Фото профиля"
+            className="h-16 w-16 rounded-full object-cover ring-2 ring-muted"
+          />
+        ) : (
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary ring-2 ring-muted">
+            <User className="h-8 w-8" />
+          </div>
+        )}
+        <div>
+          <p className="font-medium">{profile.name}</p>
+          <p className="text-sm text-muted-foreground">{profile.email}</p>
+        </div>
+      </div>
+
+      {publicProfileUrl && (
+        <Link
+          href={publicProfileUrl}
+          target="_blank"
+          className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+        >
+          <ExternalLink className="h-4 w-4" />
+          Открыть публичный профиль
+        </Link>
+      )}
+
+      <div className="space-y-2">
+        <Label htmlFor="photo">Ссылка на фото профиля</Label>
+        <div className="flex items-center gap-2">
+          <Camera className="h-4 w-4 text-muted-foreground shrink-0" />
+          <Input
+            id="photo"
+            value={photo}
+            onChange={(e) => setPhoto(e.target.value)}
+            placeholder="https://example.com/photo.jpg"
+          />
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Укажите URL изображения. Рекомендуемый размер: 500x500px.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Описание профиля</Label>
+        <WysiwygEditor value={description} onChange={setDescription} />
+        <p className="text-xs text-muted-foreground">
+          Расскажите о себе и своих услугах. Поддерживается форматирование
+          текста.
+        </p>
+      </div>
+
+      <Button onClick={handleSave} disabled={saving}>
+        {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        Сохранить
+      </Button>
+    </div>
+  );
+}

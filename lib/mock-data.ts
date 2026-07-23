@@ -233,6 +233,9 @@ export const mockPartners: PartnerRecord[] = [
     name: "Партнёр Иванов",
     phone: "+7 (999) 000-11-22",
     passwordHash: "hash:partner",
+    photo: "",
+    description:
+      "<p>Профессиональный организатор активного отдыха в Крыму. Более 5 лет опыта проведения морских прогулок, треккинга и экскурсий.</p>",
     createdAt: new Date("2024-06-01").toISOString(),
   },
 ];
@@ -499,11 +502,20 @@ export const mockMenuItems: MenuItemRecord[] = [
     updatedAt: new Date("2024-01-01").toISOString(),
   },
   {
+    id: "mock-partner-public-profile",
+    menuType: "partner",
+    name: "Публичный профиль",
+    url: "/partner/profile/public",
+    order: 5,
+    createdAt: new Date("2024-01-01").toISOString(),
+    updatedAt: new Date("2024-01-01").toISOString(),
+  },
+  {
     id: "mock-partner-notifications",
     menuType: "partner",
     name: "Уведомления и чат",
     url: "/partner/notifications",
-    order: 5,
+    order: 6,
     createdAt: new Date("2024-01-01").toISOString(),
     updatedAt: new Date("2024-01-01").toISOString(),
   },

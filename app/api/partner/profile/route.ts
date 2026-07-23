@@ -26,6 +26,8 @@ export async function GET(request: NextRequest) {
         name: partner.name,
         phone: partner.phone,
         email: partner.email,
+        photo: partner.photo ?? "",
+        description: partner.description ?? "",
       });
     } catch (error) {
       console.error("Ошибка получения профиля партнёра:", error);
@@ -44,12 +46,16 @@ export async function GET(request: NextRequest) {
     name: mock.name,
     phone: mock.phone,
     email: mock.email,
+    photo: mock.photo ?? "",
+    description: mock.description ?? "",
   });
 }
 
 const updateProfileSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   phone: z.string().min(1).max(30).optional(),
+  photo: z.string().max(5000).optional(),
+  description: z.string().max(50000).optional(),
 });
 
 export async function PATCH(request: NextRequest) {
@@ -83,6 +89,8 @@ export async function PATCH(request: NextRequest) {
       name: updated.name,
       phone: updated.phone,
       email: updated.email,
+      photo: updated.photo ?? "",
+      description: updated.description ?? "",
     });
   } catch (error) {
     console.error("Ошибка обновления профиля партнёра:", error);

@@ -9,6 +9,7 @@ import {
   MapPin,
   CalendarDays,
   Map,
+  User,
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -180,6 +181,17 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
               <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Map className="h-4 w-4" />
                 {activity.location}
+              </p>
+            )}
+            {activity.partnerEmail && (
+              <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <User className="h-4 w-4" />
+                <Link
+                  href={`/partners/${encodeURIComponent(activity.partnerEmail)}`}
+                  className="text-primary hover:underline"
+                >
+                  Страница партнёра
+                </Link>
               </p>
             )}
           </div>
