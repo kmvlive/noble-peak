@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isDatabaseAvailable } from "@/lib/db";
+import { revalidateTag } from "next/cache";
 import { getAllSections, createSection, deleteSection } from "@/lib/models";
 import { mockSections } from "@/lib/mock-data";
 import { verifyToken } from "@/lib/auth";
@@ -74,6 +75,8 @@ export async function POST(request: NextRequest) {
 
     const section = await createSection(parsed.data);
 
+    revalidateTag("sections", "max");
+
     return NextResponse.json(section, { status: 201 });
   } catch (error) {
     console.error("Ошибка создания раздела:", error);
@@ -111,6 +114,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     await deleteSection(parsed.data.id);
+    revalidateTag("sections", "max");
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Ошибка удаления раздела:", error);

@@ -105,8 +105,12 @@ export default async function HomePage() {
   const baseUrl = process.env.BASE_URL || "http://localhost:8080";
 
   const [activitiesRes, sectionsRes] = await Promise.all([
-    fetch(`${baseUrl}/api/activities`, { cache: "no-store" }),
-    fetch(`${baseUrl}/api/sections`, { cache: "no-store" }),
+    fetch(`${baseUrl}/api/activities`, {
+      next: { revalidate: 60, tags: ["activities"] },
+    }),
+    fetch(`${baseUrl}/api/sections`, {
+      next: { revalidate: 60, tags: ["sections"] },
+    }),
   ]);
 
   const activities: ActivityRecord[] = await activitiesRes.json();

@@ -8,6 +8,10 @@ export async function GET(
 ) {
   const { id } = await params;
 
+  const headers = {
+    "Cache-Control": "public, s-maxage=60, stale-while-revalidate=30",
+  };
+
   const dbAvailable = await isDatabaseAvailable();
 
   if (dbAvailable) {
@@ -19,7 +23,7 @@ export async function GET(
           { status: 404 }
         );
       }
-      return NextResponse.json(activity);
+      return NextResponse.json(activity, { headers });
     } catch (error) {
       console.error("Ошибка получения активности:", error);
       return NextResponse.json(
@@ -37,5 +41,5 @@ export async function GET(
       { status: 404 }
     );
   }
-  return NextResponse.json(mock);
+  return NextResponse.json(mock, { headers });
 }

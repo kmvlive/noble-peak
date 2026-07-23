@@ -7,13 +7,13 @@ import { isDatabaseAvailable } from "@/lib/db";
 import { getPartnerByEmail } from "@/lib/models";
 import { mockPartners } from "@/lib/mock-data";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 async function fetchActivity(id: string): Promise<Activity | null> {
   const baseUrl = process.env.BASE_URL || "http://localhost:8080";
   try {
     const res = await fetch(`${baseUrl}/api/activities/${id}`, {
-      cache: "no-store",
+      next: { revalidate: 60, tags: [`activity-${id}`, "activities"] },
     });
     if (!res.ok) return null;
     const data = await res.json();

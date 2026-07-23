@@ -6,10 +6,14 @@ import { mockSections } from "@/lib/mock-data";
 export async function GET() {
   const dbAvailable = await isDatabaseAvailable();
 
+  const headers = {
+    "Cache-Control": "public, s-maxage=60, stale-while-revalidate=30",
+  };
+
   if (dbAvailable) {
     try {
       const sections = await getAllSections();
-      return NextResponse.json(sections);
+      return NextResponse.json(sections, { headers });
     } catch (error) {
       console.error("Ошибка получения разделов:", error);
       return NextResponse.json(
@@ -19,5 +23,5 @@ export async function GET() {
     }
   }
 
-  return NextResponse.json(mockSections);
+  return NextResponse.json(mockSections, { headers });
 }

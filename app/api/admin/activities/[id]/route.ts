@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { isDatabaseAvailable } from "@/lib/db";
 import { getActivityById, updateActivity, deleteActivity } from "@/lib/models";
 import { verifyToken } from "@/lib/auth";
@@ -115,6 +116,7 @@ export async function PUT(
     }
 
     const activity = await updateActivity(id, updateData);
+    revalidateTag("activities", "max");
     return NextResponse.json(activity);
   } catch (error) {
     console.error("Ошибка обновления активности:", error);
@@ -146,6 +148,7 @@ export async function DELETE(
   try {
     const { id } = await params;
     await deleteActivity(id);
+    revalidateTag("activities", "max");
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Ошибка удаления активности:", error);

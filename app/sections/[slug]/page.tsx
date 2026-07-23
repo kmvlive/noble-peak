@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { SectionRecord, ActivityRecord } from "@/lib/models";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function SectionPage({
   params,
@@ -16,8 +16,12 @@ export default async function SectionPage({
   const baseUrl = process.env.BASE_URL || "http://localhost:8080";
 
   const [sectionsRes, activitiesRes] = await Promise.all([
-    fetch(`${baseUrl}/api/sections`, { cache: "no-store" }),
-    fetch(`${baseUrl}/api/activities`, { cache: "no-store" }),
+    fetch(`${baseUrl}/api/sections`, {
+      next: { revalidate: 60, tags: ["sections"] },
+    }),
+    fetch(`${baseUrl}/api/activities`, {
+      next: { revalidate: 60, tags: ["activities"] },
+    }),
   ]);
 
   const sections: SectionRecord[] = await sectionsRes.json();

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { isDatabaseAvailable } from "@/lib/db";
 import {
   getAllActivities,
@@ -97,6 +98,8 @@ export async function POST(request: NextRequest) {
     };
 
     const activity = await createActivity(data);
+
+    revalidateTag("activities", "max");
 
     return NextResponse.json(activity, { status: 201 });
   } catch (error) {
