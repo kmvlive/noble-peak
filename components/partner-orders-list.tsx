@@ -143,8 +143,8 @@ export function PartnerOrdersList() {
           />
         </div>
         <Button variant="outline" size="sm" onClick={handleExportCSV}>
-          <Download className="h-4 w-4 mr-1" />
-          CSV
+          <Download className="h-4 w-4 sm:mr-1" />
+          <span className="hidden sm:inline">CSV</span>
         </Button>
       </div>
 

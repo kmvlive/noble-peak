@@ -215,29 +215,40 @@ export function PartnerActivityForm() {
 
         <div className="space-y-2">
           <label className="text-sm font-medium">Изображения</label>
-          <div className="flex gap-2">
-            <Input
-              value={newImageUrl}
-              onChange={(e) => setNewImageUrl(e.target.value)}
-              placeholder="URL изображения или CSS-градиент"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  addImageUrl();
-                }
-              }}
-            />
-            <Button type="button" variant="outline" onClick={addImageUrl}>
-              Добавить
-            </Button>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="flex gap-2 flex-1">
+              <Input
+                value={newImageUrl}
+                onChange={(e) => setNewImageUrl(e.target.value)}
+                placeholder="URL изображения или CSS-градиент"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addImageUrl();
+                  }
+                }}
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={addImageUrl}
+                className="shrink-0"
+              >
+                Добавить
+              </Button>
+            </div>
             <Button
               type="button"
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
+              className="w-full sm:w-auto"
             >
-              <Upload className="mr-1.5 h-4 w-4" />
-              {uploading ? "Загрузка..." : "Загрузить с компьютера"}
+              <Upload className="h-4 w-4 sm:mr-1.5" />
+              <span className="hidden sm:inline">
+                {uploading ? "Загрузка..." : "Загрузить с компьютера"}
+              </span>
             </Button>
             <input
               ref={fileInputRef}
@@ -370,9 +381,9 @@ export function PartnerActivityForm() {
           />
         </div>
 
-        <div className="flex items-center gap-3">
-          <Users className="h-4 w-4 text-muted-foreground" />
-          <label className="text-sm font-medium">Тип активности</label>
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/30 p-3 sm:p-4">
+          <Users className="h-4 w-4 text-muted-foreground shrink-0" />
+          <span className="text-sm font-medium">Тип активности</span>
           <label className="relative inline-flex cursor-pointer items-center ml-auto">
             <input
               type="checkbox"
@@ -385,7 +396,7 @@ export function PartnerActivityForm() {
               }
             />
             <div className="peer h-6 w-11 rounded-full border bg-input after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:bg-background after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus:ring-2 peer-focus:ring-ring peer-focus:ring-offset-2" />
-            <span className="ml-3 text-sm font-medium">
+            <span className="ml-3 text-sm">
               {activityType === "individual" ? "Индивидуальная" : "Групповая"}
             </span>
           </label>

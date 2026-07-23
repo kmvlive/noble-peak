@@ -88,15 +88,15 @@ export function PartnerLayoutClient({
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-background">
-      <header className="flex h-14 shrink-0 items-center border-b px-4 gap-3">
+      <header className="flex h-14 shrink-0 items-center border-b px-3 md:px-4 gap-2 md:gap-3">
         <Link
           href="/partner"
-          className="flex items-center gap-2 text-base font-semibold tracking-tight shrink-0"
+          className="flex items-center gap-2 text-sm md:text-base font-semibold tracking-tight shrink-0"
         >
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <Sparkles className="h-3.5 w-3.5" />
           </div>
-          Кабинет партнёра
+          <span className="hidden sm:inline">Кабинет партнёра</span>
         </Link>
         <div className="flex items-center gap-1 overflow-x-auto">
           {menuLoading ? (
@@ -141,8 +141,8 @@ export function PartnerLayoutClient({
         </Link>
         <div className="flex-1" />
         <Button variant="ghost" size="sm" onClick={handleLogout}>
-          <LogOut className="mr-1.5 h-4 w-4" />
-          Выйти
+          <LogOut className="h-4 w-4 md:mr-1.5" />
+          <span className="hidden md:inline">Выйти</span>
         </Button>
       </header>
       <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>

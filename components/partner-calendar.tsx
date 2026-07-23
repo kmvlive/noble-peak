@@ -109,23 +109,22 @@ export function PartnerCalendar() {
   const orderCount = orders.filter((o) => o.status !== "cancelled").length;
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between rounded-xl border bg-card p-3">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <CalendarDays className="h-4 w-4" />
+    <div className="space-y-3 md:space-y-4">
+      <div className="flex items-center justify-between rounded-xl border bg-card p-2 md:p-3">
+        <div className="flex items-center gap-1.5 md:gap-2 text-xs md:text-sm text-muted-foreground">
+          <CalendarDays className="h-3.5 w-3.5 md:h-4 md:w-4" />
           <span>
-            Всего заказов:{" "}
-            <strong className="text-foreground">{orderCount}</strong>
+            Заказов: <strong className="text-foreground">{orderCount}</strong>
           </span>
         </div>
       </div>
 
       <div className="rounded-xl border bg-card">
-        <div className="flex items-center justify-between border-b px-4 py-3">
+        <div className="flex items-center justify-between border-b px-3 md:px-4 py-2 md:py-3">
           <Button variant="ghost" size="icon-sm" onClick={prevMonth}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <h2 className="text-base font-semibold">
+          <h2 className="text-sm md:text-base font-semibold">
             {MONTHS[month]} {year}
           </h2>
           <Button variant="ghost" size="icon-sm" onClick={nextMonth}>
@@ -133,18 +132,18 @@ export function PartnerCalendar() {
           </Button>
         </div>
 
-        <div className="p-3">
-          <div className="mb-2 grid grid-cols-7 gap-1">
+        <div className="p-1.5 md:p-3">
+          <div className="mb-1 md:mb-2 grid grid-cols-7 gap-0.5 md:gap-1">
             {WEEKDAYS.map((wd) => (
               <div
                 key={wd}
-                className="py-1 text-center text-xs font-medium text-muted-foreground"
+                className="py-1 text-center text-[10px] md:text-xs font-medium text-muted-foreground"
               >
                 {wd}
               </div>
             ))}
           </div>
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-7 gap-0.5 md:gap-1">
             {cells.map((cell, i) => {
               if (cell.day === 0) {
                 return <div key={i} />;
@@ -156,14 +155,14 @@ export function PartnerCalendar() {
               return (
                 <div
                   key={i}
-                  className={`relative flex min-h-[56px] flex-col items-center justify-start rounded-lg p-1 text-sm transition-colors ${
+                  className={`relative flex min-h-[36px] md:min-h-[56px] flex-col items-center justify-start rounded-lg p-0.5 md:p-1 text-xs md:text-sm transition-colors ${
                     isToday
                       ? "bg-primary/10 ring-1 ring-primary/30"
                       : "hover:bg-accent"
                   }`}
                 >
                   <span
-                    className={`text-xs ${
+                    className={`text-[10px] md:text-xs ${
                       isToday ? "font-bold text-primary" : "text-foreground"
                     }`}
                   >
@@ -171,16 +170,16 @@ export function PartnerCalendar() {
                   </span>
                   {dayOrders.length > 0 && (
                     <div className="mt-0.5 flex flex-wrap justify-center gap-0.5">
-                      {dayOrders.slice(0, 3).map((o) => (
+                      {dayOrders.slice(0, 2).map((o) => (
                         <div
                           key={o.id}
-                          className="h-1.5 w-1.5 rounded-full bg-primary"
+                          className="h-1 w-1 md:h-1.5 md:w-1.5 rounded-full bg-primary"
                           title={`${o.activityTitle} — ${o.clientName}`}
                         />
                       ))}
-                      {dayOrders.length > 3 && (
-                        <span className="text-[10px] text-muted-foreground">
-                          +{dayOrders.length - 3}
+                      {dayOrders.length > 2 && (
+                        <span className="text-[8px] md:text-[10px] text-muted-foreground">
+                          +{dayOrders.length - 2}
                         </span>
                       )}
                     </div>
@@ -193,9 +192,11 @@ export function PartnerCalendar() {
       </div>
 
       {orderCount > 0 && (
-        <div className="rounded-xl border bg-card p-4">
-          <h3 className="mb-3 text-sm font-semibold">Ближайшие заказы</h3>
-          <div className="space-y-2">
+        <div className="rounded-xl border bg-card p-3 md:p-4">
+          <h3 className="mb-2 md:mb-3 text-xs md:text-sm font-semibold">
+            Ближайшие заказы
+          </h3>
+          <div className="space-y-1.5 md:space-y-2">
             {orders
               .filter((o) => o.status !== "cancelled")
               .sort((a, b) => a.date.localeCompare(b.date))
@@ -203,13 +204,13 @@ export function PartnerCalendar() {
               .map((order) => (
                 <div
                   key={order.id}
-                  className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2 text-sm"
+                  className="flex items-center justify-between rounded-lg bg-muted/50 px-2.5 md:px-3 py-1.5 md:py-2 text-xs md:text-sm"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium">
                       {order.activityTitle}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-[10px] md:text-xs text-muted-foreground">
                       {new Date(order.date + "T00:00:00Z").toLocaleDateString(
                         "ru-RU",
                         { day: "numeric", month: "long", timeZone: "UTC" }

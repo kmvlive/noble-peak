@@ -50,7 +50,7 @@ function ToolbarButton({
       type="button"
       onClick={onClick}
       title={label}
-      className={`flex h-8 w-8 items-center justify-center rounded-md text-sm transition-colors ${
+      className={`flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-md text-sm transition-colors ${
         active
           ? "bg-primary/10 text-primary"
           : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
@@ -96,7 +96,7 @@ export function WysiwygEditor({ value, onChange }: WysiwygEditorProps) {
     editorProps: {
       attributes: {
         class:
-          "prose prose-sm sm:prose-base max-w-none focus:outline-none min-h-[200px] px-3 py-2",
+          "prose prose-sm sm:prose-base max-w-none focus:outline-none min-h-[150px] md:min-h-[200px] px-3 py-2",
       },
     },
     immediatelyRender: false,
@@ -127,7 +127,7 @@ export function WysiwygEditor({ value, onChange }: WysiwygEditorProps) {
 
   return (
     <div className="overflow-hidden rounded-md border">
-      <div className="flex flex-wrap items-center gap-0.5 border-b bg-muted/30 px-2 py-1.5">
+      <div className="flex flex-wrap items-center gap-0.5 border-b bg-muted/30 px-1.5 md:px-2 py-1 md:py-1.5">
         <ToolbarGroup>
           <ToolbarButton
             label="Жирный"

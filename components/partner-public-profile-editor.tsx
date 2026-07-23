@@ -158,9 +158,10 @@ export function PartnerPublicProfileEditor() {
               setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))
             }
             placeholder="partner-ivanov"
+            className="min-w-0"
           />
         </div>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground break-all">
           Только латиница, цифры и дефисы. Адрес страницы: /partners/
           {slug || "slug"}
         </p>
@@ -175,6 +176,7 @@ export function PartnerPublicProfileEditor() {
             value={photo}
             onChange={(e) => setPhoto(e.target.value)}
             placeholder="https://example.com/photo.jpg"
+            className="min-w-0"
           />
         </div>
         <p className="text-xs text-muted-foreground">
