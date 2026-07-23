@@ -20,6 +20,8 @@ const positionLabels: Record<string, string> = {
   bottom: "Низ",
 };
 
+const MAX_SLIDER_IMAGES = 6;
+
 export function AdminSliderManager() {
   const [images, setImages] = useState<SliderImage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -157,8 +159,14 @@ export function AdminSliderManager() {
             id="slider-upload"
           />
           <Button
-            disabled={uploading}
-            onClick={() => document.getElementById("slider-upload")?.click()}
+            disabled={uploading || images.length >= MAX_SLIDER_IMAGES}
+            onClick={() => {
+              if (images.length >= MAX_SLIDER_IMAGES) {
+                toast.error(`Максимум ${MAX_SLIDER_IMAGES} фото`);
+                return;
+              }
+              document.getElementById("slider-upload")?.click();
+            }}
           >
             {uploading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -7,6 +7,15 @@ interface HeroSliderProps {
   children: React.ReactNode;
 }
 
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export function HeroSlider({ children }: HeroSliderProps) {
   const [images, setImages] = useState<SliderImage[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -18,7 +27,7 @@ export function HeroSlider({ children }: HeroSliderProps) {
         const valid = (data as SliderImage[]).filter(
           (img) => img.imageUrl && img.imageUrl.length > 0
         );
-        setImages(valid);
+        setImages(shuffleArray(valid));
       })
       .catch(() => {});
   }, []);
