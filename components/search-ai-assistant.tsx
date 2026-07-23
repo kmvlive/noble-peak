@@ -419,11 +419,7 @@ export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
     return () => clearTimeout(timer);
   }, [initialQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleSend = () => {
-    const text = inputValue.trim();
-    if (!text || isProcessing || isSearchingRef.current) return;
-
-    setInputValue("");
+  const processAnswer = (text: string) => {
     addMessage("user", text);
     setIsProcessing(true);
 
@@ -515,6 +511,39 @@ export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
     }, 600);
   };
 
+  const handleSend = () => {
+    const text = inputValue.trim();
+    if (!text || isProcessing || isSearchingRef.current) return;
+
+    setInputValue("");
+    processAnswer(text);
+  };
+
+  const handleSuggestionClick = (value: string) => {
+    if (isProcessing || isSearchingRef.current) return;
+
+    setInputValue("");
+    processAnswer(value);
+  };
+
+  const ACTIVITY_TYPE_SUGGESTIONS = [
+    "Пеший туризм",
+    "Водные",
+    "Треккинг",
+    "Гастрономия",
+    "Экскурсии",
+    "Активный отдых",
+    "Развлечения",
+    "Экстрим",
+  ];
+
+  const BUDGET_SUGGESTIONS = [
+    "до 2000 ₽",
+    "3000-5000 ₽",
+    "более 10000 ₽",
+    "не важно",
+  ];
+
   const resetDialog = () => {
     setStep("greeting");
     setTypeAnswer("");
@@ -584,6 +613,41 @@ export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
 
         {step !== "done" && (
           <div className="border-t p-4">
+            {(step === "type" || step === "budget") && (
+              <div className="mb-3 flex flex-wrap gap-2">
+                {step === "type" &&
+                  ACTIVITY_TYPE_SUGGESTIONS.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => handleSuggestionClick(s)}
+                      className="min-h-[44px] rounded-xl bg-muted px-4 py-3 text-sm font-medium transition-colors hover:bg-muted/80 active:bg-muted/60"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                {step === "type" && (
+                  <button
+                    type="button"
+                    onClick={() => inputRef.current?.focus()}
+                    className="min-h-[44px] rounded-xl border border-dashed border-muted-foreground/30 px-4 py-3 text-sm text-muted-foreground transition-colors hover:bg-muted/50"
+                  >
+                    Опишите своими словами
+                  </button>
+                )}
+                {step === "budget" &&
+                  BUDGET_SUGGESTIONS.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => handleSuggestionClick(s)}
+                      className="min-h-[44px] rounded-xl bg-muted px-4 py-3 text-sm font-medium transition-colors hover:bg-muted/80 active:bg-muted/60"
+                    >
+                      {s}
+                    </button>
+                  ))}
+              </div>
+            )}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
