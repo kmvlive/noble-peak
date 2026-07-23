@@ -16,6 +16,37 @@ export const revalidate = 60;
 
 const ITEMS_PER_PAGE = 20;
 
+async function getCityCoords(
+  cityName: string
+): Promise<{ lat: number; lon: number } | null> {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cityName)}&limit=1`,
+      {
+        headers: { "User-Agent": "magazin-tour/1.0" },
+        next: { revalidate: 86400 },
+      }
+    );
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) {
+      return {
+        lat: Number.parseFloat(data[0].lat),
+        lon: Number.parseFloat(data[0].lon),
+      };
+    }
+  } catch {
+    // geocoding unavailable — will render placeholder
+  }
+  return null;
+}
+
+function osmEmbedUrl(lat: number, lon: number): string {
+  const dLat = 0.15;
+  const dLon = 0.2;
+  const bbox = `${lon - dLon},${lat - dLat},${lon + dLon},${lat + dLat}`;
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lon}`;
+}
+
 export default async function LocationPage({
   params,
   searchParams,
@@ -54,6 +85,9 @@ export default async function LocationPage({
 
   const displayName = cityDecoded.replace(/^г\.\s*/, "");
 
+  const coords = await getCityCoords(displayName);
+  const mapSrc = coords ? osmEmbedUrl(coords.lat, coords.lon) : null;
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:py-12">
       <Link
@@ -84,16 +118,22 @@ export default async function LocationPage({
         </div>
 
         <div className="overflow-hidden rounded-xl border">
-          <iframe
-            src={`https://yandex.ru/maps/?text=${encodeURIComponent(displayName)}&z=10&output=embed`}
-            width="100%"
-            height="320"
-            style={{ border: 0 }}
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            title={`Карта ${displayName}`}
-          />
+          {mapSrc ? (
+            <iframe
+              src={mapSrc}
+              width="100%"
+              height="320"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title={`Карта ${displayName}`}
+            />
+          ) : (
+            <div className="flex h-80 items-center justify-center bg-muted text-sm text-muted-foreground">
+              Карта недоступна
+            </div>
+          )}
         </div>
       </div>
 
