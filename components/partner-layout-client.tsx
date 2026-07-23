@@ -3,9 +3,16 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { HelpCircle, LogOut, Sparkles } from "lucide-react";
+import { HelpCircle, LogOut, Menu, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { FooterMenu } from "@/components/footer-menu";
 
 interface MenuItem {
@@ -98,7 +105,7 @@ export function PartnerLayoutClient({
           </div>
           <span className="hidden sm:inline">Кабинет партнёра</span>
         </Link>
-        <div className="flex items-center gap-1 overflow-x-auto">
+        <div className="hidden md:flex items-center gap-1 overflow-x-auto">
           {menuLoading ? (
             <>
               <Skeleton className="h-7 w-16" />
@@ -140,6 +147,59 @@ export function PartnerLayoutClient({
           </span>
         </Link>
         <div className="flex-1" />
+        <Sheet>
+          <SheetTrigger
+            className="md:hidden flex items-center justify-center size-9 rounded-md hover:bg-accent transition-colors"
+            aria-label="Меню"
+          >
+            <Menu className="size-5" />
+          </SheetTrigger>
+          <SheetContent side="left">
+            <SheetHeader>
+              <SheetTitle>Меню</SheetTitle>
+            </SheetHeader>
+            <nav className="flex flex-col gap-1 p-2">
+              {menuLoading ? (
+                <>
+                  <Skeleton className="h-9 w-full" />
+                  <Skeleton className="h-9 w-full" />
+                </>
+              ) : (
+                menuItems
+                  .sort((a, b) => a.order - b.order)
+                  .map((item) => {
+                    const isActive =
+                      item.url === "/partner"
+                        ? pathname === "/partner"
+                        : pathname.startsWith(item.url);
+                    return (
+                      <Link
+                        key={item.id}
+                        href={item.url}
+                        className={`flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                          isActive
+                            ? "bg-primary/10 text-primary"
+                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        }`}
+                      >
+                        {item.name}
+                      </Link>
+                    );
+                  })
+              )}
+              <hr className="my-2 border-t" />
+              <Link
+                href="https://magazin-tour.ru/kak-rabotat-s-magazinom-turov/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+              >
+                <HelpCircle className="h-4 w-4" />
+                Как работать с Магазином туров?
+              </Link>
+            </nav>
+          </SheetContent>
+        </Sheet>
         <Button variant="ghost" size="sm" onClick={handleLogout}>
           <LogOut className="h-4 w-4 md:mr-1.5" />
           <span className="hidden md:inline">Выйти</span>

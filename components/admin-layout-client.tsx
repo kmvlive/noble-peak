@@ -236,27 +236,29 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
             <Skeleton className="h-7 w-20" />
           </div>
         ) : (
-          menuItems
-            .sort((a, b) => a.order - b.order)
-            .map((item) => {
-              const isActive =
-                item.url === "/admin"
-                  ? pathname === "/admin"
-                  : pathname.startsWith(item.url);
-              return (
-                <Link
-                  key={item.id}
-                  href={item.url}
-                  className={`whitespace-nowrap rounded-md px-2.5 py-1 text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  }`}
-                >
-                  {item.name}
-                </Link>
-              );
-            })
+          <div className="hidden md:flex items-center gap-1 overflow-x-auto">
+            {menuItems
+              .sort((a, b) => a.order - b.order)
+              .map((item) => {
+                const isActive =
+                  item.url === "/admin"
+                    ? pathname === "/admin"
+                    : pathname.startsWith(item.url);
+                return (
+                  <Link
+                    key={item.id}
+                    href={item.url}
+                    className={`whitespace-nowrap rounded-md px-2.5 py-1 text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    }`}
+                  >
+                    {item.name}
+                  </Link>
+                );
+              })}
+          </div>
         )}
         <Button variant="ghost" size="sm" onClick={handleLogout}>
           <LogOut className="h-4 w-4 sm:mr-1.5" />

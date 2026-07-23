@@ -63,7 +63,7 @@ export default function RootLayout({
               <Link
                 key={section.slug}
                 href={`/sections/${section.slug}`}
-                className="shrink-0 rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                className="shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground min-h-8 flex items-center"
               >
                 {section.name}
               </Link>

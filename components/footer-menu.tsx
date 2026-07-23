@@ -42,14 +42,14 @@ export function FooterMenu() {
     <footer className="border-t">
       <div className="container mx-auto px-4 py-6">
         {items.length > 0 && (
-          <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-4">
+          <nav className="flex flex-col md:flex-row md:flex-wrap items-center justify-center gap-3 md:gap-x-6 md:gap-y-2 mb-4">
             {items
               .sort((a, b) => a.order - b.order)
               .map((item) => (
                 <Link
                   key={item.id}
                   href={item.url}
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors min-h-9 flex items-center"
                 >
                   {item.name}
                 </Link>

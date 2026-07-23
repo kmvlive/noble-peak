@@ -20,11 +20,11 @@ export function HeaderAuth() {
   }, []);
 
   const linkClass =
-    "shrink-0 rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground";
+    "rounded-full border px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground min-h-9 flex items-center";
 
   if (partnerToken) {
     return (
-      <div className="ml-auto flex items-center gap-2">
+      <div className="ml-auto flex items-center gap-1 sm:gap-2 flex-wrap justify-end max-w-full">
         <Link href="/partner" className={linkClass}>
           Кабинет партнёра
         </Link>
@@ -34,7 +34,7 @@ export function HeaderAuth() {
 
   if (clientToken) {
     return (
-      <div className="ml-auto flex items-center gap-2">
+      <div className="ml-auto flex items-center gap-1 sm:gap-2 flex-wrap justify-end max-w-full">
         <Link href="/client" className={linkClass}>
           Личный кабинет
         </Link>
@@ -43,12 +43,14 @@ export function HeaderAuth() {
   }
 
   return (
-    <div className="ml-auto flex items-center gap-2">
+    <div className="ml-auto flex items-center gap-1 sm:gap-2 flex-wrap justify-end max-w-full">
       <Link href="/partner/login" className={linkClass}>
-        Вход для партнёров
+        <span className="sm:hidden">Партнёрам</span>
+        <span className="hidden sm:inline">Вход для партнёров</span>
       </Link>
       <Link href="/client/login" className={linkClass}>
-        Вход для клиентов
+        <span className="sm:hidden">Клиентам</span>
+        <span className="hidden sm:inline">Вход для клиентов</span>
       </Link>
     </div>
   );
