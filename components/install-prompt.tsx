@@ -4,6 +4,24 @@ import { useEffect, useState } from "react";
 import { X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+const DISMISS_DAYS = 30;
+const INSTALL_DISMISSED_KEY = "pwa-install-dismissed";
+const IOS_HINT_DISMISSED_KEY = "ios-pwa-hint-dismissed";
+
+function isExpired(key: string): boolean {
+  const stored = localStorage.getItem(key);
+  if (!stored) return true;
+  const storedDate = new Date(stored + "T00:00:00Z");
+  const today = new Date().toISOString().split("T")[0];
+  const todayDate = new Date(today + "T00:00:00Z");
+  const diffMs = todayDate.getTime() - storedDate.getTime();
+  return diffMs >= DISMISS_DAYS * 24 * 60 * 60 * 1000;
+}
+
+function dismissForDays(key: string) {
+  localStorage.setItem(key, new Date().toISOString().split("T")[0]);
+}
+
 export function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
@@ -21,14 +39,14 @@ export function InstallPrompt() {
     ).matches;
 
     if (isIos && !isStandalone) {
-      const dismissed = localStorage.getItem("ios-pwa-hint-dismissed");
-      if (!dismissed) {
+      if (isExpired(IOS_HINT_DISMISSED_KEY)) {
         setTimeout(() => setShowIosHint(true), 0);
       }
     }
 
     const handler = (e: Event) => {
       e.preventDefault();
+      if (!isExpired(INSTALL_DISMISSED_KEY)) return;
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       setShowInstallButton(true);
     };
@@ -50,8 +68,13 @@ export function InstallPrompt() {
     setDeferredPrompt(null);
   };
 
+  const dismissInstall = () => {
+    dismissForDays(INSTALL_DISMISSED_KEY);
+    setShowInstallButton(false);
+  };
+
   const dismissIosHint = () => {
-    localStorage.setItem("ios-pwa-hint-dismissed", "true");
+    dismissForDays(IOS_HINT_DISMISSED_KEY);
     setShowIosHint(false);
   };
 
@@ -72,7 +95,7 @@ export function InstallPrompt() {
               </div>
             </div>
             <button
-              onClick={() => setShowInstallButton(false)}
+              onClick={dismissInstall}
               className="shrink-0 text-muted-foreground hover:text-foreground"
             >
               <X className="h-4 w-4" />
