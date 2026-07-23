@@ -164,20 +164,18 @@ export default async function HomePage() {
   return (
     <div className="min-h-[calc(100vh-9rem)]">
       <HeroSlider>
-        <div className="mx-auto max-w-5xl space-y-4 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/70 backdrop-blur-sm shadow-sm">
-            <Compass className="h-7 w-7 text-primary" />
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl text-white">
-            Найдите приключение по душе
-          </h1>
-          <p className="mx-auto max-w-xl text-base text-white/80">
-            Трекинг, сплавы, дегустации, квесты и многое другое — выбирайте и
-            бронируйте онлайн
-          </p>
-          <div className="mx-auto max-w-xl">
-            <HeroSearch />
-          </div>
+        <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/70 backdrop-blur-sm shadow-sm">
+          <Compass className="h-7 w-7 text-primary" />
+        </div>
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl text-white">
+          Найдите приключение по душе
+        </h1>
+        <p className="mx-auto max-w-xl text-base text-white/80">
+          Трекинг, сплавы, дегустации, квесты и многое другое — выбирайте и
+          бронируйте онлайн
+        </p>
+        <div className="mx-auto max-w-xl">
+          <HeroSearch />
         </div>
       </HeroSlider>
 
