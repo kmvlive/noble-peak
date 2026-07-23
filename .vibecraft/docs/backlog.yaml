@@ -2160,8 +2160,14 @@ tasks:
       - Метаданные генерируются на сервере из данных активности
     depends_on: []
     related_feature: SEO и производительность
-    status: pending
-    summary: null
+    status: completed
+    summary: "Добавлены SEO-метаданные на страницу /activities/[id]. Реализована
+      generateMetadata, которая загружает данные активности через API
+      /api/activities/[id] на сервере и формирует: title (название активности +
+      бренд), meta description (shortDescription, фолбэк на очищенный HTML
+      description), Open Graph (og:title, og:description, og:image — первое
+      реальное фото), Twitter Cards (summary_large_image с фото, если доступно).
+      Основная реализация: app/activities/[id]/page.tsx."
   - id: task-090
     phase: mvp
     title: Карта сайта (sitemap.xml)
