@@ -2687,3 +2687,20 @@ tasks:
     related_feature: Админ-панель
     status: pending
     summary: null
+  - id: task-114
+    phase: mvp
+    title: Добавить хеширование паролей администраторов в lib/auth.ts
+    description: "Добавить в lib/auth.ts функции hashAdminPassword (scrypt + соль) и
+      verifyAdminPassword (timingSafeEqual). Переписать verifyCredentials:
+      главный админ проверяется через хеш, дополнительные админы — через хеш из
+      БД. Если пароль в БД в plain text — при успешном входе заменить на хеш.
+      Экспортировать hashAdminPassword."
+    priority: high
+    acceptance_criteria:
+      - lib/auth.ts содержит hashAdminPassword и verifyAdminPassword
+      - verifyCredentials использует хеш-проверку вместо plain text
+      - hashAdminPassword экспортируется
+    depends_on: []
+    related_feature: Админ-панель
+    status: pending
+    summary: null
