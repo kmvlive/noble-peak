@@ -2219,8 +2219,20 @@ tasks:
         активность от партнёра)
     depends_on: []
     related_feature: Кабинет партнёра
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Реализован публичный профиль партнёра по URL /partners/[email]. На
+      странице отображаются фото, описание (WYSIWYG через TipTap) и список
+      активностей партнёра в виде списка. Работает кнопка «Поделиться»
+      (копирование ссылки, VK, Telegram, WhatsApp). В кабинете партнёра добавлен
+      раздел «Публичный профиль» (/partner/profile/public) для редактирования
+      фото и описания через TipTap. На странице активности
+      (components/activity-page-content.tsx:186) добавлена ссылка на публичный
+      профиль партнёра, если активность принадлежит партнёру. Основная
+      реализация: app/partners/[email]/page.tsx,
+      components/partner-public-profile-content.tsx,
+      components/partner-public-profile-editor.tsx, components/share-button.tsx,
+      components/wysiwyg-editor.tsx.
   - id: task-092
     phase: mvp
     title: "PWA: манифест, service worker, иконки и подсказки установки"
