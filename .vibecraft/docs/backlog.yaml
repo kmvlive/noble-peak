@@ -2704,3 +2704,17 @@ tasks:
     related_feature: Админ-панель
     status: pending
     summary: null
+  - id: task-115
+    phase: mvp
+    title: Обновить lib/auth.ts для хеширования паролей
+    description: Заменить содержимое lib/auth.ts на версию с хешированием паролей
+      через scrypt. Добавить функции hashAdminPassword и verifyAdminPassword.
+      Переписать verifyCredentials на проверку через хеш. Экспортировать
+      hashAdminPassword.
+    priority: high
+    acceptance_criteria:
+      - lib/auth.ts обновлён
+    depends_on: []
+    related_feature: Админ-панель
+    status: pending
+    summary: null
