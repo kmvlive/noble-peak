@@ -172,7 +172,7 @@ export function SearchSuggestions({
             <button
               key={`${suggestion.type}-${suggestion.value}`}
               type="button"
-              className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors first:rounded-t-lg last:rounded-b-lg hover:bg-accent hover:text-accent-foreground ${
+              className={`flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm transition-colors first:rounded-t-lg last:rounded-b-lg hover:bg-accent hover:text-accent-foreground sm:py-2 ${
                 i === selectedIndex ? "bg-accent text-accent-foreground" : ""
               }`}
               onClick={() => onSelect(suggestion.value)}

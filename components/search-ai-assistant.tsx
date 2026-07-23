@@ -580,14 +580,14 @@ export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
           )}
         </div>
 
-        <div className="max-h-[360px] space-y-3 overflow-y-auto px-4 py-4">
+        <div className="max-h-[50vh] space-y-3 overflow-y-auto px-4 py-4 sm:max-h-[360px]">
           {messages.map((msg, i) => (
             <div
               key={i}
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed animate-in fade-in slide-in-from-bottom-2 duration-300 ${
+                className={`max-w-[92%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed animate-in fade-in slide-in-from-bottom-2 duration-300 sm:max-w-[85%] ${
                   msg.role === "user"
                     ? "bg-primary text-primary-foreground rounded-br-md"
                     : "bg-muted rounded-bl-md"
@@ -614,38 +614,42 @@ export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
         {step !== "done" && (
           <div className="border-t p-4">
             {(step === "type" || step === "budget") && (
-              <div className="mb-3 flex flex-wrap gap-2">
-                {step === "type" &&
-                  ACTIVITY_TYPE_SUGGESTIONS.map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => handleSuggestionClick(s)}
-                      className="min-h-[44px] rounded-xl bg-muted px-4 py-3 text-sm font-medium transition-colors hover:bg-muted/80 active:bg-muted/60"
-                    >
-                      {s}
-                    </button>
-                  ))}
+              <div className="mb-3">
                 {step === "type" && (
-                  <button
-                    type="button"
-                    onClick={() => inputRef.current?.focus()}
-                    className="min-h-[44px] rounded-xl border border-dashed border-muted-foreground/30 px-4 py-3 text-sm text-muted-foreground transition-colors hover:bg-muted/50"
-                  >
-                    Опишите своими словами
-                  </button>
-                )}
-                {step === "budget" &&
-                  BUDGET_SUGGESTIONS.map((s) => (
+                  <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+                    {ACTIVITY_TYPE_SUGGESTIONS.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => handleSuggestionClick(s)}
+                        className="min-h-[48px] rounded-xl bg-muted px-3 py-2 text-sm font-medium transition-colors hover:bg-muted/80 active:bg-muted/60 sm:min-h-[44px] sm:px-4 sm:py-3"
+                      >
+                        {s}
+                      </button>
+                    ))}
                     <button
-                      key={s}
                       type="button"
-                      onClick={() => handleSuggestionClick(s)}
-                      className="min-h-[44px] rounded-xl bg-muted px-4 py-3 text-sm font-medium transition-colors hover:bg-muted/80 active:bg-muted/60"
+                      onClick={() => inputRef.current?.focus()}
+                      className="col-span-2 min-h-[48px] rounded-xl border border-dashed border-muted-foreground/30 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted/50 sm:col-auto sm:min-h-[44px] sm:px-4 sm:py-3"
                     >
-                      {s}
+                      Опишите своими словами
                     </button>
-                  ))}
+                  </div>
+                )}
+                {step === "budget" && (
+                  <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+                    {BUDGET_SUGGESTIONS.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => handleSuggestionClick(s)}
+                        className="min-h-[48px] rounded-xl bg-muted px-3 py-2 text-sm font-medium transition-colors hover:bg-muted/80 active:bg-muted/60 sm:min-h-[44px] sm:px-4 sm:py-3"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
             <form
@@ -717,7 +721,7 @@ export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
 
       {showResults && results.length > 0 && !searchError && (
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
               <Search className="h-4 w-4 text-primary" />
             </div>

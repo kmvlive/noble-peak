@@ -14,7 +14,7 @@ export default async function SearchPage(props: {
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-4 py-8 sm:py-12">
       <div className="space-y-2">
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+        <h1 className="text-xl font-bold tracking-tight sm:text-3xl">
           Поиск с ИИ-ассистентом
         </h1>
         <p className="text-sm text-muted-foreground">
