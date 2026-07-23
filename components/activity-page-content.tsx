@@ -93,10 +93,10 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
                   i > 0 ? i - 1 : activity.images.length - 1
                 )
               }
-              className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-background/70 p-2 shadow-sm backdrop-blur-sm transition-colors hover:bg-background/90"
+              className="absolute left-2 sm:left-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-background/70 p-2 sm:p-2.5 shadow-sm backdrop-blur-sm transition-colors hover:bg-background/90"
               aria-label="Предыдущее фото"
             >
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
             <button
               onClick={() =>
@@ -104,10 +104,10 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
                   i < activity.images.length - 1 ? i + 1 : 0
                 )
               }
-              className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-background/70 p-2 shadow-sm backdrop-blur-sm transition-colors hover:bg-background/90"
+              className="absolute right-2 sm:right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-background/70 p-2 sm:p-2.5 shadow-sm backdrop-blur-sm transition-colors hover:bg-background/90"
               aria-label="Следующее фото"
             >
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
           </>
         )}
@@ -157,7 +157,7 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
                 <img
                   src={src}
                   alt={`Фото ${i + 1}`}
-                  className="h-16 w-16 object-cover sm:h-20 sm:w-20"
+                  className="h-14 w-14 object-cover sm:h-20 sm:w-20"
                 />
               </button>
             ) : null
@@ -167,25 +167,25 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
 
       <div className="space-y-6 px-4 py-6 sm:px-6">
         <div className="flex items-start justify-between gap-4">
-          <div className="space-y-2">
+          <div className="min-w-0 space-y-2">
             <div className="flex items-center gap-2">
               <Badge variant="secondary">
                 <MapPin className="mr-0.5 h-3 w-3" />
                 {activity.category}
               </Badge>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            <h1 className="text-2xl font-bold tracking-tight break-words sm:text-3xl">
               {activity.title}
             </h1>
             {activity.location && (
               <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Map className="h-4 w-4" />
-                {activity.location}
+                <Map className="h-4 w-4 shrink-0" />
+                <span className="truncate">{activity.location}</span>
               </p>
             )}
             {activity.partnerEmail && (
               <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <User className="h-4 w-4" />
+                <User className="h-4 w-4 shrink-0" />
                 <Link
                   href={`/partners/${encodeURIComponent(activity.partnerSlug || activity.partnerEmail)}`}
                   className="text-primary hover:underline"
@@ -195,8 +195,8 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
               </p>
             )}
           </div>
-          <div className="text-right">
-            <p className="text-2xl font-bold text-primary">
+          <div className="shrink-0 text-right">
+            <p className="text-xl font-bold text-primary sm:text-2xl">
               {activity.price.toLocaleString("ru-RU")} ₽
             </p>
             <p className="text-xs text-muted-foreground">за человека</p>
@@ -212,7 +212,7 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
             variant={liked ? "default" : "outline"}
             size="lg"
             onClick={handleLike}
-            className="gap-2"
+            className="gap-2 min-h-[48px]"
           >
             <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} />
             {likes}
@@ -220,7 +220,7 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
         </div>
 
         <div
-          className="prose prose-sm sm:prose-base max-w-none prose-headings:text-foreground prose-a:text-primary prose-ul:space-y-1"
+          className="prose prose-sm sm:prose-base max-w-none overflow-x-auto break-words prose-headings:text-foreground prose-a:text-primary prose-ul:space-y-1"
           dangerouslySetInnerHTML={{ __html: activity.description }}
         />
 
@@ -260,7 +260,7 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
           <div className="pt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <Link
               href={`/payment?activityId=${activity.id}&date=${selectedDate}&time=${selectedTime || ""}`}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary min-h-[48px] px-4 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               Перейти к оплате — {activity.price.toLocaleString("ru-RU")} ₽
             </Link>
@@ -274,7 +274,7 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
         <div className="pt-2">
           <Link
             href="/"
-            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors min-h-[44px]"
           >
             <ChevronLeft className="h-4 w-4" />
             На главную

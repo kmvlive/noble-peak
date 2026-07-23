@@ -69,10 +69,10 @@ export function PhotoLightbox({
                 currentIndex > 0 ? currentIndex - 1 : images.length - 1
               );
             }}
-            className="absolute left-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/70"
+            className="absolute left-2 sm:left-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/50 p-2 sm:p-3 text-white transition-colors hover:bg-black/70"
             aria-label="Предыдущее фото"
           >
-            <ChevronLeft className="h-8 w-8" />
+            <ChevronLeft className="h-6 w-6 sm:h-8 sm:w-8" />
           </button>
           <button
             onClick={(e) => {
@@ -81,10 +81,10 @@ export function PhotoLightbox({
                 currentIndex < images.length - 1 ? currentIndex + 1 : 0
               );
             }}
-            className="absolute right-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/70"
+            className="absolute right-2 sm:right-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/50 p-2 sm:p-3 text-white transition-colors hover:bg-black/70"
             aria-label="Следующее фото"
           >
-            <ChevronRight className="h-8 w-8" />
+            <ChevronRight className="h-6 w-6 sm:h-8 sm:w-8" />
           </button>
         </>
       )}

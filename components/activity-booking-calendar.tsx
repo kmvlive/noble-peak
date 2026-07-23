@@ -178,8 +178,8 @@ export function ActivityBookingCalendar({
         </div>
         <div className="grid grid-cols-7 gap-px rounded-lg border bg-muted overflow-hidden">
           {Array.from({ length: 35 }).map((_, i) => (
-            <div key={i} className="aspect-square bg-background p-2">
-              <div className="h-8 w-8 rounded-full bg-muted animate-pulse mx-auto" />
+            <div key={i} className="aspect-square bg-background p-1 sm:p-2">
+              <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-muted animate-pulse mx-auto" />
             </div>
           ))}
         </div>
@@ -190,11 +190,11 @@ export function ActivityBookingCalendar({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <Button variant="outline" size="icon-sm" onClick={prevMonth}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="min-w-[160px] text-center text-sm font-medium">
+          <span className="min-w-[140px] sm:min-w-[160px] text-center text-sm font-medium">
             {MONTHS[month]} {year}
           </span>
           <Button variant="outline" size="icon-sm" onClick={nextMonth}>
@@ -207,7 +207,7 @@ export function ActivityBookingCalendar({
         {DAY_NAMES.map((name) => (
           <div
             key={name}
-            className="bg-muted/50 px-2 py-2 text-center text-xs font-medium text-muted-foreground"
+            className="bg-muted/50 px-1 py-2 text-center text-xs font-medium text-muted-foreground"
           >
             {name}
           </div>
@@ -232,12 +232,12 @@ export function ActivityBookingCalendar({
               type="button"
               disabled={!canSelect}
               onClick={() => handleDateClick(dateStr)}
-              className={`relative bg-background p-1 text-center text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed ${
+              className={`relative bg-background p-0.5 sm:p-1 text-center text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed ${
                 canSelect ? "hover:bg-accent/50" : ""
               } ${isSelected ? "ring-2 ring-primary ring-inset" : ""}`}
             >
               <span
-                className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-xs ${
+                className={`inline-flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full text-xs ${
                   isSelected
                     ? "bg-primary text-primary-foreground font-medium"
                     : isAvailable && !isPast
@@ -294,7 +294,7 @@ export function ActivityBookingCalendar({
         </div>
       )}
 
-      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
         <span className="inline-flex items-center gap-1.5">
           <span className="inline-block h-3 w-3 rounded-full bg-primary/10 border border-primary/30" />
           Доступно

@@ -110,7 +110,7 @@ export function ActivityReviews({ activityId }: { activityId: string }) {
         </div>
 
         {total > 0 && (
-          <div className="flex items-center gap-3 rounded-lg bg-muted/50 px-4 py-3">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg bg-muted/50 px-4 py-3">
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <Star
@@ -144,11 +144,11 @@ export function ActivityReviews({ activityId }: { activityId: string }) {
                       {review.clientName}
                     </span>
                   </div>
-                  <div className="flex items-center gap-0.5">
+                  <div className="flex items-center gap-0.5 shrink-0">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
-                        className={`h-4 w-4 ${
+                        className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${
                           star <= review.rating
                             ? "fill-amber-400 text-amber-400"
                             : "text-muted-foreground/20"
@@ -186,10 +186,10 @@ export function ActivityReviews({ activityId }: { activityId: string }) {
                   onClick={() => setRating(star)}
                   onMouseEnter={() => setHoverRating(star)}
                   onMouseLeave={() => setHoverRating(0)}
-                  className="transition-colors"
+                  className="p-1 transition-colors"
                 >
                   <Star
-                    className={`h-6 w-6 ${
+                    className={`h-6 w-6 sm:h-5 sm:w-5 ${
                       star <= (hoverRating || rating)
                         ? "fill-amber-400 text-amber-400"
                         : "text-muted-foreground/30 hover:text-amber-400/50"
@@ -207,7 +207,7 @@ export function ActivityReviews({ activityId }: { activityId: string }) {
             <Button
               onClick={handleSubmit}
               disabled={submitting}
-              className="gap-2"
+              className="w-full sm:w-auto gap-2"
             >
               {submitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
