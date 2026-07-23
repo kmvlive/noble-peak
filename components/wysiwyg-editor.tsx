@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import type { Editor } from "@tiptap/core";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -112,6 +112,16 @@ export function WysiwygEditor({ value, onChange }: WysiwygEditorProps) {
   if (editor && !isReady) {
     editorReady();
   }
+
+  useEffect(() => {
+    if (editor) {
+      const currentHtml = editor.getHTML();
+      const newValue = value || "";
+      if (currentHtml !== newValue) {
+        editor.commands.setContent(newValue);
+      }
+    }
+  }, [editor, value]);
 
   const setLink = useCallback(() => {
     if (!editor) return;
