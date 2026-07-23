@@ -27,7 +27,7 @@ export function HeroSlider({ children }: HeroSliderProps) {
         const valid = (data as SliderImage[]).filter(
           (img) => img.imageUrl && img.imageUrl.length > 0
         );
-        setImages(shuffleArray(valid));
+        setImages(shuffleArray(valid).slice(0, 6));
       })
       .catch(() => {});
   }, []);
