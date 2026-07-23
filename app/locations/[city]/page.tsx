@@ -7,7 +7,6 @@ import {
   MapPin,
   Compass,
   Map,
-  ExternalLink,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,7 +53,6 @@ export default async function LocationPage({
   const pageActivities = cityActivities.slice(offset, offset + ITEMS_PER_PAGE);
 
   const displayName = cityDecoded.replace(/^г\.\s*/, "");
-  const yandexMapsUrl = `https://yandex.ru/maps/?text=${encodeURIComponent(displayName)}&z=10`;
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:py-12">
@@ -85,16 +83,17 @@ export default async function LocationPage({
           </div>
         </div>
 
-        <div className="flex justify-center">
-          <a
-            href={yandexMapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-          >
-            <ExternalLink className="h-4 w-4" />
-            Открыть на Яндекс Картах
-          </a>
+        <div className="overflow-hidden rounded-xl border">
+          <iframe
+            src={`https://yandex.ru/maps/?text=${encodeURIComponent(displayName)}&z=10&output=embed`}
+            width="100%"
+            height="320"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title={`Карта ${displayName}`}
+          />
         </div>
       </div>
 
