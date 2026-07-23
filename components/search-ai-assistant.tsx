@@ -5,6 +5,7 @@ import { Bot, Send, Sparkles, Search, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ActivityCard } from "@/components/activity-card";
+import { SearchSuggestions } from "@/components/search-suggestions";
 import type { ActivityRecord } from "@/lib/models";
 
 interface Message {
@@ -352,6 +353,8 @@ export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
   const [showResults, setShowResults] = useState(false);
   const [searchError, setSearchError] = useState(false);
 
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isSearchingRef = useRef(false);
 
@@ -588,20 +591,45 @@ export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
               }}
               className="flex gap-2"
             >
-              <Input
-                placeholder={
-                  step === "greeting"
-                    ? "Напишите, что ищете..."
-                    : step === "type"
-                      ? "Например: водные, треккинг..."
-                      : step === "city"
-                        ? "Например: Москва, Сочи..."
-                        : "Например: до 3000 ₽..."
-                }
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                className="flex-1"
-              />
+              <div className="relative flex-1">
+                <Input
+                  ref={inputRef}
+                  placeholder={
+                    step === "greeting"
+                      ? "Напишите, что ищете..."
+                      : step === "type"
+                        ? "Например: водные, треккинг..."
+                        : step === "city"
+                          ? "Например: Москва, Сочи..."
+                          : "Например: до 3000 ₽..."
+                  }
+                  value={inputValue}
+                  onChange={(e) => {
+                    setInputValue(e.target.value);
+                    if (e.target.value.trim().length >= 2) {
+                      setShowSuggestions(true);
+                    } else {
+                      setShowSuggestions(false);
+                    }
+                  }}
+                  onFocus={() => {
+                    if (inputValue.trim().length >= 2) {
+                      setShowSuggestions(true);
+                    }
+                  }}
+                  className="flex-1"
+                />
+                <SearchSuggestions
+                  query={inputValue}
+                  visible={showSuggestions}
+                  onSelect={(value) => {
+                    setInputValue(value);
+                    setShowSuggestions(false);
+                    setTimeout(() => handleSend(), 0);
+                  }}
+                  onClose={() => setShowSuggestions(false)}
+                />
+              </div>
               <Button type="submit" size="icon" disabled={!inputValue.trim()}>
                 <Send className="h-4 w-4" />
               </Button>
