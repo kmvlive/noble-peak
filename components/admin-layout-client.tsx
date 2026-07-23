@@ -22,6 +22,7 @@ import {
   FileText,
   MessageSquare,
   Image,
+  ShoppingCart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -177,6 +178,11 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
       label: "Платёжная система",
       icon: CreditCard,
     },
+    {
+      href: "/admin/order-settings",
+      label: "Варианты заказа",
+      icon: ShoppingCart,
+    },
     { href: "/admin/settings", label: "Настройки", icon: Settings },
     { href: "/admin/analytics", label: "Статистика", icon: BarChart3 },
   ];
@@ -189,6 +195,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
     "/admin/menu/footer",
     "/admin/admins",
     "/admin/payment-settings",
+    "/admin/order-settings",
     "/admin/settings",
     "/admin/analytics",
   ];

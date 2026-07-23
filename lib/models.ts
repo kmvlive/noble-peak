@@ -1487,6 +1487,40 @@ export async function deleteNotification(id: string): Promise<void> {
   );
 }
 
+export interface OrderSettingsRecord {
+  id: string;
+  orderFormEnabled: boolean;
+  updatedAt: string;
+}
+
+export async function getOrderSettings(): Promise<OrderSettingsRecord | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TableName.ORDER_SETTINGS,
+      Key: { id: "default" },
+    })
+  );
+  return (result.Item as OrderSettingsRecord) ?? null;
+}
+
+export async function saveOrderSettings(
+  data: Omit<OrderSettingsRecord, "id" | "updatedAt">
+): Promise<OrderSettingsRecord> {
+  const now = new Date().toISOString();
+  const record: OrderSettingsRecord = {
+    id: "default",
+    ...data,
+    updatedAt: now,
+  };
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.ORDER_SETTINGS,
+      Item: record,
+    })
+  );
+  return record;
+}
+
 export interface SliderImage {
   id: string;
   imageUrl: string;

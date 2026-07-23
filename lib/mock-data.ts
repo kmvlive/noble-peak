@@ -21,7 +21,7 @@ import {
   activities as staticActivities,
   sections as staticSections,
 } from "./data";
-import type { SliderImage } from "./models";
+import type { SliderImage, OrderSettingsRecord } from "./models";
 
 export const mockServices: Service[] = [
   {
@@ -724,6 +724,12 @@ export const mockReviews: ReviewRecord[] = [
     createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
   },
 ];
+
+export const mockOrderSettings: OrderSettingsRecord = {
+  id: "default",
+  orderFormEnabled: true,
+  updatedAt: new Date().toISOString(),
+};
 
 export const mockSliderImages: SliderImage[] = [];
 

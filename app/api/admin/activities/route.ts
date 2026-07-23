@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isDatabaseAvailable } from "@/lib/db";
-import { getAllActivities, createActivity } from "@/lib/models";
+import {
+  getAllActivities,
+  createActivity,
+  getOrderSettings,
+} from "@/lib/models";
 import { mockActivities } from "@/lib/mock-data";
 import { verifyToken } from "@/lib/auth";
 import { z } from "zod";
@@ -84,7 +88,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const activity = await createActivity(parsed.data);
+    const orderSettings = await getOrderSettings();
+    const orderFormEnabled = orderSettings?.orderFormEnabled ?? true;
+
+    const data = {
+      ...parsed.data,
+      orderType: orderFormEnabled ? parsed.data.orderType : "payment",
+    };
+
+    const activity = await createActivity(data);
 
     return NextResponse.json(activity, { status: 201 });
   } catch (error) {

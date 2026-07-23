@@ -23,6 +23,7 @@ export const TableName = {
   NOTIFICATIONS: "notifications",
   CHAT_MESSAGES: "chat_messages",
   SLIDER_IMAGES: "slider_images",
+  ORDER_SETTINGS: "order_settings",
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];
@@ -229,6 +230,12 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
     keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
     attributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
   },
+
+  [TableName.ORDER_SETTINGS]: {
+    name: TableName.ORDER_SETTINGS,
+    keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+    attributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
+  },
 };
 
 export const TABLE_NAMES: TableName[] = Object.values(TableName);
@@ -243,6 +250,7 @@ export const IndexName = {
   CHAT_MESSAGES_CLIENT_EMAIL: "clientEmail-index",
   CHAT_MESSAGES_PARTNER_EMAIL: "partnerEmail-index",
   PARTNERS_SLUG: "slug-index",
+  ORDER_SETTINGS_ID: "id",
 } as const;
 
 export type IndexName = (typeof IndexName)[keyof typeof IndexName];
