@@ -212,6 +212,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
           size="icon-sm"
           className="md:hidden"
           onClick={() => setSidebarOpen(!sidebarOpen)}
+          aria-label={sidebarOpen ? "Закрыть меню" : "Открыть меню"}
         >
           {sidebarOpen ? (
             <X className="h-5 w-5" />
@@ -258,16 +259,23 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
             })
         )}
         <Button variant="ghost" size="sm" onClick={handleLogout}>
-          <LogOut className="mr-1.5 h-4 w-4" />
-          Выйти
+          <LogOut className="h-4 w-4 sm:mr-1.5" />
+          <span className="hidden sm:inline">Выйти</span>
         </Button>
       </header>
       <div className="flex flex-1 overflow-hidden">
+        {/* Mobile backdrop */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 top-14 z-30 bg-black/20 md:hidden animate-in fade-in duration-200"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
         <aside
-          className={`w-56 shrink-0 border-r bg-muted/30 overflow-y-auto ${
+          className={`w-56 shrink-0 border-r bg-background overflow-y-auto transition-transform duration-200 ${
             sidebarOpen
-              ? "fixed inset-0 top-14 z-40 block bg-background/95 md:static md:block"
-              : "hidden md:block"
+              ? "fixed inset-y-0 left-0 top-14 z-40 block translate-x-0 md:static md:translate-x-0 md:block md:bg-muted/30"
+              : "hidden md:block md:bg-muted/30"
           }`}
         >
           <nav className="flex flex-col gap-1 p-3">
@@ -281,7 +289,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                   key={item.href}
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 md:py-2 text-sm font-medium transition-colors ${
                     isActive
                       ? "bg-primary/10 text-primary"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"

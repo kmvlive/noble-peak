@@ -309,26 +309,29 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
 
         <div className="space-y-2">
           <label className="text-sm font-medium">Изображения</label>
-          <div className="flex gap-2">
-            <Input
-              value={newImageUrl}
-              onChange={(e) => setNewImageUrl(e.target.value)}
-              placeholder="URL изображения или CSS-градиент"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  addImageUrl();
-                }
-              }}
-            />
-            <Button type="button" variant="outline" onClick={addImageUrl}>
-              Добавить
-            </Button>
+          <div className="flex flex-col gap-2 sm:flex-row sm:gap-2">
+            <div className="flex gap-2 flex-1">
+              <Input
+                value={newImageUrl}
+                onChange={(e) => setNewImageUrl(e.target.value)}
+                placeholder="URL изображения или CSS-градиент"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addImageUrl();
+                  }
+                }}
+              />
+              <Button type="button" variant="outline" onClick={addImageUrl}>
+                Добавить
+              </Button>
+            </div>
             <Button
               type="button"
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
+              className="w-full sm:w-auto"
             >
               <Upload className="mr-1.5 h-4 w-4" />
               {uploading ? "Загрузка..." : "Загрузить с компьютера"}
@@ -548,28 +551,34 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
           </label>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-h-11">
           <input
             type="checkbox"
             id="isPopular"
             checked={isPopular}
             onChange={(e) => setIsPopular(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+            className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
           />
-          <label htmlFor="isPopular" className="text-sm font-medium">
+          <label
+            htmlFor="isPopular"
+            className="text-sm font-medium cursor-pointer py-2"
+          >
             Популярная активность
           </label>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-h-11">
           <input
             type="checkbox"
             id="over18"
             checked={over18}
             onChange={(e) => setOver18(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+            className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
           />
-          <label htmlFor="over18" className="text-sm font-medium">
+          <label
+            htmlFor="over18"
+            className="text-sm font-medium cursor-pointer py-2"
+          >
             18+
           </label>
         </div>

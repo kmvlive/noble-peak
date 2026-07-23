@@ -294,12 +294,12 @@ export function AdminActivityCalendar({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon-sm" onClick={prevMonth}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="min-w-[160px] text-center text-sm font-medium">
+          <span className="min-w-[140px] text-center text-sm font-medium sm:min-w-[160px]">
             {MONTHS[month]} {year}
           </span>
           <Button variant="outline" size="icon-sm" onClick={nextMonth}>

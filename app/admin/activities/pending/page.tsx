@@ -191,13 +191,18 @@ export default function AdminPendingActivitiesPage() {
                     </span>
                   </div>
                 </div>
-                <div className="flex shrink-0 items-center gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:shrink-0 sm:items-center sm:gap-2">
                   <Link
                     href={`/activities/${activity.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
+                    className="w-full sm:w-auto"
                   >
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full sm:w-auto"
+                    >
                       <Eye className="mr-1.5 h-4 w-4" />
                       Просмотр
                       <ExternalLink className="ml-1 h-3 w-3" />
@@ -211,6 +216,7 @@ export default function AdminPendingActivitiesPage() {
                       setPartnerPercent("70");
                       setApproveDialogId(activity.id);
                     }}
+                    className="w-full sm:w-auto"
                   >
                     {isProcessing ? (
                       <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
@@ -224,6 +230,7 @@ export default function AdminPendingActivitiesPage() {
                     size="sm"
                     disabled={isProcessing}
                     onClick={() => setRejectDialogId(activity.id)}
+                    className="w-full sm:w-auto"
                   >
                     <XCircle className="mr-1.5 h-4 w-4" />
                     Отклонить

@@ -87,8 +87,8 @@ export function AdminActivityList() {
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Активности</h1>
-        <Link href="/admin/activities/new">
-          <Button>
+        <Link href="/admin/activities/new" className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto">
             <Plus className="mr-1.5 h-4 w-4" />
             Создать активность
           </Button>
@@ -112,8 +112,8 @@ export function AdminActivityList() {
             {search ? "Ничего не найдено" : "Активностей пока нет"}
           </p>
           {!search && (
-            <Link href="/admin/activities/new">
-              <Button variant="outline" size="sm">
+            <Link href="/admin/activities/new" className="w-full sm:w-auto">
+              <Button variant="outline" size="sm" className="w-full sm:w-auto">
                 <Plus className="mr-1.5 h-4 w-4" />
                 Создать первую
               </Button>

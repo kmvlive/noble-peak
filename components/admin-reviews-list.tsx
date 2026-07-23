@@ -87,7 +87,7 @@ export function AdminReviewsList() {
         </p>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 snap-x snap-mandatory scrollbar-none">
         {[
           { value: "pending", label: "На модерации" },
           { value: "approved", label: "Одобренные" },
@@ -99,6 +99,7 @@ export function AdminReviewsList() {
             variant={filter === f.value ? "default" : "outline"}
             size="sm"
             onClick={() => setFilter(f.value)}
+            className="snap-start shrink-0"
           >
             {f.label}
           </Button>

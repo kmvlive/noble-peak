@@ -173,8 +173,8 @@ export function AdminOrdersList() {
         <h1 className="text-xl font-semibold">Отчёты</h1>
       </div>
 
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
+        <div className="relative flex-1 max-w-sm w-full sm:w-auto">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Поиск по номеру заказа..."
@@ -192,14 +192,16 @@ export function AdminOrdersList() {
             </button>
           )}
         </div>
-        <Button variant="secondary" size="sm" onClick={handleSearch}>
-          <Search className="h-4 w-4 mr-1" />
-          Найти
-        </Button>
-        <Button variant="outline" size="sm" onClick={handleExportCSV}>
-          <Download className="h-4 w-4 mr-1" />
-          CSV
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="secondary" size="sm" onClick={handleSearch}>
+            <Search className="h-4 w-4 mr-1" />
+            Найти
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportCSV}>
+            <Download className="h-4 w-4 mr-1" />
+            CSV
+          </Button>
+        </div>
       </div>
 
       {loading ? (
