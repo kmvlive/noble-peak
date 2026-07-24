@@ -2803,8 +2803,8 @@ tasks:
       - Главный администратор artkmv1@ya.ru также проходит через хеш-проверку
     depends_on: []
     related_feature: Админ-панель
-    status: pending
-    summary: null
+    status: completed
+    summary: "Добавлены функции hashAdminPassword (scrypt+salt) и verifyAdminPassword (timingSafeEqual) в lib/auth.ts. verifyCredentials переписана: главный админ проверяется через хеш (вычисляется при старте), дополнительные админы — через хеш из БД. Добавлена миграция plain text → hash при успешном входе. API создания/редактирования админа (app/api/admin/admins/route.ts) и сброса пароля (app/api/admin/reset-password/route.ts) теперь хешируют пароль перед сохранением. hashAdminPassword экспортируется из lib/auth.ts."
   - id: task-114
     phase: mvp
     title: Добавить хеширование паролей администраторов в lib/auth.ts

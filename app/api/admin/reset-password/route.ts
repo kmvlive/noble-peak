@@ -4,6 +4,7 @@ import {
   getPasswordResetToken,
   markPasswordResetTokenUsed,
 } from "@/lib/models";
+import { hashAdminPassword } from "@/lib/auth";
 
 const resetPasswordSchema = z.object({
   token: z.string().min(1),
@@ -60,11 +61,13 @@ export async function POST(request: NextRequest) {
     const admin = await getAdminByEmail(resetRecord.email);
 
     if (admin) {
-      await updateAdmin(resetRecord.email, { password });
+      await updateAdmin(resetRecord.email, {
+        password: hashAdminPassword(password),
+      });
     } else {
       await createAdmin({
         email: resetRecord.email,
-        password,
+        password: hashAdminPassword(password),
         name: "Администратор",
         role: "admin",
       });

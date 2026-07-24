@@ -9,7 +9,12 @@ import {
   deleteAdmin,
 } from "@/lib/models";
 import { mockAdmins } from "@/lib/mock-data";
-import { verifyToken, isMainAdminPayload, getMainAdminEmail } from "@/lib/auth";
+import {
+  verifyToken,
+  isMainAdminPayload,
+  getMainAdminEmail,
+  hashAdminPassword,
+} from "@/lib/auth";
 
 const createAdminSchema = z.object({
   email: z.string().email().max(200),
@@ -137,7 +142,7 @@ export async function POST(request: NextRequest) {
 
     const admin = await createAdmin({
       email: parsed.data.email,
-      password: parsed.data.password,
+      password: hashAdminPassword(parsed.data.password),
       name: parsed.data.name,
       role: "admin",
     });
@@ -204,7 +209,7 @@ export async function PUT(request: NextRequest) {
       role?: "main_admin" | "admin";
     } = {};
     if (parsed.data.password !== undefined) {
-      updateData.password = parsed.data.password;
+      updateData.password = hashAdminPassword(parsed.data.password);
     }
     if (parsed.data.name !== undefined) {
       updateData.name = parsed.data.name;
