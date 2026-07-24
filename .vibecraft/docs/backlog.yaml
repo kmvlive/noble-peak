@@ -2846,3 +2846,16 @@ tasks:
     related_feature: Админ-панель
     status: pending
     summary: null
+  - id: task-122
+    phase: mvp
+    title: Обновить код на сервере и пересобрать
+    description: Подключиться к серверу 201.24.114.46 по SSH, выполнить git pull в
+      /opt/noble-peak, затем docker compose up -d --build. После перезапуска
+      проверить что https://my.magazin-tour.ru отвечает.
+    priority: high
+    acceptance_criteria:
+      - Сервер показывает актуальную версию кода
+    depends_on: []
+    related_feature: Админ-панель
+    status: pending
+    summary: null
