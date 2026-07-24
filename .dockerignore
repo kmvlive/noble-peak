@@ -5,6 +5,7 @@ out
 .env
 .env.local
 .env*.local
+.env.production
 .git
 .gitignore
 README.md

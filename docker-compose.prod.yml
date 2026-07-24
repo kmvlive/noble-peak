@@ -1,0 +1,45 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: magazin-tour-app
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      - BASE_URL=${BASE_URL}
+      - DOCUMENT_API_ENDPOINT=${DOCUMENT_API_ENDPOINT}
+      - DOCUMENT_API_REGION=${DOCUMENT_API_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - USE_DATABASE=${USE_DATABASE}
+      - TINKOFF_TERMINAL_KEY=${TINKOFF_TERMINAL_KEY}
+      - TINKOFF_PASSWORD=${TINKOFF_PASSWORD}
+      - TINKOFF_API_URL=${TINKOFF_API_URL}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - SMTP_FROM=${SMTP_FROM}
+    env_file:
+      - .env.production
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:8080/api/health', (r) => r.statusCode === 200 ? process.exit(0) : process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    volumes:
+      - uploads-data:/app/public/uploads
+
+volumes:
+  uploads-data:

@@ -17,6 +17,8 @@ import { ActivityCard } from "@/components/activity-card";
 import { HeroSearch } from "@/components/hero-search";
 import { HeroSlider } from "@/components/hero-slider";
 
+export const dynamic = "force-dynamic";
+
 const sectionIcons: Record<string, React.ReactNode> = {
   Waves: <Waves className="h-6 w-6" />,
   Mountain: <Mountain className="h-6 w-6" />,
