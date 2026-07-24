@@ -2869,5 +2869,5 @@ tasks:
       - Уведомления всплывают через NotificationPoller
     depends_on: []
     related_feature: Уведомления и чат
-    status: pending
-    summary: null
+    status: completed
+    summary: "Реализована отправка уведомлений на сайте (через createNotification) и писем (через sendEmail/nodemailer) клиенту и партнёру после бронирования (app/api/bookings/route.ts) и после оплаты (app/api/payments/callback/route.ts). После создания брони: уведомление клиенту (booking_status), уведомление партнёру (new_order), письмо клиенту с подтверждением брони, письмо партнёру о новом заказе. После оплаты: уведомление клиенту (booking_status), уведомление партнёру (new_order), письмо клиенту с подтверждением оплаты, письмо партнёру об оплаченном заказе. Письмо админу сохранено. Уведомления всплывают через существующий NotificationPoller."

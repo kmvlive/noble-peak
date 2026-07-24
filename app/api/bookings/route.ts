@@ -3,6 +3,7 @@ import { z } from "zod";
 import { isDatabaseAvailable } from "@/lib/db";
 import {
   createBooking,
+  createNotification,
   removeBookedSlotFromCalendar,
   createOrder,
   getActivityById,
@@ -106,6 +107,62 @@ export async function POST(request: NextRequest) {
         <p><strong>Клиент:</strong> ${clientName}</p>
         <p><strong>Телефон:</strong> ${clientPhone}</p>
         <p><strong>Email:</strong> ${clientEmail}</p>
+        <p><strong>Подробности:</strong> ${details || "—"}</p>
+        <hr />
+        <p>ID бронирования: ${booking.id}</p>
+        <p>С уважением, ${appName}.</p>
+      `,
+    });
+
+    createNotification({
+      recipientEmail: clientEmail,
+      type: "booking_status",
+      title: "Бронирование создано",
+      message: `Ваше бронирование на "${activityTitle}" на ${date}${time ? ` в ${time}` : " (весь день)"} создано.`,
+      link: `/client/bookings/${booking.id}`,
+    }).catch((e) => console.error("Ошибка создания уведомления клиенту:", e));
+
+    const partnerEmail = activity?.partnerEmail;
+    if (partnerEmail) {
+      createNotification({
+        recipientEmail: partnerEmail,
+        type: "new_order",
+        title: "Новый заказ",
+        message: `Новый заказ на "${activityTitle}" от ${clientName} на ${date}${time ? ` в ${time}` : " (весь день)"}.`,
+        link: `/partner/orders`,
+      }).catch((e) =>
+        console.error("Ошибка создания уведомления партнёру:", e)
+      );
+
+      await sendEmail({
+        to: partnerEmail,
+        subject: `Новый заказ: ${activityTitle}`,
+        html: `
+          <h1>Новый заказ</h1>
+          <p><strong>Активность:</strong> ${activityTitle}</p>
+          <p><strong>Дата:</strong> ${date}</p>
+          <p><strong>Время:</strong> ${time || "Весь день"}</p>
+          <p><strong>Клиент:</strong> ${clientName}</p>
+          <p><strong>Телефон:</strong> ${clientPhone}</p>
+          <p><strong>Email:</strong> ${clientEmail}</p>
+          <p><strong>Подробности:</strong> ${details || "—"}</p>
+          <hr />
+          <p>ID бронирования: ${booking.id}</p>
+          <p>С уважением, ${appName}.</p>
+        `,
+      });
+    }
+
+    await sendEmail({
+      to: clientEmail,
+      subject: `Бронирование подтверждено: ${activityTitle}`,
+      html: `
+        <h1>Бронирование подтверждено</h1>
+        <p><strong>Активность:</strong> ${activityTitle}</p>
+        <p><strong>Дата:</strong> ${date}</p>
+        <p><strong>Время:</strong> ${time || "Весь день"}</p>
+        <p><strong>Имя:</strong> ${clientName}</p>
+        <p><strong>Телефон:</strong> ${clientPhone}</p>
         <p><strong>Подробности:</strong> ${details || "—"}</p>
         <hr />
         <p>ID бронирования: ${booking.id}</p>
