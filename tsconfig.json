@@ -19,7 +19,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@noble-peak/shared": ["./packages/shared/src"],
+      "@noble-peak/shared/*": ["./packages/shared/src/*"]
     }
   },
   "include": [

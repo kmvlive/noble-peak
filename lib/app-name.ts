@@ -1,1 +1,2 @@
-export const appName = "Магазин туров и активностей";
+export * from "@noble-peak/shared";
+export { appName } from "@noble-peak/shared";

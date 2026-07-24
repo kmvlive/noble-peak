@@ -2,6 +2,9 @@
   "name": "vibecraft-template",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "packages/shared"
+  ],
   "scripts": {
     "dev": "next dev",
     "dev:docker": "next dev -p 8080",
