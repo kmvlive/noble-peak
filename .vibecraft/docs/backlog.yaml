@@ -2821,8 +2821,8 @@ tasks:
       - hashAdminPassword экспортируется
     depends_on: []
     related_feature: Админ-панель
-    status: pending
-    summary: null
+    status: completed
+    summary: "Реализовано хеширование паролей администраторов в lib/auth.ts: добавлены функции hashAdminPassword (scrypt + соль) и verifyAdminPassword (timingSafeEqual). verifyCredentials проверяет главного админа через хеш (вычисляется при старте), дополнительных админов — через хеш из БД; при успешном входе с plain text паролем в БД автоматически заменяет его на хеш. hashAdminPassword экспортируется и используется в API создания/редактирования админов и сброса пароля. Основная реализация: lib/auth.ts."
   - id: task-115
     phase: mvp
     title: Обновить lib/auth.ts для хеширования паролей
