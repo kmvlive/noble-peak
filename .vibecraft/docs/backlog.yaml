@@ -2836,8 +2836,13 @@ tasks:
       - lib/auth.ts обновлён
     depends_on: []
     related_feature: Админ-панель
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      lib/auth.ts обновлён: добавлены функции hashAdminPassword (scrypt с
+      солью) и verifyAdminPassword (timingSafeEqual). verifyCredentials
+      переписана на проверку через хеш вместо открытого сравнения, с
+      автоматической миграцией старых паролей при входе. Реализация:
+      lib/auth.ts:33-39.
   - id: task-116
     phase: mvp
     title: Уведомления и письма после бронирования и оплаты
