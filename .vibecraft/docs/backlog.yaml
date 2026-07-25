@@ -2859,3 +2859,18 @@ tasks:
     related_feature: Админ-панель
     status: pending
     summary: null
+  - id: task-123
+    phase: mvp
+    title: Переключить контейнер на production режим
+    description: "Переделать docker-compose.yml на production режим: команда запуска
+      должна быть npm run start (next start) вместо npm run dev:docker (next
+      dev). Добавить переменную NODE_ENV=production. После изменения пересобрать
+      контейнер."
+    priority: high
+    acceptance_criteria:
+      - Контейнер app запускает production сборку (next start), а не dev-сервер
+      - "Админка работает: вход, редирект, сохранение токена"
+    depends_on: []
+    related_feature: Админ-панель
+    status: pending
+    summary: null
