@@ -2911,3 +2911,22 @@ tasks:
     related_feature: Админ-панель
     status: pending
     summary: null
+  - id: task-126
+    phase: mvp
+    title: Исправить production сборку
+    description: "Исправить все ошибки сборки в production режиме: 1) Удалить весь
+      demo-код (Service interface, функции с services) из lib/models.ts. 2)
+      Заменить import { TableName, IndexName } на import { TABLE_NAMES,
+      INDEX_NAMES } + const TableName = TABLE_NAMES; const IndexName =
+      INDEX_NAMES; в lib/models.ts. 3) Заменить все TableName.UPPER_CASE на
+      TableName.lowercase. 4) Исправить reset-password файлы на TABLE_NAMES. 5)
+      Убедиться что lib/schema.ts не импортит из @noble-peak/shared. 6) Запушить
+      на GitHub."
+    priority: high
+    acceptance_criteria:
+      - production сборка проходит без ошибок TypeScript и Turbopack
+      - контейнер app запускается и отвечает на порту 8080
+    depends_on: []
+    related_feature: Админ-панель
+    status: pending
+    summary: null
