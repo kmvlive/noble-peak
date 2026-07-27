@@ -3001,8 +3001,17 @@ tasks:
       - После сохранения данные отображаются на странице
     depends_on: []
     related_feature: Кабинет партнёра
-    status: pending
-    summary: null
+    status: completed
+    summary: "Реализован раздел «Юридические данные» в кабинете партнёра
+      (/partner/legal). Форма содержит все поля: страна, статус (Физлицо/ИП/Юрлицо),
+      ФИО, документ (Паспорт РФ/другой страны), серия и номер, дата выдачи, подпись
+      «Паспорт конфиденциален», ИНН. Кнопка «Сохранить» отправляет PATCH
+      /api/partner/legal, данные сохраняются в PartnerRecord.legalData в DynamoDB.
+      После сохранения данные отображаются на странице в виде читаемой таблицы.
+      Основная реализация: app/partner/legal/page.tsx,
+      components/partner-legal-form.tsx, app/api/partner/legal/route.ts,
+      packages/shared/src/models.ts (LegalData, PartnerRecord.legalData),
+      lib/models.ts (updatePartner поддержка legalData)."
   - id: task-131
     phase: mvp
     title: Показывать анкетные и юридические данные партнёра в админ-панели

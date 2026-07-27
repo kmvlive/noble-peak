@@ -831,6 +831,16 @@ export async function deleteAdmin(email: string): Promise<void> {
   );
 }
 
+export interface LegalData {
+  country: string;
+  status: "individual" | "ip" | "legal_entity";
+  fullName: string;
+  document: "passport_rf" | "passport_foreign";
+  documentSeriesNumber: string;
+  issueDate: string;
+  tin: string;
+}
+
 export interface PartnerRecord {
   email: string;
   name: string;
@@ -841,6 +851,7 @@ export interface PartnerRecord {
   slug?: string;
   orderFormEnabled?: boolean;
   documentNumber?: string;
+  legalData?: LegalData;
   createdAt: string;
 }
 
@@ -923,6 +934,7 @@ export async function updatePartner(
       | "slug"
       | "orderFormEnabled"
       | "documentNumber"
+      | "legalData"
     >
   >
 ): Promise<PartnerRecord> {
@@ -970,6 +982,12 @@ export async function updatePartner(
     updateExpr.push("#documentNumber = :documentNumber");
     exprValues[":documentNumber"] = data.documentNumber;
     exprNames["#documentNumber"] = "documentNumber";
+  }
+
+  if (data.legalData !== undefined) {
+    updateExpr.push("#legalData = :legalData");
+    exprValues[":legalData"] = data.legalData;
+    exprNames["#legalData"] = "legalData";
   }
 
   if (updateExpr.length === 0) {

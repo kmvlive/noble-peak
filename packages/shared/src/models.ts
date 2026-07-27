@@ -107,6 +107,16 @@ export interface AdminRecord {
   updatedAt: string;
 }
 
+export interface LegalData {
+  country: string;
+  status: "individual" | "ip" | "legal_entity";
+  fullName: string;
+  document: "passport_rf" | "passport_foreign";
+  documentSeriesNumber: string;
+  issueDate: string;
+  tin: string;
+}
+
 export interface PartnerRecord {
   email: string;
   name: string;
@@ -117,6 +127,7 @@ export interface PartnerRecord {
   slug?: string;
   orderFormEnabled?: boolean;
   documentNumber?: string;
+  legalData?: LegalData;
   createdAt: string;
 }
 
