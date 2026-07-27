@@ -3029,3 +3029,21 @@ tasks:
     related_feature: Техническое сопровождение
     status: pending
     summary: null
+  - id: task-139
+    phase: mvp
+    title: Уведомления в Telegram для клиента и партнёра
+    description: Создать Telegram-бота через BotFather, добавить в настройки клиента
+      и партнёра переключатель «Получать уведомления в Telegram». При включении
+      — пользователь вводит Telegram ID или подключается через бота. Уведомления
+      дублируются в Telegram через Bot API.
+    priority: high
+    acceptance_criteria:
+      - Создан Telegram-бот для приёма chat_id от пользователей
+      - В настройках клиента есть переключатель «Получать уведомления в Telegram»
+      - В настройках партнёра есть переключатель «Получать уведомления в
+        Telegram»
+      - При включённом переключателе уведомления отправляются в Telegram
+    depends_on: []
+    related_feature: Уведомления и чат
+    status: pending
+    summary: null
