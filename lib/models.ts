@@ -840,6 +840,7 @@ export interface PartnerRecord {
   description?: string;
   slug?: string;
   orderFormEnabled?: boolean;
+  documentNumber?: string;
   createdAt: string;
 }
 
@@ -915,7 +916,13 @@ export async function updatePartner(
   data: Partial<
     Pick<
       PartnerRecord,
-      "name" | "phone" | "photo" | "description" | "slug" | "orderFormEnabled"
+      | "name"
+      | "phone"
+      | "photo"
+      | "description"
+      | "slug"
+      | "orderFormEnabled"
+      | "documentNumber"
     >
   >
 ): Promise<PartnerRecord> {
@@ -957,6 +964,12 @@ export async function updatePartner(
     updateExpr.push("#orderFormEnabled = :orderFormEnabled");
     exprValues[":orderFormEnabled"] = data.orderFormEnabled;
     exprNames["#orderFormEnabled"] = "orderFormEnabled";
+  }
+
+  if (data.documentNumber !== undefined) {
+    updateExpr.push("#documentNumber = :documentNumber");
+    exprValues[":documentNumber"] = data.documentNumber;
+    exprNames["#documentNumber"] = "documentNumber";
   }
 
   if (updateExpr.length === 0) {

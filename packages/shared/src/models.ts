@@ -116,6 +116,7 @@ export interface PartnerRecord {
   description?: string;
   slug?: string;
   orderFormEnabled?: boolean;
+  documentNumber?: string;
   createdAt: string;
 }
 

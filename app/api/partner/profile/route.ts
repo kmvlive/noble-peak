@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
         photo: partner.photo ?? "",
         description: partner.description ?? "",
         slug: partner.slug ?? "",
+        documentNumber: partner.documentNumber ?? "",
       });
     } catch (error) {
       console.error("Ошибка получения профиля партнёра:", error);
@@ -50,6 +51,7 @@ export async function GET(request: NextRequest) {
     photo: mock.photo ?? "",
     description: mock.description ?? "",
     slug: mock.slug ?? "",
+    documentNumber: mock.documentNumber ?? "",
   });
 }
 
@@ -63,6 +65,7 @@ const updateProfileSchema = z.object({
     .max(100)
     .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Только латиница, цифры и дефисы")
     .optional(),
+  documentNumber: z.string().max(200).optional(),
 });
 
 export async function PATCH(request: NextRequest) {
@@ -109,6 +112,7 @@ export async function PATCH(request: NextRequest) {
       photo: updated.photo ?? "",
       description: updated.description ?? "",
       slug: updated.slug ?? "",
+      documentNumber: updated.documentNumber ?? "",
     });
   } catch (error) {
     console.error("Ошибка обновления профиля партнёра:", error);

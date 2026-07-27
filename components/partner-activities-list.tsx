@@ -8,6 +8,7 @@ import {
   XCircle,
   ExternalLink,
   Search,
+  Award,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
@@ -51,6 +52,7 @@ export function PartnerActivitiesList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [documentNumber, setDocumentNumber] = useState("");
 
   useEffect(() => {
     const token = getToken();
@@ -59,15 +61,26 @@ export function PartnerActivitiesList() {
       return;
     }
 
-    fetch("/api/partner/activities", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Ошибка загрузки");
-        return res.json();
+    Promise.all([
+      fetch("/api/partner/activities", {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      fetch("/api/partner/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+    ])
+      .then(([activitiesRes, profileRes]) => {
+        if (!activitiesRes.ok) throw new Error("Ошибка загрузки активностей");
+        return Promise.all([
+          activitiesRes.json(),
+          profileRes.ok
+            ? profileRes.json()
+            : Promise.resolve({ documentNumber: "" }),
+        ]);
       })
-      .then((data) => {
-        setActivities(data);
+      .then(([activitiesData, profileData]) => {
+        setActivities(activitiesData);
+        setDocumentNumber(profileData.documentNumber || "");
         setLoading(false);
       })
       .catch((err) => {
@@ -168,6 +181,12 @@ export function PartnerActivitiesList() {
                     {new Date(activity.createdAt).toLocaleDateString("ru-RU")}
                   </span>
                 </div>
+                {documentNumber && (
+                  <div className="mt-2 flex items-center gap-1 text-xs text-primary">
+                    <Award className="h-3 w-3" />
+                    <span>Аттестат: {documentNumber}</span>
+                  </div>
+                )}
               </div>
               {activity.status === "active" && (
                 <a
