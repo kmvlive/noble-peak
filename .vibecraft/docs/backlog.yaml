@@ -3071,3 +3071,21 @@ tasks:
     related_feature: Техническое сопровождение
     status: pending
     summary: null
+  - id: task-143
+    phase: mvp
+    title: Исправить экспорт getToken из admin-layout-client.tsx
+    description: "Ошибка: Turbopack не видит экспорт getToken из
+      components/admin-layout-client.tsx, потому что он объявлен как `function
+      getToken()`, а потом реэкспортирован через `export { getToken }`. Нужно
+      заменить на `export function getToken()` и убрать строку `export {
+      getToken }`."
+    priority: high
+    acceptance_criteria:
+      - Ошибка 'Export getToken doesn't exist in target module' исчезла
+      - admin-activity-list.tsx может импортировать getToken из
+        admin-layout-client
+      - Страница /admin загружается без ошибок
+    depends_on: []
+    related_feature: Техническое сопровождение
+    status: pending
+    summary: null
