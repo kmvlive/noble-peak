@@ -86,6 +86,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [menuLoading, setMenuLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(false);
   const redirectedRef = useRef(false);
 
   useEffect(() => {
@@ -93,11 +94,14 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!hasToken() && !redirectedRef.current) {
+    const authed = hasToken();
+    setIsAuthed(authed);
+
+    if (pathname !== "/admin/login" && !authed && !redirectedRef.current) {
       redirectedRef.current = true;
       router.replace("/admin/login");
     }
-  }, [router]);
+  }, [router, pathname]);
 
   useEffect(() => {
     fetchMenuItems();
@@ -114,8 +118,6 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
       setMenuLoading(false);
     }
   };
-
-  const isAuthed = hasToken();
 
   const handleLogout = useCallback(() => {
     clearToken();
