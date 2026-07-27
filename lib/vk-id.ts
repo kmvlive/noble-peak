@@ -27,28 +27,25 @@ export function getVkAuthUrl(redirectUri: string, state: string): string {
 
 export async function exchangeVkCode(
   code: string,
-  _redirectUri: string
+  redirectUri: string
 ): Promise<{
   accessToken: string;
   userId: number;
   email?: string;
   phone?: string;
 }> {
-  const { clientId } = getVkConfig();
+  const { clientId, clientSecret } = getVkConfig();
 
-  const tokenRes = await fetch(
-    "https://api.vk.com/method/auth.exchangeSilentAuthToken",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        v: VK_API_VERSION,
-        token: code,
-        access_token: "",
-        device_id: clientId,
-      }),
-    }
-  );
+  const tokenRes = await fetch("https://oauth.vk.com/access_token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      redirect_uri: redirectUri,
+      code,
+    }),
+  });
 
   if (!tokenRes.ok) {
     const text = await tokenRes.text();
@@ -64,32 +61,11 @@ export async function exchangeVkCode(
 
   const accessToken = tokenData.access_token;
   const userId = tokenData.user_id;
+  const email = tokenData.email;
 
   if (!accessToken || !userId) {
     throw new Error("VK token exchange returned no token or user_id");
   }
 
-  let email: string | undefined;
-  let phone: string | undefined;
-
-  try {
-    const userRes = await fetch("https://api.vk.com/method/users.get", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        v: VK_API_VERSION,
-        access_token: accessToken,
-        fields: "email,phone",
-      }),
-    });
-    const userData = await userRes.json();
-    if (userData.response?.[0]) {
-      email = userData.response[0].email;
-      phone = userData.response[0].phone;
-    }
-  } catch {
-    // non-critical
-  }
-
-  return { accessToken, userId, email, phone };
+  return { accessToken, userId, email };
 }
