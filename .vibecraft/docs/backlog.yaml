@@ -3040,3 +3040,34 @@ tasks:
     related_feature: Техническое сопровождение
     status: pending
     summary: null
+  - id: task-142
+    phase: mvp
+    title: Синхронизировать код Telegram-уведомлений на сервер
+    description: >-
+      Перенести файлы Telegram-уведомлений из SourceCraft на сервер Timeweb
+      через PuTTY/SSH. Файлы для копирования:
+
+      - lib/telegram-notify.ts
+
+      - app/api/client/telegram-notifications/route.ts
+
+      - app/api/partner/telegram-notifications/route.ts
+
+      - app/api/telegram-webhook/route.ts
+
+      - components/client-notifications-list.tsx (обновлённый с Telegram UI)
+
+      - components/partner-notifications-list.tsx (обновлённый с Telegram UI)
+
+
+      После копирования перезапустить контейнер app.
+    priority: high
+    acceptance_criteria:
+      - Файлы скопированы на сервер в /opt/noble-peak/
+      - Контейнер app перезапущен
+      - В настройках клиента и партнёра отображается переключатель
+        Telegram-уведомлений
+    depends_on: []
+    related_feature: Техническое сопровождение
+    status: pending
+    summary: null
