@@ -267,6 +267,8 @@ export interface ClientRecord {
   name: string;
   phone: string;
   passwordHash: string;
+  vkUserId?: string;
+  vkAccessToken?: string;
   createdAt: string;
 }
 
@@ -313,7 +315,9 @@ export async function getAllClients(): Promise<ClientRecord[]> {
 
 export async function updateClient(
   email: string,
-  data: Partial<Pick<ClientRecord, "name" | "phone">>
+  data: Partial<
+    Pick<ClientRecord, "name" | "phone" | "vkUserId" | "vkAccessToken">
+  >
 ): Promise<ClientRecord> {
   const updateExpr: string[] = [];
   const exprValues: Record<string, unknown> = {};
@@ -329,6 +333,18 @@ export async function updateClient(
     updateExpr.push("#phone = :phone");
     exprValues[":phone"] = data.phone;
     exprNames["#phone"] = "phone";
+  }
+
+  if (data.vkUserId !== undefined) {
+    updateExpr.push("#vkUserId = :vkUserId");
+    exprValues[":vkUserId"] = data.vkUserId;
+    exprNames["#vkUserId"] = "vkUserId";
+  }
+
+  if (data.vkAccessToken !== undefined) {
+    updateExpr.push("#vkAccessToken = :vkAccessToken");
+    exprValues[":vkAccessToken"] = data.vkAccessToken;
+    exprNames["#vkAccessToken"] = "vkAccessToken";
   }
 
   if (updateExpr.length === 0) {
@@ -852,6 +868,8 @@ export interface PartnerRecord {
   orderFormEnabled?: boolean;
   documentNumber?: string;
   legalData?: LegalData;
+  vkUserId?: string;
+  vkAccessToken?: string;
   createdAt: string;
 }
 
@@ -935,6 +953,8 @@ export async function updatePartner(
       | "orderFormEnabled"
       | "documentNumber"
       | "legalData"
+      | "vkUserId"
+      | "vkAccessToken"
     >
   >
 ): Promise<PartnerRecord> {
@@ -988,6 +1008,18 @@ export async function updatePartner(
     updateExpr.push("#legalData = :legalData");
     exprValues[":legalData"] = data.legalData;
     exprNames["#legalData"] = "legalData";
+  }
+
+  if (data.vkUserId !== undefined) {
+    updateExpr.push("#vkUserId = :vkUserId");
+    exprValues[":vkUserId"] = data.vkUserId;
+    exprNames["#vkUserId"] = "vkUserId";
+  }
+
+  if (data.vkAccessToken !== undefined) {
+    updateExpr.push("#vkAccessToken = :vkAccessToken");
+    exprValues[":vkAccessToken"] = data.vkAccessToken;
+    exprNames["#vkAccessToken"] = "vkAccessToken";
   }
 
   if (updateExpr.length === 0) {

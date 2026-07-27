@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { UserCircle } from "lucide-react";
 import { ClientLoginForm } from "@/components/client-login-form";
 
@@ -14,7 +15,13 @@ export default function ClientLoginPage() {
             Войдите или зарегистрируйтесь
           </p>
         </div>
-        <ClientLoginForm />
+        <Suspense
+          fallback={
+            <div className="text-center text-muted-foreground">Загрузка...</div>
+          }
+        >
+          <ClientLoginForm />
+        </Suspense>
       </div>
     </div>
   );

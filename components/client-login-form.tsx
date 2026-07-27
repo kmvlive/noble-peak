@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mail, Lock, User, Phone } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { VkLoginButton } from "@/components/vk-login-button";
 
 export function ClientLoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [loading, setLoading] = useState(false);
 
@@ -20,6 +22,47 @@ export function ClientLoginForm() {
   const [regPhone, setRegPhone] = useState("");
   const [regEmail, setRegEmail] = useState("");
   const [regPassword, setRegPassword] = useState("");
+
+  useEffect(() => {
+    const code = searchParams.get("code");
+    const state = searchParams.get("state");
+    const savedState = sessionStorage.getItem("vk_state");
+    const savedRedirectUri = sessionStorage.getItem("vk_redirect_uri");
+
+    if (
+      code &&
+      state &&
+      savedState &&
+      state === savedState &&
+      savedRedirectUri
+    ) {
+      sessionStorage.removeItem("vk_state");
+      sessionStorage.removeItem("vk_redirect_uri");
+
+      setLoading(true);
+      fetch("/api/client/vk-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, redirectUri: savedRedirectUri }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            toast.error(data.error || "Ошибка авторизации ВКонтакте");
+            return;
+          }
+          toast.success("Добро пожаловать!");
+          localStorage.setItem("client_token", data.token);
+          router.replace("/");
+        })
+        .catch(() => {
+          toast.error("Ошибка соединения с сервером");
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [searchParams, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -260,6 +303,19 @@ export function ClientLoginForm() {
           </Button>
         </form>
       )}
+
+      <div className="relative my-6">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-card px-2 text-muted-foreground">или</span>
+        </div>
+      </div>
+
+      <VkLoginButton
+        redirectUri={`${typeof window !== "undefined" ? window.location.origin : ""}/client/login`}
+      />
     </div>
   );
 }

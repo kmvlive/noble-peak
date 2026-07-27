@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { UserCircle } from "lucide-react";
 import { PartnerLoginForm } from "@/components/partner-login-form";
 
@@ -16,7 +17,13 @@ export default function PartnerLoginPage() {
             Войдите или зарегистрируйтесь
           </p>
         </div>
-        <PartnerLoginForm />
+        <Suspense
+          fallback={
+            <div className="text-center text-muted-foreground">Загрузка...</div>
+          }
+        >
+          <PartnerLoginForm />
+        </Suspense>
       </div>
     </div>
   );

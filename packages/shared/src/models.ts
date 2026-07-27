@@ -40,6 +40,8 @@ export interface ClientRecord {
   name: string;
   phone: string;
   passwordHash: string;
+  vkUserId?: string;
+  vkAccessToken?: string;
   createdAt: string;
 }
 
@@ -128,6 +130,8 @@ export interface PartnerRecord {
   orderFormEnabled?: boolean;
   documentNumber?: string;
   legalData?: LegalData;
+  vkUserId?: string;
+  vkAccessToken?: string;
   createdAt: string;
 }
 
