@@ -3087,5 +3087,14 @@ tasks:
     depends_on:
       - task-132
     related_feature: Уведомления и чат
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Добавлен переключатель «Получать уведомления ВКонтакте» в настройки
+      клиента и партнёра. На странице /client/notifications в
+      ClientNotificationsList и /partner/notifications в
+      PartnerNotificationsList добавлена карточка с иконкой VK, описанием и
+      Switch-компонентом. Состояние загружается через GET
+      /api/client/vk-notifications и GET /api/partner/vk-notifications,
+      сохраняется через PUT. API-маршруты и поля vkNotificationsEnabled в
+      ClientRecord/PartnerRecord уже существовали. typecheck, lint, build
+      проходят.

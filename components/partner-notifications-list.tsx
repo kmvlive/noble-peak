@@ -16,6 +16,7 @@ import {
 import Link from "next/link";
 import { getToken } from "@/components/partner-layout-client";
 import { ChatWidget } from "@/components/chat-widget";
+import { Switch } from "@/components/ui/switch";
 
 interface Notification {
   id: string;
@@ -72,6 +73,8 @@ export function PartnerNotificationsList() {
   const [error, setError] = useState<string | null>(null);
   const [unreadOnly, setUnreadOnly] = useState(false);
   const [tab, setTab] = useState<"notifications" | "chat">("notifications");
+  const [vkEnabled, setVkEnabled] = useState(false);
+  const [vkLoading, setVkLoading] = useState(true);
 
   useEffect(() => {
     const token = getToken();
@@ -94,6 +97,21 @@ export function PartnerNotificationsList() {
       .catch((err) => {
         setError(err.message);
         setLoading(false);
+      });
+
+    fetch("/api/partner/vk-notifications", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Ошибка загрузки");
+        return res.json();
+      })
+      .then((data) => {
+        setVkEnabled(data.enabled ?? false);
+        setVkLoading(false);
+      })
+      .catch(() => {
+        setVkLoading(false);
       });
   }, [router]);
 
@@ -137,6 +155,26 @@ export function PartnerNotificationsList() {
     }
   };
 
+  const handleVkToggle = async (enabled: boolean) => {
+    const token = getToken();
+    setVkEnabled(enabled);
+    try {
+      const res = await fetch("/api/partner/vk-notifications", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ enabled }),
+      });
+      if (!res.ok) {
+        setVkEnabled(!enabled);
+      }
+    } catch {
+      setVkEnabled(!enabled);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 border-b pb-2">
@@ -163,6 +201,33 @@ export function PartnerNotificationsList() {
           Чаты
         </button>
       </div>
+
+      {tab === "notifications" && (
+        <div className="rounded-lg border bg-card p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <svg
+                className="h-5 w-5 text-[#0077FF]"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M12.362 1.868c-5.694 0-10.31 4.616-10.31 10.31 0 5.695 4.616 10.311 10.31 10.311 5.695 0 10.311-4.616 10.311-10.31 0-5.695-4.616-10.311-10.31-10.311zm4.786 7.078c.101.448.101.448.101.448s-1.342 5.604-1.897 7.837c-.234.94-.685 1.253-1.125 1.284-.956.07-1.682-.631-2.608-1.236-1.45-.946-2.277-1.536-3.687-2.459-1.63-1.069-.574-1.657.357-2.617.244-.251 4.47-4.096 4.653-4.444.038-.073.072-.21-.027-.297-.1-.087-.247-.058-.353-.034-.151.034-2.545 1.617-7.187 4.749-.68.467-1.296.694-1.848.682-.608-.013-1.777-.344-2.646-.626-.534-.174-.959-.266-.922-.562.02-.156.234-.316.645-.479 2.536-1.104 4.229-1.797 5.079-2.036 2.424-.703 2.927-.825 3.255-.825.072 0-.193.329.193.872z" />
+              </svg>
+              <div>
+                <p className="text-sm font-medium">Уведомления ВКонтакте</p>
+                <p className="text-xs text-muted-foreground">
+                  Дублировать уведомления в личные сообщения ВК
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={vkEnabled}
+              onCheckedChange={handleVkToggle}
+              disabled={vkLoading}
+            />
+          </div>
+        </div>
+      )}
 
       {tab === "chat" ? (
         <ChatWidget userRole="partner" userEmail="" apiBase="/api/partner" />
