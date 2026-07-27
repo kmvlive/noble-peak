@@ -3028,5 +3028,11 @@ tasks:
       - task-129
       - task-130
     related_feature: Админ-панель
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      В админ-панели (/admin/partners) в таблицу партнёров добавлен столбец
+      «Данные» с кнопкой «Анкета». При нажатии открывается диалог с анкетными
+      данными (номер документа) и юридическими данными (страна, статус, ФИО,
+      документ, серия/номер, дата выдачи, ИНН). Данные читаются из PartnerRecord
+      через API /api/admin/partners (БД или mock-данные). Основная реализация:
+      components/admin-partners-manager.tsx.
