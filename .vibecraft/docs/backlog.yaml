@@ -2948,3 +2948,18 @@ tasks:
     related_feature: Техническое сопровождение
     status: pending
     summary: null
+  - id: task-128
+    phase: mvp
+    title: Исправить GET запрос счётчиков аналитики — добавить токен
+    description: "GET /api/admin/analytics-counters тоже проверяет авторизацию, но в
+      компоненте admin-analytics-manager.tsx GET запрос идёт без заголовков.
+      Нужно добавить headers: authHeaders() в fetch для GET запроса, как уже
+      сделано для POST и DELETE."
+    priority: high
+    acceptance_criteria:
+      - GET запрос к /api/admin/analytics-counters не возвращает 401
+      - Список счётчиков загружается без ошибки
+    depends_on: []
+    related_feature: Техническое сопровождение
+    status: pending
+    summary: null
