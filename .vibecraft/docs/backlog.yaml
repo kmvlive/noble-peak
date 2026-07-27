@@ -2930,3 +2930,21 @@ tasks:
     related_feature: Админ-панель
     status: pending
     summary: null
+  - id: task-127
+    phase: mvp
+    title: Исправить 401 ошибку при добавлении/удалении счётчиков аналитики
+    description: "POST и DELETE запросы к /api/admin/analytics-counters возвращают
+      401, потому что не передают Authorization: Bearer заголовок с токеном
+      администратора. Нужно добавить authHeaders() функцию в компонент
+      admin-analytics-manager.tsx, которая объединяет Content-Type и
+      Authorization заголовки, и использовать её в fetch вызовах для POST и
+      DELETE."
+    priority: high
+    acceptance_criteria:
+      - Добавление нового счётчика аналитики работает без ошибки 401
+      - Удаление счётчика аналитики работает без ошибки 401
+      - GET запрос (загрузка списка) продолжает работать как раньше
+    depends_on: []
+    related_feature: Техническое сопровождение
+    status: pending
+    summary: null
