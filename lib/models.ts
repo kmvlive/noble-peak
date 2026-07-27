@@ -10,6 +10,7 @@ import {
 import { TableName, IndexName } from "./schema";
 import { randomUUID } from "node:crypto";
 import { sendVkNotification } from "./vk-notify";
+import { sendTelegramNotification } from "./telegram-notify";
 
 export interface Service {
   id: string;
@@ -271,6 +272,8 @@ export interface ClientRecord {
   vkUserId?: string;
   vkAccessToken?: string;
   vkNotificationsEnabled?: boolean;
+  telegramChatId?: string;
+  telegramNotificationsEnabled?: boolean;
   createdAt: string;
 }
 
@@ -320,7 +323,13 @@ export async function updateClient(
   data: Partial<
     Pick<
       ClientRecord,
-      "name" | "phone" | "vkUserId" | "vkAccessToken" | "vkNotificationsEnabled"
+      | "name"
+      | "phone"
+      | "vkUserId"
+      | "vkAccessToken"
+      | "vkNotificationsEnabled"
+      | "telegramChatId"
+      | "telegramNotificationsEnabled"
     >
   >
 ): Promise<ClientRecord> {
@@ -356,6 +365,21 @@ export async function updateClient(
     updateExpr.push("#vkNotificationsEnabled = :vkNotificationsEnabled");
     exprValues[":vkNotificationsEnabled"] = data.vkNotificationsEnabled;
     exprNames["#vkNotificationsEnabled"] = "vkNotificationsEnabled";
+  }
+
+  if (data.telegramChatId !== undefined) {
+    updateExpr.push("#telegramChatId = :telegramChatId");
+    exprValues[":telegramChatId"] = data.telegramChatId;
+    exprNames["#telegramChatId"] = "telegramChatId";
+  }
+
+  if (data.telegramNotificationsEnabled !== undefined) {
+    updateExpr.push(
+      "#telegramNotificationsEnabled = :telegramNotificationsEnabled"
+    );
+    exprValues[":telegramNotificationsEnabled"] =
+      data.telegramNotificationsEnabled;
+    exprNames["#telegramNotificationsEnabled"] = "telegramNotificationsEnabled";
   }
 
   if (updateExpr.length === 0) {
@@ -882,6 +906,8 @@ export interface PartnerRecord {
   vkUserId?: string;
   vkAccessToken?: string;
   vkNotificationsEnabled?: boolean;
+  telegramChatId?: string;
+  telegramNotificationsEnabled?: boolean;
   createdAt: string;
 }
 
@@ -968,6 +994,8 @@ export async function updatePartner(
       | "vkUserId"
       | "vkAccessToken"
       | "vkNotificationsEnabled"
+      | "telegramChatId"
+      | "telegramNotificationsEnabled"
     >
   >
 ): Promise<PartnerRecord> {
@@ -1039,6 +1067,21 @@ export async function updatePartner(
     updateExpr.push("#vkNotificationsEnabled = :vkNotificationsEnabled");
     exprValues[":vkNotificationsEnabled"] = data.vkNotificationsEnabled;
     exprNames["#vkNotificationsEnabled"] = "vkNotificationsEnabled";
+  }
+
+  if (data.telegramChatId !== undefined) {
+    updateExpr.push("#telegramChatId = :telegramChatId");
+    exprValues[":telegramChatId"] = data.telegramChatId;
+    exprNames["#telegramChatId"] = "telegramChatId";
+  }
+
+  if (data.telegramNotificationsEnabled !== undefined) {
+    updateExpr.push(
+      "#telegramNotificationsEnabled = :telegramNotificationsEnabled"
+    );
+    exprValues[":telegramNotificationsEnabled"] =
+      data.telegramNotificationsEnabled;
+    exprNames["#telegramNotificationsEnabled"] = "telegramNotificationsEnabled";
   }
 
   if (updateExpr.length === 0) {
@@ -1531,6 +1574,10 @@ export async function createNotification(
 
   sendVkNotification(data.recipientEmail, data.title, data.message).catch((e) =>
     console.error("VK notify error:", e)
+  );
+
+  sendTelegramNotification(data.recipientEmail, data.title, data.message).catch(
+    (e) => console.error("Telegram notify error:", e)
   );
 
   return notification;

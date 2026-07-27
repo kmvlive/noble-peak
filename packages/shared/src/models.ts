@@ -43,6 +43,8 @@ export interface ClientRecord {
   vkUserId?: string;
   vkAccessToken?: string;
   vkNotificationsEnabled?: boolean;
+  telegramChatId?: string;
+  telegramNotificationsEnabled?: boolean;
   createdAt: string;
 }
 
@@ -134,6 +136,8 @@ export interface PartnerRecord {
   vkUserId?: string;
   vkAccessToken?: string;
   vkNotificationsEnabled?: boolean;
+  telegramChatId?: string;
+  telegramNotificationsEnabled?: boolean;
   createdAt: string;
 }
 
