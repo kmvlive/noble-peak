@@ -19,7 +19,7 @@ export function getVkAuthUrl(redirectUri: string, state: string): string {
     client_id: clientId,
     redirect_uri: redirectUri,
     state,
-    scope: "email,phone",
+    scope: "email,phone,messages",
     v: VK_API_VERSION,
   });
   return `https://id.vk.com/authorize?${params.toString()}`;

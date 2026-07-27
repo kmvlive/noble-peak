@@ -42,6 +42,7 @@ export interface ClientRecord {
   passwordHash: string;
   vkUserId?: string;
   vkAccessToken?: string;
+  vkNotificationsEnabled?: boolean;
   createdAt: string;
 }
 
@@ -132,6 +133,7 @@ export interface PartnerRecord {
   legalData?: LegalData;
   vkUserId?: string;
   vkAccessToken?: string;
+  vkNotificationsEnabled?: boolean;
   createdAt: string;
 }
 

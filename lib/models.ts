@@ -9,6 +9,7 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import { TableName, IndexName } from "./schema";
 import { randomUUID } from "node:crypto";
+import { sendVkNotification } from "./vk-notify";
 
 export interface Service {
   id: string;
@@ -269,6 +270,7 @@ export interface ClientRecord {
   passwordHash: string;
   vkUserId?: string;
   vkAccessToken?: string;
+  vkNotificationsEnabled?: boolean;
   createdAt: string;
 }
 
@@ -316,7 +318,10 @@ export async function getAllClients(): Promise<ClientRecord[]> {
 export async function updateClient(
   email: string,
   data: Partial<
-    Pick<ClientRecord, "name" | "phone" | "vkUserId" | "vkAccessToken">
+    Pick<
+      ClientRecord,
+      "name" | "phone" | "vkUserId" | "vkAccessToken" | "vkNotificationsEnabled"
+    >
   >
 ): Promise<ClientRecord> {
   const updateExpr: string[] = [];
@@ -345,6 +350,12 @@ export async function updateClient(
     updateExpr.push("#vkAccessToken = :vkAccessToken");
     exprValues[":vkAccessToken"] = data.vkAccessToken;
     exprNames["#vkAccessToken"] = "vkAccessToken";
+  }
+
+  if (data.vkNotificationsEnabled !== undefined) {
+    updateExpr.push("#vkNotificationsEnabled = :vkNotificationsEnabled");
+    exprValues[":vkNotificationsEnabled"] = data.vkNotificationsEnabled;
+    exprNames["#vkNotificationsEnabled"] = "vkNotificationsEnabled";
   }
 
   if (updateExpr.length === 0) {
@@ -870,6 +881,7 @@ export interface PartnerRecord {
   legalData?: LegalData;
   vkUserId?: string;
   vkAccessToken?: string;
+  vkNotificationsEnabled?: boolean;
   createdAt: string;
 }
 
@@ -955,6 +967,7 @@ export async function updatePartner(
       | "legalData"
       | "vkUserId"
       | "vkAccessToken"
+      | "vkNotificationsEnabled"
     >
   >
 ): Promise<PartnerRecord> {
@@ -1020,6 +1033,12 @@ export async function updatePartner(
     updateExpr.push("#vkAccessToken = :vkAccessToken");
     exprValues[":vkAccessToken"] = data.vkAccessToken;
     exprNames["#vkAccessToken"] = "vkAccessToken";
+  }
+
+  if (data.vkNotificationsEnabled !== undefined) {
+    updateExpr.push("#vkNotificationsEnabled = :vkNotificationsEnabled");
+    exprValues[":vkNotificationsEnabled"] = data.vkNotificationsEnabled;
+    exprNames["#vkNotificationsEnabled"] = "vkNotificationsEnabled";
   }
 
   if (updateExpr.length === 0) {
@@ -1508,6 +1527,10 @@ export async function createNotification(
       TableName: TableName.NOTIFICATIONS,
       Item: notification,
     })
+  );
+
+  sendVkNotification(data.recipientEmail, data.title, data.message).catch((e) =>
+    console.error("VK notify error:", e)
   );
 
   return notification;
