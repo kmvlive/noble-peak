@@ -3089,3 +3089,17 @@ tasks:
     related_feature: Техническое сопровождение
     status: pending
     summary: null
+  - id: task-144
+    phase: mvp
+    title: Собрать production build и подготовить к деплою
+    description: Собрать production build (next build) в SourceCraft, упаковать
+      результат в архив и предоставить ссылку для скачивания на сервер Timeweb.
+    priority: high
+    acceptance_criteria:
+      - Production build успешно собран
+      - Архив .next доступен для скачивания
+      - На сервере можно запустить production режим
+    depends_on: []
+    related_feature: Техническое сопровождение
+    status: pending
+    summary: null
