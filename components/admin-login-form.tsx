@@ -39,6 +39,7 @@ export function AdminLoginForm() {
       }
 
       setToken(data.token);
+      document.cookie = `admin_token=${data.token}; path=/; max-age=86400; sameSite=lax`;
       toast.success("Добро пожаловать!");
       router.replace("/admin");
     } catch {

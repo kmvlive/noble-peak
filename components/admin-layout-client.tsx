@@ -50,6 +50,7 @@ export function setToken(token: string) {
 
 export function clearToken() {
   localStorage.removeItem(TOKEN_KEY);
+  document.cookie = "admin_token=; path=/; max-age=0";
 }
 
 export { getToken };
