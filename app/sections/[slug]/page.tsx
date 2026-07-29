@@ -30,7 +30,9 @@ export default async function SectionPage({
   const section = sections.find((s) => s.id === slug);
   if (!section) notFound();
 
-  const categoryActivities = activities.filter((a) => a.section === section.id);
+  const categoryActivities = activities.filter(
+    (a) => a.section === section.name
+  );
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:py-12">
