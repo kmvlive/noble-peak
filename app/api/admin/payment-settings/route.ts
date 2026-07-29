@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isDatabaseAvailable } from "@/lib/db";
 import { getPaymentSettings, savePaymentSettings } from "@/lib/models";
 import { mockPaymentSettings } from "@/lib/mock-data";
-import { verifyToken } from "@/lib/auth";
+import { verifyToken, getTokenFromRequest } from "@/lib/auth";
 import { z } from "zod";
 
 const savePaymentSettingsSchema = z.object({
@@ -11,14 +11,6 @@ const savePaymentSettingsSchema = z.object({
   webhookUrl: z.string().url("Некорректный URL вебхука"),
 });
 
-function getTokenFromRequest(request: NextRequest): string | null {
-  const authHeader = request.headers.get("authorization");
-  if (authHeader?.startsWith("Bearer ")) {
-    return authHeader.slice(7);
-  }
-  const cookie = request.cookies.get("admin_token");
-  return cookie?.value ?? null;
-}
 
 export async function GET() {
   const dbAvailable = await isDatabaseAvailable();

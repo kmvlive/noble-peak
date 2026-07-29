@@ -1,5 +1,6 @@
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { MAIN_ADMIN_EMAIL } from "@noble-peak/shared";
+import type { NextRequest } from "next/server";
 
 export {
   createToken,
@@ -10,6 +11,15 @@ export {
   MAIN_ADMIN_EMAIL,
   type TokenPayload,
 } from "@noble-peak/shared";
+
+export function getTokenFromRequest(request: NextRequest): string | null {
+  const authHeader = request.headers.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    return authHeader.slice(7);
+  }
+  const cookie = request.cookies.get("admin_token");
+  return cookie?.value ?? null;
+}
 
 const MAIN_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Artkmv11";
 
