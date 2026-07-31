@@ -1,0 +1,16 @@
+name: Auto Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Trigger deploy webhook
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call deploy endpoint
+        run: |
+          curl -sf -X POST "${{ secrets.DEPLOY_URL }}/api/deploy" \
+            -H "Authorization: Bearer ${{ secrets.DEPLOY_SECRET }}" \
+            -H "Content-Type: application/json"
