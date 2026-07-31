@@ -61,6 +61,31 @@ function isDateInPast(year: number, month: number, day: number): boolean {
   return date < today;
 }
 
+function isTodayDate(year: number, month: number, day: number): boolean {
+  const today = new Date();
+  return (
+    year === today.getFullYear() &&
+    month === today.getMonth() &&
+    day === today.getDate()
+  );
+}
+
+function getCurrentHourString(): string {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+}
+
+function filterFutureHours(
+  hours: string[],
+  year: number,
+  month: number,
+  day: number
+): string[] {
+  if (!isTodayDate(year, month, day)) return hours;
+  const now = getCurrentHourString();
+  return hours.filter((h) => h >= now);
+}
+
 export function ActivityBookingCalendar({
   activityId,
   onSelect,
@@ -145,7 +170,11 @@ export function ActivityBookingCalendar({
     setInternalSelectedDate(dateStr);
     setSelectedHour(null);
 
-    if (!entry.hours || entry.hours.length === 0) {
+    const [y, m, d] = dateStr.split("-").map(Number);
+    const futureHours = entry.hours
+      ? filterFutureHours(entry.hours, y, m - 1, d)
+      : [];
+    if (futureHours.length === 0) {
       onSelect(dateStr, undefined);
     }
   };
@@ -164,7 +193,14 @@ export function ActivityBookingCalendar({
   const selectedEntry = internalSelectedDate
     ? dates[internalSelectedDate]
     : null;
-  const hasHours = selectedEntry?.hours && selectedEntry.hours.length > 0;
+  const filteredHours =
+    internalSelectedDate && selectedEntry?.hours
+      ? (() => {
+          const [y, m, d] = internalSelectedDate.split("-").map(Number);
+          return filterFutureHours(selectedEntry.hours!, y, m - 1, d);
+        })()
+      : [];
+  const hasHours = filteredHours.length > 0;
 
   if (loading) {
     return (
@@ -257,13 +293,13 @@ export function ActivityBookingCalendar({
         })}
       </div>
 
-      {internalSelectedDate && hasHours && selectedEntry?.hours && (
+      {internalSelectedDate && hasHours && (
         <div className="rounded-lg border p-4 space-y-3">
           <h3 className="text-sm font-semibold">
             Доступное время на {internalSelectedDate}
           </h3>
           <div className="flex flex-wrap gap-1.5">
-            {selectedEntry.hours.map((hour) => {
+            {filteredHours.map((hour) => {
               const isActive = selectedHour === hour;
               return (
                 <button
