@@ -64,7 +64,7 @@ export default async function SectionPage({
     })),
   };
 
-  const isDebug = process.env.NODE_ENV === "development";
+  const isDebug = true;
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:py-12">
