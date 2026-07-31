@@ -25,6 +25,7 @@ const createPartnerActivitySchema = z.object({
     .default("individual"),
   orderType: z.enum(["payment", "order_form"]).optional().default("order_form"),
   imageGradient: z.string().optional().default("from-blue-400 to-indigo-500"),
+  isMultiDay: z.boolean().optional().default(false),
   location: z.string().max(200).optional().default(""),
 });
 

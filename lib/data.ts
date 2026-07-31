@@ -13,6 +13,7 @@ export interface Activity {
   over18: boolean;
   orderType: "order_form" | "payment";
   location?: string;
+  isMultiDay?: boolean;
   partnerEmail?: string;
   partnerSlug?: string;
 }

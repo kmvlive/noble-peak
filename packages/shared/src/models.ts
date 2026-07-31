@@ -29,6 +29,7 @@ export interface ActivityRecord {
   orderType: OrderType;
   imageGradient: string;
   location?: string;
+  isMultiDay?: boolean;
   status: ActivityStatus;
   partnerEmail?: string;
   createdAt: string;

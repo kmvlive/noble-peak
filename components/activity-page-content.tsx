@@ -10,6 +10,7 @@ import {
   CalendarDays,
   Map,
   User,
+  CalendarRange,
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -173,6 +174,15 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
                 <MapPin className="mr-0.5 h-3 w-3" />
                 {activity.category}
               </Badge>
+              {activity.isMultiDay && (
+                <Badge
+                  variant="outline"
+                  className="gap-1 border-primary/30 text-primary"
+                >
+                  <CalendarRange className="h-3 w-3" />
+                  Многодневная
+                </Badge>
+              )}
             </div>
             <h1 className="text-2xl font-bold tracking-tight break-words sm:text-3xl">
               {activity.title}

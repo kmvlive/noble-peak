@@ -38,6 +38,7 @@ interface AdminActivityFormProps {
     orderType: OrderType;
     imageGradient: string;
     location?: string;
+    isMultiDay?: boolean;
   };
 }
 
@@ -87,6 +88,7 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [over18, setOver18] = useState(activity?.over18 ?? false);
   const [location, setLocation] = useState(activity?.location ?? "");
+  const [isMultiDay, setIsMultiDay] = useState(activity?.isMultiDay ?? false);
 
   const [id, setId] = useState(activity?.id ?? "");
 
@@ -141,6 +143,7 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
       orderType,
       imageGradient,
       location: location.trim(),
+      isMultiDay,
     };
 
     try {
@@ -580,6 +583,22 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
             className="text-sm font-medium cursor-pointer py-2"
           >
             18+
+          </label>
+        </div>
+
+        <div className="flex items-center gap-3 min-h-11">
+          <input
+            type="checkbox"
+            id="isMultiDay"
+            checked={isMultiDay}
+            onChange={(e) => setIsMultiDay(e.target.checked)}
+            className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
+          />
+          <label
+            htmlFor="isMultiDay"
+            className="text-sm font-medium cursor-pointer py-2"
+          >
+            Многодневная активность
           </label>
         </div>
 

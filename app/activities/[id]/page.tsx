@@ -45,6 +45,7 @@ async function fetchActivity(id: string): Promise<Activity | null> {
       over18: data.over18,
       orderType: data.orderType,
       location: data.location,
+      isMultiDay: data.isMultiDay,
       partnerEmail: data.partnerEmail,
       partnerSlug,
     };

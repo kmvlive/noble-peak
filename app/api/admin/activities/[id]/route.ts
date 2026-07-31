@@ -20,6 +20,7 @@ const updateActivitySchema = z.object({
   activityType: z.enum(["individual", "group"]).optional(),
   orderType: z.enum(["payment", "order_form"]).optional(),
   imageGradient: z.string().optional(),
+  isMultiDay: z.boolean().optional(),
   location: z.string().max(200).optional(),
   status: z.enum(["active", "pending", "rejected"]).optional(),
 });

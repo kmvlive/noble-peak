@@ -41,6 +41,7 @@ export function PartnerActivityForm() {
   const [over18, setOver18] = useState(false);
   const [activityType, setActivityType] = useState<ActivityType>("individual");
   const [location, setLocation] = useState("");
+  const [isMultiDay, setIsMultiDay] = useState(false);
 
   useEffect(() => {
     fetch("/api/admin/sections")
@@ -79,6 +80,7 @@ export function PartnerActivityForm() {
       activityType,
       imageGradient,
       location: location.trim(),
+      isMultiDay,
     };
 
     try {
@@ -412,6 +414,19 @@ export function PartnerActivityForm() {
           />
           <label htmlFor="over18" className="text-sm font-medium">
             18+
+          </label>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id="isMultiDay"
+            checked={isMultiDay}
+            onChange={(e) => setIsMultiDay(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+          />
+          <label htmlFor="isMultiDay" className="text-sm font-medium">
+            Многодневная активность
           </label>
         </div>
 
