@@ -31,7 +31,7 @@ export default async function SectionPage({
   if (!section) notFound();
 
   const categoryActivities = activities.filter(
-    (a) => a.section === section.name
+    (a) => a.section === section.category
   );
 
   return (
