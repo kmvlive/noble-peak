@@ -82,7 +82,7 @@ export function PartnerLayoutClient({
 
   const handleLogout = () => {
     clearToken();
-    router.replace("/partner/login");
+    router.replace("/");
   };
 
   const isLoginPage = pathname === "/partner/login";

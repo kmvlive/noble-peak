@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { Sparkles, Home, CalendarCheck, Bell } from "lucide-react";
+import { Sparkles, Home, CalendarCheck, Bell, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface MenuItem {
@@ -25,9 +26,15 @@ export function ClientLayoutClient({
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
   const pathname = usePathname();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [menuLoading, setMenuLoading] = useState(true);
+
+  const handleLogout = () => {
+    localStorage.removeItem("client_token");
+    router.replace("/");
+  };
 
   useEffect(() => {
     fetchMenuItems();
@@ -100,6 +107,10 @@ export function ClientLayoutClient({
           )}
         </nav>
         <div className="hidden md:block flex-1" />
+        <Button variant="ghost" size="sm" onClick={handleLogout}>
+          <LogOut className="h-4 w-4 md:mr-1.5" />
+          <span className="hidden md:inline">Выйти</span>
+        </Button>
       </header>
       <main className="flex-1 overflow-y-auto">{children}</main>
       {!hideBottomNav && (
