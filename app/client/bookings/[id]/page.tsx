@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { CheckCircle, ArrowLeft } from "lucide-react";
 import { appName } from "@/lib/app-name";
+import { GuestSetPassword } from "@/components/guest-set-password";
 
 export const metadata: Metadata = {
   title: `Бронирование подтверждено — ${appName}`,
@@ -32,6 +33,7 @@ export default async function BookingConfirmationPage({
           <p className="text-xs text-muted-foreground">Номер бронирования</p>
           <p className="mt-1 font-mono text-sm font-medium">{id}</p>
         </div>
+        <GuestSetPassword />
         <div className="flex flex-col gap-2">
           <Link
             href="/"

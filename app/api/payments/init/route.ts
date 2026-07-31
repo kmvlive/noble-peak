@@ -7,8 +7,14 @@ import {
   getActivityById,
   removeBookedSlotFromCalendar,
   createOrder,
+  getClientByPhone,
+  createClient,
+  getClientByEmail,
 } from "@/lib/models";
-import { getClientEmailFromRequest } from "@/lib/client-auth";
+import {
+  getClientEmailFromRequest,
+  createClientToken,
+} from "@/lib/client-auth";
 import { initPayment } from "@/lib/payment";
 
 const initPaymentSchema = z.object({
@@ -16,18 +22,18 @@ const initPaymentSchema = z.object({
   date: z.string().min(1),
   time: z.string().nullable(),
   details: z.string().max(5000).default(""),
+  clientName: z.string().optional(),
+  clientPhone: z.string().optional(),
 });
+
+function generateGuestEmail(phone: string): string {
+  const cleanPhone = phone.replace(/\D/g, "");
+  return `guest_${cleanPhone}@magazin-tour.ru`;
+}
 
 export async function POST(request: NextRequest) {
   try {
     const clientEmail = getClientEmailFromRequest(request);
-    if (!clientEmail) {
-      return NextResponse.json(
-        { error: "Необходимо авторизоваться" },
-        { status: 401 }
-      );
-    }
-
     const parsed = initPaymentSchema.safeParse(await request.json());
     if (!parsed.success) {
       return NextResponse.json(
@@ -44,7 +50,56 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { activityId, date, time, details } = parsed.data;
+    const { activityId, date, time, details, clientName, clientPhone } =
+      parsed.data;
+
+    let effectiveEmail = clientEmail;
+    let effectiveName = "";
+    let effectivePhone = "";
+
+    if (!effectiveEmail) {
+      if (!clientName || !clientPhone) {
+        return NextResponse.json(
+          { error: "Необходимо авторизоваться или указать имя и телефон" },
+          { status: 401 }
+        );
+      }
+
+      const existingClient = await getClientByPhone(clientPhone);
+      if (existingClient) {
+        return NextResponse.json(
+          {
+            isGuestConflict: true,
+            error:
+              "Этот номер уже используется. Пожалуйста, авторизуйтесь для оплаты",
+          },
+          { status: 409 }
+        );
+      }
+
+      const guestEmail = generateGuestEmail(clientPhone);
+
+      const existingGuest = await getClientByEmail(guestEmail);
+      if (!existingGuest) {
+        await createClient({
+          email: guestEmail,
+          name: clientName,
+          phone: clientPhone,
+          passwordHash: "",
+        });
+      }
+
+      effectiveEmail = guestEmail;
+      effectiveName = clientName;
+      effectivePhone = clientPhone;
+    } else {
+      const clientRes = await fetch(`${request.nextUrl.origin}/api/client/me`, {
+        headers: { cookie: request.headers.get("cookie") ?? "" },
+      });
+      const clientData = clientRes.ok ? await clientRes.json() : null;
+      effectiveName = clientData?.client?.name ?? "";
+      effectivePhone = clientData?.client?.phone ?? "";
+    }
 
     const activity = await getActivityById(activityId);
     if (!activity) {
@@ -54,20 +109,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const clientRes = await fetch(`${request.nextUrl.origin}/api/client/me`, {
-      headers: { cookie: request.headers.get("cookie") ?? "" },
-    });
-    const clientData = clientRes.ok ? await clientRes.json() : null;
-    const clientName = clientData?.client?.name ?? "";
-    const clientPhone = clientData?.client?.phone ?? "";
-
     const amount = activity.partnerPrice ?? activity.price;
 
     const booking = await createBooking(
       {
-        clientEmail,
-        clientName,
-        clientPhone,
+        clientEmail: effectiveEmail,
+        clientName: effectiveName,
+        clientPhone: effectivePhone,
         activityId: activity.id,
         activityTitle: activity.title,
         date,
@@ -80,9 +128,9 @@ export async function POST(request: NextRequest) {
 
     createOrder({
       bookingId: booking.id,
-      clientEmail,
-      clientName,
-      clientPhone,
+      clientEmail: effectiveEmail,
+      clientName: effectiveName,
+      clientPhone: effectivePhone,
       activityId: activity.id,
       activityTitle: activity.title,
       partnerEmail: activity.partnerEmail ?? null,
@@ -122,10 +170,16 @@ export async function POST(request: NextRequest) {
       paymentUrl: tinkoffRes.PaymentURL,
     });
 
+    const setPasswordToken = !clientEmail
+      ? createClientToken(effectiveEmail)
+      : null;
+
     return NextResponse.json({
       success: true,
       bookingId: booking.id,
       paymentUrl: tinkoffRes.PaymentURL,
+      setPasswordToken,
+      isGuest: !clientEmail,
     });
   } catch {
     return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });

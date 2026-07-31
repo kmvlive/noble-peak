@@ -289,6 +289,22 @@ export async function getClientByEmail(
   return (result.Item as ClientRecord) ?? null;
 }
 
+export async function getClientByPhone(
+  phone: string
+): Promise<ClientRecord | null> {
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.CLIENTS,
+      FilterExpression: "phone = :phone",
+      ExpressionAttributeValues: {
+        ":phone": phone,
+      },
+    })
+  );
+  const items = (result.Items as ClientRecord[]) ?? [];
+  return items.length > 0 ? items[0] : null;
+}
+
 export async function createClient(
   data: Omit<ClientRecord, "createdAt">
 ): Promise<ClientRecord> {
@@ -325,6 +341,7 @@ export async function updateClient(
       ClientRecord,
       | "name"
       | "phone"
+      | "passwordHash"
       | "vkUserId"
       | "vkAccessToken"
       | "vkNotificationsEnabled"
@@ -347,6 +364,12 @@ export async function updateClient(
     updateExpr.push("#phone = :phone");
     exprValues[":phone"] = data.phone;
     exprNames["#phone"] = "phone";
+  }
+
+  if (data.passwordHash !== undefined) {
+    updateExpr.push("#passwordHash = :passwordHash");
+    exprValues[":passwordHash"] = data.passwordHash;
+    exprNames["#passwordHash"] = "passwordHash";
   }
 
   if (data.vkUserId !== undefined) {

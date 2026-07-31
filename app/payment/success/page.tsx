@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { CheckCircle, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { appName } from "@/lib/app-name";
+import { GuestSetPassword } from "@/components/guest-set-password";
 
 export const metadata: Metadata = {
   title: `Оплата успешна — ${appName}`,
@@ -34,6 +35,7 @@ export default async function PaymentSuccessPage({
             <p className="mt-1 font-mono text-sm font-medium">{bookingId}</p>
           </div>
         )}
+        <GuestSetPassword />
         <div className="flex flex-col gap-2">
           <Link
             href="/"

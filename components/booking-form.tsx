@@ -55,12 +55,19 @@ export function BookingForm({
           clientPhone: phone,
           details,
           price,
+          isGuest: !initialName,
         }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
+        if (res.status === 409) {
+          toast.error(
+            "Этот номер уже используется. Пожалуйста, авторизуйтесь для оплаты"
+          );
+          return;
+        }
         if (res.status === 401) {
           toast.error("Необходимо войти в личный кабинет");
           router.push("/client/login");
@@ -71,6 +78,11 @@ export function BookingForm({
       }
 
       toast.success("Бронирование подтверждено!");
+
+      if (data.isGuest && data.setPasswordToken) {
+        localStorage.setItem("guest_token", data.setPasswordToken);
+      }
+
       router.push(`/client/bookings/${data.booking.id}`);
     } catch {
       toast.error("Ошибка соединения с сервером");

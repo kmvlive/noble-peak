@@ -1,15 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { CreditCard, Loader2, AlertCircle, ArrowLeft } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
+import {
+  CreditCard,
+  Loader2,
+  AlertCircle,
+  ArrowLeft,
+  User,
+  Phone,
+} from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
+import { toast } from "sonner";
 
 export function PaymentPageContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const activityId = searchParams.get("activityId");
   const date = searchParams.get("date");
@@ -20,6 +28,10 @@ export function PaymentPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
+  const [isGuest, setIsGuest] = useState(false);
+  const [guestName, setGuestName] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
+  const [guestConflict, setGuestConflict] = useState(false);
 
   const handleRetry = () => {
     setError(null);
@@ -28,17 +40,29 @@ export function PaymentPageContent() {
     setRetryKey((k) => k + 1);
   };
 
-  useEffect(() => {
+  const run = useCallback(async () => {
     if (!activityId || !date) return;
 
     let cancelled = false;
 
-    const run = async () => {
+    const doFetch = async () => {
       try {
+        const body: Record<string, unknown> = {
+          activityId,
+          date,
+          time,
+          details: "",
+        };
+
+        if (isGuest) {
+          body.clientName = guestName;
+          body.clientPhone = guestPhone;
+        }
+
         const res = await fetch("/api/payments/init", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ activityId, date, time, details: "" }),
+          body: JSON.stringify(body),
         });
 
         if (cancelled) return;
@@ -47,12 +71,32 @@ export function PaymentPageContent() {
 
         if (!res.ok) {
           if (res.status === 401) {
-            router.push("/client/login");
+            if (isGuest) {
+              setError(
+                data.error || "Необходимо указать имя и телефон для оплаты"
+              );
+              setLoading(false);
+              return;
+            }
+            setIsGuest(true);
+            setLoading(false);
+            return;
+          }
+          if (res.status === 409) {
+            setGuestConflict(true);
+            setError(
+              "Этот номер уже используется. Пожалуйста, авторизуйтесь для оплаты"
+            );
+            setLoading(false);
             return;
           }
           setError(data.error || "Ошибка при создании платежа");
           setLoading(false);
           return;
+        }
+
+        if (data.isGuest && data.setPasswordToken) {
+          localStorage.setItem("guest_token", data.setPasswordToken);
         }
 
         setPaymentUrl(data.paymentUrl);
@@ -70,12 +114,31 @@ export function PaymentPageContent() {
       }
     };
 
-    run();
+    doFetch();
 
     return () => {
       cancelled = true;
     };
-  }, [activityId, date, time, router, retryKey]);
+  }, [activityId, date, time, isGuest, guestName, guestPhone]);
+
+  useEffect(() => {
+    const cancel = run();
+    return () => {
+      cancel?.then((fn) => fn?.());
+    };
+  }, [run, retryKey]);
+
+  const handleGuestSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!guestName || !guestPhone) {
+      toast.error("Заполните имя и телефон");
+      return;
+    }
+    setGuestConflict(false);
+    setError(null);
+    setLoading(true);
+    setRetryKey((k) => k + 1);
+  };
 
   if (!activityId || !date) {
     return (
@@ -103,7 +166,89 @@ export function PaymentPageContent() {
     );
   }
 
-  if (error) {
+  if (isGuest && !loading && !paymentUrl && !redirecting) {
+    return (
+      <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md space-y-6">
+          <div className="text-center space-y-2">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+              <CreditCard className="h-8 w-8 text-primary" />
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight">Оплата</h1>
+            <p className="text-sm text-muted-foreground">
+              Укажите имя и телефон для оформления оплаты
+            </p>
+          </div>
+
+          {guestConflict && (
+            <Card className="border-destructive/50 bg-destructive/10 p-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+                <p className="text-sm text-muted-foreground">
+                  Этот номер уже используется. Пожалуйста, авторизуйтесь для
+                  оплаты
+                </p>
+              </div>
+            </Card>
+          )}
+
+          <form
+            onSubmit={handleGuestSubmit}
+            className="space-y-4 rounded-lg border p-4"
+          >
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Имя</label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={guestName}
+                  onChange={(e) => setGuestName(e.target.value)}
+                  className="pl-10"
+                  placeholder="Ваше имя"
+                  required
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Телефон
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={guestPhone}
+                  onChange={(e) => setGuestPhone(e.target.value)}
+                  className="pl-10"
+                  placeholder="+7 (999) 123-45-67"
+                  required
+                />
+              </div>
+            </div>
+            <Button type="submit" className="w-full">
+              Продолжить
+            </Button>
+          </form>
+
+          <Link
+            href="/client/login"
+            className="block text-center text-sm text-primary hover:underline"
+          >
+            Уже зарегистрированы? Войти
+          </Link>
+
+          <Link
+            href={`/activities/${activityId}`}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Вернуться к активности
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !paymentUrl) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
         <div className="w-full max-w-md space-y-6">
