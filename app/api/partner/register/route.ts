@@ -60,7 +60,24 @@ export async function POST(request: NextRequest) {
 
     const baseUrl = process.env.BASE_URL ?? "http://localhost:8080";
 
-    await sendEmail({
+    const response = NextResponse.json({
+      success: true,
+      token,
+      partner: {
+        name: partner.name,
+        phone: partner.phone,
+        email: partner.email,
+      },
+    });
+    response.cookies.set("partner_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 30,
+    });
+
+    sendEmail({
       to: email,
       subject: `Добро пожаловать в кабинет партнёра ${appName}`,
       html: `
@@ -78,23 +95,8 @@ export async function POST(request: NextRequest) {
         <p>Рекомендуем сменить пароль после первого входа.</p>
         <p>С уважением, команда ${appName}.</p>
       `,
-    });
-
-    const response = NextResponse.json({
-      success: true,
-      token,
-      partner: {
-        name: partner.name,
-        phone: partner.phone,
-        email: partner.email,
-      },
-    });
-    response.cookies.set("partner_token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 30,
+    }).catch((err) => {
+      console.error("Ошибка отправки email партнёру:", err);
     });
 
     return response;

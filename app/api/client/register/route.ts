@@ -58,7 +58,20 @@ export async function POST(request: NextRequest) {
 
     const token = createClientToken(email);
 
-    await sendEmail({
+    const response = NextResponse.json({
+      success: true,
+      token,
+      client: { name: client.name, phone: client.phone, email: client.email },
+    });
+    response.cookies.set("client_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 30,
+    });
+
+    sendEmail({
       to: email,
       subject: `Добро пожаловать в ${appName}`,
       html: `
@@ -74,19 +87,8 @@ export async function POST(request: NextRequest) {
         <p>Рекомендуем сменить пароль после первого входа.</p>
         <p>С уважением, команда ${appName}.</p>
       `,
-    });
-
-    const response = NextResponse.json({
-      success: true,
-      token,
-      client: { name: client.name, phone: client.phone, email: client.email },
-    });
-    response.cookies.set("client_token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 30,
+    }).catch((err) => {
+      console.error("Ошибка отправки email клиенту:", err);
     });
 
     return response;
