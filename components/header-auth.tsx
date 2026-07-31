@@ -16,7 +16,11 @@ export function HeaderAuth() {
     check();
 
     window.addEventListener("storage", check);
-    return () => window.removeEventListener("storage", check);
+    const interval = setInterval(check, 1000);
+    return () => {
+      window.removeEventListener("storage", check);
+      clearInterval(interval);
+    };
   }, []);
 
   const linkClass =
