@@ -3889,3 +3889,18 @@ tasks:
     related_feature: Техническое сопровождение
     status: pending
     summary: null
+  - id: task-179
+    phase: mvp
+    title: Исправить редирект после входа клиента на /client
+    description: 'В components/client-login-form.tsx заменить router.replace("/") на
+      router.replace("/client") в трёх местах: handleLogin, handleRegister и
+      VK-обработчик в useEffect.'
+    priority: high
+    acceptance_criteria:
+      - После входа клиента редирект на /client
+      - После регистрации клиента редирект на /client
+      - После VK-входа клиента редирект на /client
+    depends_on: []
+    related_feature: Личный кабинет клиента
+    status: pending
+    summary: null
