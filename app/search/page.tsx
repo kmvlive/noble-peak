@@ -6,10 +6,11 @@ export const metadata: Metadata = {
 };
 
 export default async function SearchPage(props: {
-  searchParams?: Promise<{ q?: string }>;
+  searchParams?: Promise<{ q?: string; direct?: string }>;
 }) {
   const searchParams = await props.searchParams;
   const initialQuery = searchParams?.q || "";
+  const direct = searchParams?.direct === "1";
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-4 py-8 sm:py-12">
@@ -23,7 +24,7 @@ export default async function SearchPage(props: {
         </p>
       </div>
 
-      <SearchAiAssistant initialQuery={initialQuery} />
+      <SearchAiAssistant initialQuery={initialQuery} direct={direct} />
     </div>
   );
 }

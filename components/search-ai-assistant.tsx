@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, startTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Bot, Send, Sparkles, Search, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ interface Message {
 
 interface SearchAiAssistantProps {
   initialQuery?: string;
+  direct?: boolean;
 }
 
 type QuestionStep = "greeting" | "type" | "city" | "budget" | "done";
@@ -337,7 +339,10 @@ async function searchActivities(params: {
   return res.json();
 }
 
-export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
+export function SearchAiAssistant({
+  initialQuery,
+  direct,
+}: SearchAiAssistantProps) {
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: GREETING_MESSAGE },
   ]);
@@ -357,6 +362,7 @@ export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isSearchingRef = useRef(false);
+  const router = useRouter();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -373,7 +379,7 @@ export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
   };
 
   useEffect(() => {
-    if (!initialQuery) return;
+    if (!initialQuery || direct) return;
 
     const timer = setTimeout(() => {
       setMessages([
@@ -418,6 +424,59 @@ export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
     }, 800);
     return () => clearTimeout(timer);
   }, [initialQuery]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!direct || !initialQuery) return;
+
+    startTransition(() => {
+      setStep("done");
+      setIsProcessing(true);
+    });
+
+    searchActivities({
+      q: initialQuery,
+      city: "",
+      budgetText: "",
+    })
+      .then((response) => {
+        setResults(response.activities);
+        setSectionNameMap(response.sectionNameMap);
+        setShowResults(true);
+        setSearchError(false);
+        if (response.activities.length === 0) {
+          setMessages([
+            {
+              role: "assistant",
+              content:
+                "К сожалению, по вашему запросу ничего не найдено. Попробуйте изменить критерии поиска.",
+            },
+          ]);
+        } else {
+          setMessages([
+            {
+              role: "assistant",
+              content: `Найдено ${response.activities.length} ${response.activities.length === 1 ? "активность" : "активностей"}:`,
+            },
+          ]);
+        }
+      })
+      .catch(() => {
+        setSearchError(true);
+        setShowResults(true);
+        setMessages([
+          {
+            role: "assistant",
+            content:
+              "Произошла ошибка при поиске. Пожалуйста, попробуйте ещё раз.",
+          },
+        ]);
+      })
+      .finally(() => {
+        startTransition(() => {
+          setIsProcessing(false);
+        });
+      });
+  }, [direct, initialQuery]);
 
   const processAnswer = (text: string) => {
     addMessage("user", text);
@@ -691,9 +750,10 @@ export function SearchAiAssistant({ initialQuery }: SearchAiAssistantProps) {
                   query={inputValue}
                   visible={showSuggestions}
                   onSelect={(value) => {
-                    setInputValue(value);
                     setShowSuggestions(false);
-                    setTimeout(() => handleSend(), 0);
+                    router.push(
+                      `/search?q=${encodeURIComponent(value)}&direct=1`
+                    );
                   }}
                   onClose={() => setShowSuggestions(false)}
                 />

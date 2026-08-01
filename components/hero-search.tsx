@@ -24,7 +24,7 @@ export function HeroSearch() {
   const handleSelect = (value: string) => {
     setQuery(value);
     setShowSuggestions(false);
-    router.push(`/search?q=${encodeURIComponent(value)}`);
+    router.push(`/search?q=${encodeURIComponent(value)}&direct=1`);
   };
 
   const handleClose = () => {
