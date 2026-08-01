@@ -4,3 +4,6 @@ webhooks:
     events:
       - push
       - implement_project
+  - url: http://localhost:8080/api/trigger-deploy
+    events:
+      - implement_project

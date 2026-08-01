@@ -4,6 +4,14 @@ import path from "path";
 import yaml from "js-yaml";
 
 export async function GET(request: NextRequest) {
+  return handleTriggerDeploy(request);
+}
+
+export async function POST(request: NextRequest) {
+  return handleTriggerDeploy(request);
+}
+
+async function handleTriggerDeploy(request: NextRequest) {
   try {
     const webhooksPath = path.join(
       process.cwd(),

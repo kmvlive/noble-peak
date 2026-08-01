@@ -3939,7 +3939,8 @@ tasks:
   - id: task-181
     phase: mvp
     title: Форсировать деплой с Telegram-уведомлениями
-    description: Добавить в конец implement_project вызов curl
+    description: >-
+      Добавить в конец implement_project вызов curl
       http://localhost:8080/api/trigger-deploy, чтобы сервер сам себя
       пересобирал после каждого изменения кода.
     priority: high
@@ -3948,5 +3949,12 @@ tasks:
       - Telegram-блок появился в Уведомления и чат у партнёра
     depends_on: []
     related_feature: Техническое сопровождение
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Добавлен POST-обработчик в app/api/trigger-deploy/route.ts для поддержки
+      SourceCraft webhook (POST). Добавлен второй webhook в
+      .sourcecraft/webhooks.yaml:7 с URL http://localhost:8080/api/trigger-deploy
+      на событие implement_project, чтобы при каждом изменении кода сервер
+      сам себя пересобирал. Telegram-блоки уже присутствуют в компонентах
+      components/client-notifications-list.tsx и
+      components/partner-notifications-list.tsx. typecheck, lint, build проходят.
