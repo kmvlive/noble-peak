@@ -4050,5 +4050,9 @@ tasks:
       - После VK-входа клиента редирект на /client
     depends_on: []
     related_feature: Личный кабинет клиента
-    status: pending
-    summary: null
+    status: completed
+    summary:
+      'В components/client-login-form.tsx заменены три вызова router.replace("/")
+      на router.replace("/client") в handleLogin, handleRegister и VK-обработчике
+      useEffect. После входа, регистрации и VK-авторизации клиент теперь
+      перенаправляется на /client. typecheck, lint, build проходят.'

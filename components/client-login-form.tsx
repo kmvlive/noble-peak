@@ -53,7 +53,7 @@ export function ClientLoginForm() {
           }
           toast.success("Добро пожаловать!");
           localStorage.setItem("client_token", data.token);
-          router.replace("/");
+          router.replace("/client");
         })
         .catch(() => {
           toast.error("Ошибка соединения с сервером");
@@ -89,7 +89,7 @@ export function ClientLoginForm() {
 
       toast.success("Добро пожаловать!");
       localStorage.setItem("client_token", data.token);
-      router.replace("/");
+      router.replace("/client");
     } catch {
       toast.error("Ошибка соединения с сервером");
     } finally {
@@ -127,7 +127,7 @@ export function ClientLoginForm() {
 
       toast.success("Регистрация прошла успешно! Проверьте вашу почту.");
       localStorage.setItem("client_token", data.token);
-      router.replace("/");
+      router.replace("/client");
     } catch {
       toast.error("Ошибка соединения с сервером");
     } finally {
