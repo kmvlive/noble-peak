@@ -116,6 +116,29 @@ export async function POST(request: NextRequest) {
       });
     } else if (isPaymentFailed(Status)) {
       await failBookingPayment(booking.id, Status);
+
+      const activity = await getActivityById(booking.activityId);
+
+      createNotification({
+        recipientEmail: booking.clientEmail,
+        type: "booking_status",
+        title: "Оплата не прошла",
+        message: `Оплата бронирования на "${booking.activityTitle}" не прошла. Попробуйте снова или свяжитесь с поддержкой.`,
+        link: `/client/bookings/${booking.id}`,
+      }).catch((e) => console.error("Ошибка создания уведомления клиенту:", e));
+
+      const partnerEmail = activity?.partnerEmail;
+      if (partnerEmail) {
+        createNotification({
+          recipientEmail: partnerEmail,
+          type: "new_order",
+          title: "Заказ отменён",
+          message: `Заказ на "${booking.activityTitle}" от ${booking.clientName} отменён — оплата не прошла.`,
+          link: `/partner/orders`,
+        }).catch((e) =>
+          console.error("Ошибка создания уведомления партнёру:", e)
+        );
+      }
     }
 
     return NextResponse.json({ Success: true });

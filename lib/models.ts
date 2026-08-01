@@ -1580,7 +1580,7 @@ export interface NotificationRecord {
 
 export async function createNotification(
   data: Omit<NotificationRecord, "id" | "createdAt" | "isRead">
-): Promise<NotificationRecord> {
+): Promise<NotificationRecord | null> {
   const notification: NotificationRecord = {
     id: randomUUID(),
     ...data,
@@ -1588,12 +1588,16 @@ export async function createNotification(
     createdAt: new Date().toISOString(),
   };
 
-  await docClient.send(
-    new PutCommand({
-      TableName: TableName.NOTIFICATIONS,
-      Item: notification,
-    })
-  );
+  try {
+    await docClient.send(
+      new PutCommand({
+        TableName: TableName.NOTIFICATIONS,
+        Item: notification,
+      })
+    );
+  } catch (e) {
+    console.error("Ошибка сохранения уведомления в БД:", e);
+  }
 
   sendVkNotification(data.recipientEmail, data.title, data.message).catch((e) =>
     console.error("VK notify error:", e)
