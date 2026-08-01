@@ -3939,8 +3939,7 @@ tasks:
   - id: task-181
     phase: mvp
     title: Форсировать деплой с Telegram-уведомлениями
-    description: >-
-      Добавить в конец implement_project вызов curl
+    description: Добавить в конец implement_project вызов curl
       http://localhost:8080/api/trigger-deploy, чтобы сервер сам себя
       пересобирал после каждого изменения кода.
     priority: high
@@ -3950,11 +3949,30 @@ tasks:
     depends_on: []
     related_feature: Техническое сопровождение
     status: completed
-    summary: >-
-      Добавлен POST-обработчик в app/api/trigger-deploy/route.ts для поддержки
-      SourceCraft webhook (POST). Добавлен второй webhook в
-      .sourcecraft/webhooks.yaml:7 с URL http://localhost:8080/api/trigger-deploy
-      на событие implement_project, чтобы при каждом изменении кода сервер
-      сам себя пересобирал. Telegram-блоки уже присутствуют в компонентах
+    summary: Добавлен POST-обработчик в app/api/trigger-deploy/route.ts для
+      поддержки SourceCraft webhook (POST). Добавлен второй webhook в
+      .sourcecraft/webhooks.yaml:7 с URL
+      http://localhost:8080/api/trigger-deploy на событие implement_project,
+      чтобы при каждом изменении кода сервер сам себя пересобирал.
+      Telegram-блоки уже присутствуют в компонентах
       components/client-notifications-list.tsx и
-      components/partner-notifications-list.tsx. typecheck, lint, build проходят.
+      components/partner-notifications-list.tsx. typecheck, lint, build
+      проходят.
+  - id: task-182
+    phase: mvp
+    title: RSS-каналы для разделов активностей
+    description: "Создать RSS-каналы для сайта: 1) Общая RSS-лента /rss.xml со всеми
+      активными активностями, 2) RSS для каждого раздела
+      /sections/[slug]/rss.xml с активностями этого раздела. В RSS: название,
+      описание, цена, город, ссылка на активность."
+    priority: medium
+    acceptance_criteria:
+      - RSS-лента доступна по /rss.xml
+      - RSS содержит все активные активности с названием, описанием, ценой,
+        городом, ссылкой
+      - RSS-лента для каждого раздела доступна по /sections/[slug]/rss.xml
+      - RSS автоматически обновляется при добавлении новых активностей
+    depends_on: []
+    related_feature: SEO и производительность
+    status: pending
+    summary: null
