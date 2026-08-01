@@ -2,7 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { User, Loader2, ExternalLink, Camera, Globe } from "lucide-react";
+import {
+  Copy,
+  Rss,
+  User,
+  Loader2,
+  ExternalLink,
+  Camera,
+  Globe,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -116,6 +124,18 @@ export function PartnerPublicProfileEditor() {
       ? `${window.location.origin}/partners/${encodeURIComponent(slug)}`
       : "";
 
+  const rssUrl =
+    typeof window !== "undefined" && slug
+      ? `${window.location.origin}/partners/${encodeURIComponent(slug)}/rss.xml`
+      : "";
+
+  const handleCopyRssLink = () => {
+    if (rssUrl) {
+      navigator.clipboard.writeText(rssUrl);
+      toast.success("Ссылка скопирована");
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4 mb-6">
@@ -145,6 +165,29 @@ export function PartnerPublicProfileEditor() {
           <ExternalLink className="h-4 w-4" />
           Открыть публичный профиль
         </Link>
+      )}
+
+      {rssUrl && (
+        <div className="flex items-center gap-2 text-sm">
+          <Rss className="h-4 w-4 text-orange-500 shrink-0" />
+          <span className="text-muted-foreground">Ваш RSS-канал:</span>
+          <a
+            href={rssUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline truncate max-w-[300px]"
+          >
+            {rssUrl}
+          </a>
+          <button
+            type="button"
+            onClick={handleCopyRssLink}
+            className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+            title="Скопировать ссылку"
+          >
+            <Copy className="h-4 w-4" />
+          </button>
+        </div>
       )}
 
       <div className="space-y-2">
