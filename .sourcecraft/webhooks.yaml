@@ -3,4 +3,4 @@ webhooks:
     secret: 3724841febb66a37c1f25c9c8157a6521ccd9166c848e2371462a37f85f94852
     events:
       - push
-
+      - implement_project
