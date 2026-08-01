@@ -3,15 +3,17 @@ import Link from "next/link";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
-import { BridgeProvider } from "@/components/bridge-provider";
-import { Toaster } from "@/components/ui/sonner";
 import { sections } from "@/lib/data";
 import { appName } from "@/lib/app-name";
-import { FooterMenu } from "@/components/footer-menu";
-import { AnalyticsInjector } from "@/components/analytics-injector";
-import { NotificationPoller } from "@/components/notification-poller";
-import { HeaderAuth } from "@/components/header-auth";
-import { InstallPrompt } from "@/components/install-prompt";
+import {
+  BridgeProvider,
+  AnalyticsInjector,
+  NotificationPoller,
+  HeaderAuth,
+  FooterMenu,
+  InstallPrompt,
+  Toaster,
+} from "@/components/root-client-components";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
