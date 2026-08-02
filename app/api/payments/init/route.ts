@@ -15,7 +15,7 @@ import {
   getClientEmailFromRequest,
   createClientToken,
 } from "@/lib/client-auth";
-import { initPayment } from "@/lib/payment";
+import { initPayment, loadPaymentSettings } from "@/lib/payment";
 
 const initPaymentSchema = z.object({
   activityId: z.string().min(1),
@@ -145,6 +145,7 @@ export async function POST(request: NextRequest) {
     );
 
     const amountKopecks = Math.round(amount * 100);
+    await loadPaymentSettings();
     const tinkoffRes = await initPayment(
       booking.id,
       amountKopecks,

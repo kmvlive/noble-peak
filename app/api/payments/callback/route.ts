@@ -3,6 +3,7 @@ import {
   verifyNotificationToken,
   isPaymentSuccessful,
   isPaymentFailed,
+  loadPaymentSettings,
 } from "@/lib/payment";
 import {
   getBookingById,
@@ -26,6 +27,8 @@ export async function POST(request: NextRequest) {
 
     const params = { ...body };
     delete params.Token;
+
+    await loadPaymentSettings();
 
     if (!verifyNotificationToken(params, Token)) {
       return NextResponse.json({ error: "Invalid token" }, { status: 403 });

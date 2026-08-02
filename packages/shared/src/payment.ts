@@ -1,14 +1,30 @@
 import { createHash } from "node:crypto";
 
+let _terminalKey: string | undefined;
+let _password: string | undefined;
+
+export function setPaymentCredentials(
+  terminalKey: string,
+  password: string
+): void {
+  _terminalKey = terminalKey;
+  _password = password;
+}
+
+export function clearPaymentCredentials(): void {
+  _terminalKey = undefined;
+  _password = undefined;
+}
+
 const TINKOFF_API_URL =
   process.env.TINKOFF_API_URL ?? "https://securepay.tinkoff.ru/v2";
 
 function getTerminalKey(): string {
-  return process.env.TINKOFF_TERMINAL_KEY ?? "";
+  return _terminalKey ?? process.env.TINKOFF_TERMINAL_KEY ?? "";
 }
 
 function getPassword(): string {
-  return process.env.TINKOFF_PASSWORD ?? "";
+  return _password ?? process.env.TINKOFF_PASSWORD ?? "";
 }
 
 function getBaseUrl(): string {
