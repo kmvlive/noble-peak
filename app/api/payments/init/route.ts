@@ -20,7 +20,10 @@ import { initPayment, loadPaymentSettings } from "@/lib/payment";
 const initPaymentSchema = z.object({
   activityId: z.string().min(1),
   date: z.string().min(1),
-  time: z.string().nullable(),
+  time: z
+    .string()
+    .nullable()
+    .transform((v) => (v === "" ? null : v)),
   details: z.string().max(5000).default(""),
   clientName: z.string().optional(),
   clientPhone: z.string().optional(),
