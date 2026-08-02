@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isDatabaseAvailable } from "@/lib/db";
-import { getAllPartners, updatePartner, getPartnerByEmail } from "@/lib/models";
+import {
+  getAllPartners,
+  updatePartner,
+  getPartnerByEmail,
+  deletePartner,
+} from "@/lib/models";
 import { mockPartners } from "@/lib/mock-data";
 import { verifyToken, isMainAdminPayload } from "@/lib/auth";
 import { z } from "zod";
@@ -8,6 +13,15 @@ import { z } from "zod";
 const updatePartnerSchema = z.object({
   email: z.string().email(),
   orderFormEnabled: z.boolean(),
+});
+
+const updateBlockStatusSchema = z.object({
+  email: z.string().email(),
+  blocked: z.boolean(),
+});
+
+const deletePartnerSchema = z.object({
+  email: z.string().email(),
 });
 
 function getTokenFromRequest(request: NextRequest): string | null {
@@ -93,6 +107,114 @@ export async function PUT(request: NextRequest) {
     console.error("Ошибка обновления партнёра:", error);
     return NextResponse.json(
       { error: "Ошибка обновления партнёра" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  const token = getTokenFromRequest(request);
+  if (!token || !verifyToken(token)) {
+    return NextResponse.json({ error: "Неавторизован" }, { status: 401 });
+  }
+
+  const payload = verifyToken(token);
+  if (!payload || !isMainAdminPayload(payload)) {
+    return NextResponse.json(
+      {
+        error: "Только главный администратор может блокировать партнёров",
+      },
+      { status: 403 }
+    );
+  }
+
+  const dbAvailable = await isDatabaseAvailable();
+  if (!dbAvailable) {
+    return NextResponse.json(
+      { error: "База данных недоступна" },
+      { status: 503 }
+    );
+  }
+
+  try {
+    const body = await request.json();
+    const parsed = updateBlockStatusSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Некорректные данные", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const { email, blocked } = parsed.data;
+
+    const existing = await getPartnerByEmail(email);
+    if (!existing) {
+      return NextResponse.json({ error: "Партнёр не найден" }, { status: 404 });
+    }
+
+    const updated = await updatePartner(email, { blocked });
+
+    return NextResponse.json(updated);
+  } catch (error) {
+    console.error("Ошибка изменения статуса партнёра:", error);
+    return NextResponse.json(
+      { error: "Ошибка изменения статуса партнёра" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  const token = getTokenFromRequest(request);
+  if (!token || !verifyToken(token)) {
+    return NextResponse.json({ error: "Неавторизован" }, { status: 401 });
+  }
+
+  const payload = verifyToken(token);
+  if (!payload || !isMainAdminPayload(payload)) {
+    return NextResponse.json(
+      {
+        error: "Только главный администратор может удалять партнёров",
+      },
+      { status: 403 }
+    );
+  }
+
+  const dbAvailable = await isDatabaseAvailable();
+  if (!dbAvailable) {
+    return NextResponse.json(
+      { error: "База данных недоступна" },
+      { status: 503 }
+    );
+  }
+
+  try {
+    const body = await request.json();
+    const parsed = deletePartnerSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Некорректные данные", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const { email } = parsed.data;
+
+    const existing = await getPartnerByEmail(email);
+    if (!existing) {
+      return NextResponse.json({ error: "Партнёр не найден" }, { status: 404 });
+    }
+
+    await deletePartner(email);
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Ошибка удаления партнёра:", error);
+    return NextResponse.json(
+      { error: "Ошибка удаления партнёра" },
       { status: 500 }
     );
   }

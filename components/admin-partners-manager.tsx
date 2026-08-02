@@ -19,6 +19,9 @@ import {
   BookOpen,
   BadgeInfo,
   ChevronRight,
+  Ban,
+  Trash2,
+  ShieldAlert,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +30,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
@@ -59,7 +63,7 @@ function InfoRow({
       <div className="min-w-0">
         <p className="text-xs text-muted-foreground">{label}</p>
         <p className="text-sm font-medium break-words">
-          {value || <span className="text-muted-foreground/50">—</span>}
+          {value || <span className="text-muted-foreground/50">&mdash;</span>}
         </p>
       </div>
     </div>
@@ -180,6 +184,81 @@ function PartnerInfoDialog({
   );
 }
 
+type ConfirmAction = "block" | "unblock" | "delete" | null;
+
+function ConfirmDialog({
+  open,
+  onOpenChange,
+  partner,
+  action,
+  onConfirm,
+  loading,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  partner: PartnerRecord | null;
+  action: ConfirmAction;
+  onConfirm: () => void;
+  loading: boolean;
+}) {
+  if (!partner || !action) return null;
+
+  const titles: Record<string, string> = {
+    block: "Заблокировать партнёра",
+    unblock: "Разблокировать партнёра",
+    delete: "Удалить партнёра",
+  };
+
+  const descriptions: Record<string, string> = {
+    block: `Партнёр «${partner.name}» (${partner.email}) не сможет войти в личный кабинет.`,
+    unblock: `Партнёр «${partner.name}» (${partner.email}) снова сможет войти в личный кабинет.`,
+    delete: `Партнёр «${partner.name}» (${partner.email}) и все его данные будут безвозвратно удалены. Это действие нельзя отменить.`,
+  };
+
+  const confirmLabels: Record<string, string> = {
+    block: "Заблокировать",
+    unblock: "Разблокировать",
+    delete: "Удалить",
+  };
+
+  const isDelete = action === "delete";
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            {isDelete ? (
+              <Trash2 className="h-4 w-4 text-destructive" />
+            ) : (
+              <Ban className="h-4 w-4 text-destructive" />
+            )}
+            {titles[action]}
+          </DialogTitle>
+          <DialogDescription>{descriptions[action]}</DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={loading}
+          >
+            Отмена
+          </Button>
+          <Button
+            variant={isDelete ? "destructive" : "default"}
+            onClick={onConfirm}
+            disabled={loading}
+          >
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {confirmLabels[action]}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function AdminPartnersManager() {
   const [partners, setPartners] = useState<PartnerRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -188,6 +267,12 @@ export function AdminPartnersManager() {
   const [selectedPartner, setSelectedPartner] = useState<PartnerRecord | null>(
     null
   );
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
+  const [confirmPartner, setConfirmPartner] = useState<PartnerRecord | null>(
+    null
+  );
+  const [actionLoading, setActionLoading] = useState(false);
 
   const fetchPartners = async () => {
     const token = getToken();
@@ -255,6 +340,79 @@ export function AdminPartnersManager() {
     setDialogOpen(true);
   };
 
+  const requestConfirm = (partner: PartnerRecord, action: ConfirmAction) => {
+    setConfirmPartner(partner);
+    setConfirmAction(action);
+    setConfirmOpen(true);
+  };
+
+  const executeAction = async () => {
+    if (!confirmPartner || !confirmAction) return;
+    const token = getToken();
+    setActionLoading(true);
+
+    try {
+      if (confirmAction === "delete") {
+        const res = await fetch("/api/admin/partners", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ email: confirmPartner.email }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          toast.error(err.error || "Ошибка удаления");
+          return;
+        }
+
+        setPartners((prev) =>
+          prev.filter((p) => p.email !== confirmPartner.email)
+        );
+        toast.success("Партнёр удалён");
+      } else {
+        const newBlocked = confirmAction === "block";
+
+        const res = await fetch("/api/admin/partners", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            email: confirmPartner.email,
+            blocked: newBlocked,
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          toast.error(err.error || "Ошибка изменения статуса");
+          return;
+        }
+
+        setPartners((prev) =>
+          prev.map((p) =>
+            p.email === confirmPartner.email ? { ...p, blocked: newBlocked } : p
+          )
+        );
+        toast.success(
+          newBlocked ? "Партнёр заблокирован" : "Партнёр разблокирован"
+        );
+      }
+
+      setConfirmOpen(false);
+      setConfirmPartner(null);
+      setConfirmAction(null);
+    } catch {
+      toast.error("Ошибка выполнения операции");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -293,16 +451,27 @@ export function AdminPartnersManager() {
                 Телефон
               </th>
               <th className="px-4 py-3 text-center text-sm font-medium text-muted-foreground">
+                Статус
+              </th>
+              <th className="px-4 py-3 text-center text-sm font-medium text-muted-foreground">
                 Форма заказа
               </th>
               <th className="px-4 py-3 text-center text-sm font-medium text-muted-foreground">
                 Данные
               </th>
+              <th className="px-4 py-3 text-center text-sm font-medium text-muted-foreground">
+                Действия
+              </th>
             </tr>
           </thead>
           <tbody>
             {partners.map((partner) => (
-              <tr key={partner.email} className="border-b last:border-b-0">
+              <tr
+                key={partner.email}
+                className={`border-b last:border-b-0 ${
+                  partner.blocked ? "bg-destructive/5" : ""
+                }`}
+              >
                 <td className="px-4 py-3 text-sm">{partner.name}</td>
                 <td className="px-4 py-3 text-sm text-muted-foreground">
                   <span className="inline-flex items-center gap-1">
@@ -315,6 +484,19 @@ export function AdminPartnersManager() {
                     <Phone className="h-3.5 w-3.5" />
                     {partner.phone}
                   </span>
+                </td>
+                <td className="px-4 py-3 text-center">
+                  {partner.blocked ? (
+                    <span className="inline-flex items-center gap-1 text-sm text-destructive">
+                      <ShieldAlert className="h-4 w-4" />
+                      Заблокирован
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-sm text-green-600">
+                      <UserCheck className="h-4 w-4" />
+                      Активен
+                    </span>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-center">
                   <Button
@@ -353,6 +535,40 @@ export function AdminPartnersManager() {
                     <span className="text-xs">Анкета</span>
                   </Button>
                 </td>
+                <td className="px-4 py-3 text-center">
+                  <div className="inline-flex items-center gap-1">
+                    {partner.blocked ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => requestConfirm(partner, "unblock")}
+                        className="inline-flex items-center gap-1"
+                      >
+                        <UserCheck className="h-3.5 w-3.5" />
+                        <span className="text-xs">Разблокировать</span>
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => requestConfirm(partner, "block")}
+                        className="inline-flex items-center gap-1"
+                      >
+                        <Ban className="h-3.5 w-3.5" />
+                        <span className="text-xs">Заблокировать</span>
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => requestConfirm(partner, "delete")}
+                      className="inline-flex items-center gap-1 text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      <span className="text-xs">Удалить</span>
+                    </Button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -363,6 +579,21 @@ export function AdminPartnersManager() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         partner={selectedPartner}
+      />
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={(open) => {
+          setConfirmOpen(open);
+          if (!open) {
+            setConfirmPartner(null);
+            setConfirmAction(null);
+          }
+        }}
+        partner={confirmPartner}
+        action={confirmAction}
+        onConfirm={executeAction}
+        loading={actionLoading}
       />
     </>
   );

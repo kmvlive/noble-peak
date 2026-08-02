@@ -170,6 +170,7 @@ export const mockPartners: PartnerRecord[] = [
     description:
       "<p>Профессиональный организатор активного отдыха в Крыму. Более 5 лет опыта проведения морских прогулок, треккинга и экскурсий.</p>",
     orderFormEnabled: true,
+    blocked: false,
     documentNumber: "26-С-123456-26",
     legalData: {
       country: "Россия",

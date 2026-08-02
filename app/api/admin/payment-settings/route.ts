@@ -11,7 +11,6 @@ const savePaymentSettingsSchema = z.object({
   webhookUrl: z.string().url("Некорректный URL вебхука"),
 });
 
-
 export async function GET() {
   const dbAvailable = await isDatabaseAvailable();
 

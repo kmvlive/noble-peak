@@ -22,6 +22,14 @@ export async function GET(request: NextRequest) {
           { status: 404 }
         );
       }
+
+      if (partner.blocked) {
+        return NextResponse.json(
+          { error: "Ваш аккаунт заблокирован. Обратитесь к администратору." },
+          { status: 403 }
+        );
+      }
+
       return NextResponse.json({
         name: partner.name,
         phone: partner.phone,
@@ -83,6 +91,18 @@ export async function PATCH(request: NextRequest) {
   }
 
   try {
+    const partner = await getPartnerByEmail(partnerEmail);
+    if (!partner) {
+      return NextResponse.json({ error: "Партнёр не найден" }, { status: 404 });
+    }
+
+    if (partner.blocked) {
+      return NextResponse.json(
+        { error: "Ваш аккаунт заблокирован. Обратитесь к администратору." },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const parsed = updateProfileSchema.safeParse(body);
 

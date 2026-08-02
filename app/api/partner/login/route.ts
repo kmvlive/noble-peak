@@ -39,6 +39,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (partner.blocked) {
+      return NextResponse.json(
+        { error: "Ваш аккаунт заблокирован. Обратитесь к администратору." },
+        { status: 403 }
+      );
+    }
+
     const token = createPartnerToken(email);
 
     const response = NextResponse.json({

@@ -925,6 +925,7 @@ export interface PartnerRecord {
   description?: string;
   slug?: string;
   orderFormEnabled?: boolean;
+  blocked?: boolean;
   documentNumber?: string;
   legalData?: LegalData;
   vkUserId?: string;
@@ -1013,6 +1014,7 @@ export async function updatePartner(
       | "description"
       | "slug"
       | "orderFormEnabled"
+      | "blocked"
       | "documentNumber"
       | "legalData"
       | "vkUserId"
@@ -1061,6 +1063,12 @@ export async function updatePartner(
     updateExpr.push("#orderFormEnabled = :orderFormEnabled");
     exprValues[":orderFormEnabled"] = data.orderFormEnabled;
     exprNames["#orderFormEnabled"] = "orderFormEnabled";
+  }
+
+  if (data.blocked !== undefined) {
+    updateExpr.push("#blocked = :blocked");
+    exprValues[":blocked"] = data.blocked;
+    exprNames["#blocked"] = "blocked";
   }
 
   if (data.documentNumber !== undefined) {

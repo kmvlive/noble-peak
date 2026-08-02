@@ -132,6 +132,7 @@ export interface PartnerRecord {
   description?: string;
   slug?: string;
   orderFormEnabled?: boolean;
+  blocked?: boolean;
   documentNumber?: string;
   legalData?: LegalData;
   vkUserId?: string;
