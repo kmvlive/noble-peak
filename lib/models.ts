@@ -293,9 +293,10 @@ export async function getClientByPhone(
   phone: string
 ): Promise<ClientRecord | null> {
   const result = await docClient.send(
-    new ScanCommand({
+    new QueryCommand({
       TableName: TableName.CLIENTS,
-      FilterExpression: "phone = :phone",
+      IndexName: IndexName.CLIENTS_PHONE,
+      KeyConditionExpression: "phone = :phone",
       ExpressionAttributeValues: {
         ":phone": phone,
       },
