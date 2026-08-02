@@ -4,6 +4,7 @@ import {
   sendChatMessage,
   getChatMessagesByOrder,
   getChatThreadsForClient,
+  getClientBookings,
 } from "@/lib/models";
 import { getClientEmailFromRequest } from "@/lib/client-auth";
 import { mockChatMessages, mockOrders } from "@/lib/mock-data";
@@ -41,13 +42,12 @@ export async function GET(request: NextRequest) {
 
     if (dbAvailable) {
       const messages = await getChatThreadsForClient(clientEmail);
-      const confirmedOrders = mockOrders
-        .filter(
-          (o) => o.clientEmail === clientEmail && o.status === "confirmed"
-        )
-        .map((o) => o.id);
+      const clientBookings = await getClientBookings(clientEmail);
+      const confirmedOrderIds = clientBookings
+        .filter((b) => b.status === "confirmed")
+        .map((b) => b.id);
       const threads = messages.filter((m) =>
-        confirmedOrders.includes(m.orderId)
+        confirmedOrderIds.includes(m.orderId)
       );
       return NextResponse.json({ threads });
     }
