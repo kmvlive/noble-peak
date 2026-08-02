@@ -4397,5 +4397,5 @@ tasks:
       - Автоматический деплой из SourceCraft работает
     depends_on: []
     related_feature: Техническое сопровождение
-    status: pending
-    summary: null
+    status: completed
+    summary: "Production build исправлен: app/layout.tsx и components/root-client-components.tsx используют правильные named exports с dynamic import для клиентских компонентов (BridgeProvider, AnalyticsInjector, NotificationPoller, HeaderAuth, FooterMenu, InstallPrompt, Toaster). typecheck, lint, build проходят без ошибок. Код запушен в SourceCraft (origin/main), настроен webhook для автоматического деплоя на сервер Timewood через .sourcecraft/webhooks.yaml. Health-check отвечает 200."
