@@ -79,7 +79,17 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
   [TableName.CLIENTS]: {
     name: TableName.CLIENTS,
     keySchema: [{ AttributeName: "email", KeyType: "HASH" }],
-    attributeDefinitions: [{ AttributeName: "email", AttributeType: "S" }],
+    attributeDefinitions: [
+      { AttributeName: "email", AttributeType: "S" },
+      { AttributeName: "phone", AttributeType: "S" },
+    ],
+    globalSecondaryIndexes: [
+      {
+        IndexName: "phone-index",
+        KeySchema: [{ AttributeName: "phone", KeyType: "HASH" }],
+        Projection: { ProjectionType: "ALL" },
+      },
+    ],
   },
   [TableName.BOOKINGS]: {
     name: TableName.BOOKINGS,
@@ -87,11 +97,17 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
     attributeDefinitions: [
       { AttributeName: "id", AttributeType: "S" },
       { AttributeName: "clientEmail", AttributeType: "S" },
+      { AttributeName: "activityId", AttributeType: "S" },
     ],
     globalSecondaryIndexes: [
       {
         IndexName: "clientEmail-index",
         KeySchema: [{ AttributeName: "clientEmail", KeyType: "HASH" }],
+        Projection: { ProjectionType: "ALL" },
+      },
+      {
+        IndexName: "activityId-index",
+        KeySchema: [{ AttributeName: "activityId", KeyType: "HASH" }],
         Projection: { ProjectionType: "ALL" },
       },
     ],
@@ -243,6 +259,7 @@ export const TABLE_NAMES: TableName[] = Object.values(TableName);
 export const IndexName = {
   SERVICES_STATUS: "status-index",
   BOOKINGS_CLIENT_EMAIL: "clientEmail-index",
+  BOOKINGS_ACTIVITY_ID: "activityId-index",
   ACTIVITIES_STATUS: "status-index",
   REVIEWS_STATUS: "status-index",
   NOTIFICATIONS_RECIPIENT_EMAIL: "recipientEmail-index",
@@ -250,6 +267,7 @@ export const IndexName = {
   CHAT_MESSAGES_CLIENT_EMAIL: "clientEmail-index",
   CHAT_MESSAGES_PARTNER_EMAIL: "partnerEmail-index",
   PARTNERS_SLUG: "slug-index",
+  CLIENTS_PHONE: "phone-index",
   ORDER_SETTINGS_ID: "id",
 } as const;
 
