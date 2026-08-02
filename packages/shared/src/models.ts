@@ -222,6 +222,11 @@ export interface SliderImage {
   createdAt: string;
 }
 
+export interface CityRecord {
+  name: string;
+  createdAt: string;
+}
+
 export interface ChatMessageRecord {
   id: string;
   orderId: string;

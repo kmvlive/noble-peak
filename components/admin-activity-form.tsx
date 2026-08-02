@@ -17,6 +17,8 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { getToken } from "./admin-layout-client";
 import { WysiwygEditor } from "./wysiwyg-editor";
+import { CityAutocomplete } from "./city-autocomplete";
+import { RUSSIAN_CITIES } from "@/lib/russian-cities";
 import type { OrderType, ActivityType, SectionRecord } from "@/lib/models";
 import { AdminActivityCalendar } from "./admin-activity-calendar";
 import { slugify } from "@/lib/utils";
@@ -169,6 +171,15 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
       }
 
       toast.success(isEditing ? "Активность обновлена" : "Активность создана");
+
+      if (location.trim() && !RUSSIAN_CITIES.includes(location.trim())) {
+        fetch("/api/cities", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: location.trim() }),
+        }).catch(() => {});
+      }
+
       router.push("/admin");
     } catch {
       toast.error("Ошибка сохранения");
@@ -404,10 +415,10 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
           <label htmlFor="location" className="text-sm font-medium">
             Город / место
           </label>
-          <Input
+          <CityAutocomplete
             id="location"
             value={location}
-            onChange={(e) => setLocation(e.target.value)}
+            onChange={setLocation}
             placeholder="г. Ялта, ул. Кирова, 15"
           />
         </div>

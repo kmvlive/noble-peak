@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { getToken } from "./partner-layout-client";
 import { WysiwygEditor } from "./wysiwyg-editor";
+import { CityAutocomplete } from "./city-autocomplete";
+import { RUSSIAN_CITIES } from "@/lib/russian-cities";
 import type { SectionRecord, ActivityType } from "@/lib/models";
 
 const gradientOptions = [
@@ -102,6 +104,15 @@ export function PartnerActivityForm() {
       }
 
       toast.success("Активность отправлена на модерацию");
+
+      if (location.trim() && !RUSSIAN_CITIES.includes(location.trim())) {
+        fetch("/api/cities", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: location.trim() }),
+        }).catch(() => {});
+      }
+
       router.push("/partner");
     } catch {
       toast.error("Ошибка сохранения");
@@ -317,10 +328,10 @@ export function PartnerActivityForm() {
           <label htmlFor="location" className="text-sm font-medium">
             Город / место
           </label>
-          <Input
+          <CityAutocomplete
             id="location"
             value={location}
-            onChange={(e) => setLocation(e.target.value)}
+            onChange={setLocation}
             placeholder="г. Ялта, ул. Кирова, 15"
           />
         </div>

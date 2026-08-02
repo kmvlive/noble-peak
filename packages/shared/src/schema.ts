@@ -24,6 +24,7 @@ export const TableName = {
   CHAT_MESSAGES: "chat_messages",
   SLIDER_IMAGES: "slider_images",
   ORDER_SETTINGS: "order_settings",
+  CITIES: "cities",
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];
@@ -273,6 +274,12 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
     name: TableName.ORDER_SETTINGS,
     keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
     attributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
+  },
+
+  [TableName.CITIES]: {
+    name: TableName.CITIES,
+    keySchema: [{ AttributeName: "name", KeyType: "HASH" }],
+    attributeDefinitions: [{ AttributeName: "name", AttributeType: "S" }],
   },
 };
 

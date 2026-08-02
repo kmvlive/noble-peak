@@ -15,6 +15,7 @@ import type {
   AnalyticsCounterRecord,
   OrderRecord,
   ReviewRecord,
+  CityRecord,
   ChatMessageRecord,
 } from "./models";
 import type { SliderImage, OrderSettingsRecord } from "./models";
@@ -685,6 +686,14 @@ export const mockOrderSettings: OrderSettingsRecord = {
 };
 
 export const mockSliderImages: SliderImage[] = [];
+
+export const mockCities: CityRecord[] = [
+  { name: "Севастополь", createdAt: new Date("2024-01-01").toISOString() },
+  { name: "Симферополь", createdAt: new Date("2024-01-01").toISOString() },
+  { name: "Ялта", createdAt: new Date("2024-01-01").toISOString() },
+  { name: "Москва", createdAt: new Date("2024-01-01").toISOString() },
+  { name: "Санкт-Петербург", createdAt: new Date("2024-01-01").toISOString() },
+];
 
 export const mockOrders: OrderRecord[] = [
   {

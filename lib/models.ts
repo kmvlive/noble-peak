@@ -1760,6 +1760,38 @@ export async function updateSliderImagePosition(
   );
 }
 
+export interface CityRecord {
+  name: string;
+  createdAt: string;
+}
+
+export async function getAllCities(): Promise<CityRecord[]> {
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.CITIES,
+    })
+  );
+  return (result.Items as CityRecord[]) ?? [];
+}
+
+export async function createCity(name: string): Promise<CityRecord> {
+  const city: CityRecord = {
+    name,
+    createdAt: new Date().toISOString(),
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.CITIES,
+      Item: city,
+      ConditionExpression: "attribute_not_exists(#name)",
+      ExpressionAttributeNames: { "#name": "name" },
+    })
+  );
+
+  return city;
+}
+
 export interface ChatMessageRecord {
   id: string;
   orderId: string;
