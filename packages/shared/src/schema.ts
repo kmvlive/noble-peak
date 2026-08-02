@@ -166,7 +166,29 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
   [TableName.ORDERS]: {
     name: TableName.ORDERS,
     keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
-    attributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
+    attributeDefinitions: [
+      { AttributeName: "id", AttributeType: "S" },
+      { AttributeName: "clientEmail", AttributeType: "S" },
+      { AttributeName: "activityId", AttributeType: "S" },
+      { AttributeName: "status", AttributeType: "S" },
+    ],
+    globalSecondaryIndexes: [
+      {
+        IndexName: "clientEmail-index",
+        KeySchema: [{ AttributeName: "clientEmail", KeyType: "HASH" }],
+        Projection: { ProjectionType: "ALL" },
+      },
+      {
+        IndexName: "activityId-index",
+        KeySchema: [{ AttributeName: "activityId", KeyType: "HASH" }],
+        Projection: { ProjectionType: "ALL" },
+      },
+      {
+        IndexName: "status-index",
+        KeySchema: [{ AttributeName: "status", KeyType: "HASH" }],
+        Projection: { ProjectionType: "ALL" },
+      },
+    ],
   },
   [TableName.NOTIFICATIONS]: {
     name: TableName.NOTIFICATIONS,
@@ -268,6 +290,9 @@ export const IndexName = {
   CHAT_MESSAGES_PARTNER_EMAIL: "partnerEmail-index",
   PARTNERS_SLUG: "slug-index",
   CLIENTS_PHONE: "phone-index",
+  ORDERS_CLIENT_EMAIL: "clientEmail-index",
+  ORDERS_ACTIVITY_ID: "activityId-index",
+  ORDERS_STATUS: "status-index",
   ORDER_SETTINGS_ID: "id",
 } as const;
 

@@ -9,6 +9,11 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { VkLoginButton } from "@/components/vk-login-button";
 
+function setClientToken(token: string) {
+  localStorage.setItem("client_token", token);
+  document.cookie = `client_token=${token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+}
+
 export function ClientLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -52,7 +57,7 @@ export function ClientLoginForm() {
             return;
           }
           toast.success("Добро пожаловать!");
-          localStorage.setItem("client_token", data.token);
+          setClientToken(data.token);
           router.replace("/client");
         })
         .catch(() => {
@@ -88,7 +93,7 @@ export function ClientLoginForm() {
       }
 
       toast.success("Добро пожаловать!");
-      localStorage.setItem("client_token", data.token);
+      setClientToken(data.token);
       router.replace("/client");
     } catch {
       toast.error("Ошибка соединения с сервером");
@@ -126,7 +131,7 @@ export function ClientLoginForm() {
       }
 
       toast.success("Регистрация прошла успешно! Проверьте вашу почту.");
-      localStorage.setItem("client_token", data.token);
+      setClientToken(data.token);
       router.replace("/client");
     } catch {
       toast.error("Ошибка соединения с сервером");
