@@ -39,6 +39,10 @@ export async function POST(request: NextRequest) {
     const clientEmail = getClientEmailFromRequest(request);
     const parsed = initPaymentSchema.safeParse(await request.json());
     if (!parsed.success) {
+      console.error(
+        "Ошибка валидации /api/payments/init:",
+        parsed.error.flatten()
+      );
       return NextResponse.json(
         { error: "Некорректные данные", details: parsed.error.flatten() },
         { status: 400 }
