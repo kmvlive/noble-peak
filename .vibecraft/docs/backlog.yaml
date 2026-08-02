@@ -4214,3 +4214,24 @@ tasks:
     related_feature: Техническое сопровождение
     status: pending
     summary: null
+  - id: task-194
+    phase: mvp
+    title: Исправить production build и запустить сервер
+    description: "Исправить production build на сервере Timeweb. Проблема: сборка
+      падает с ошибкой _global-error при prerender-е. Файлы app/layout.tsx и
+      components/root-client-components.tsx уже исправлены в репозитории
+      (используют правильные named exports с dynamic import). Нужно: 1) запушить
+      текущий код из SourceCraft в GitHub kmvlive/noble-peak, 2) на сервере
+      выполнить git pull, npm run build, pm2 restart. После этого проверить, что
+      сайт отвечает на https://my.magazin-tour.ru и оплата через Т-банк
+      работает."
+    priority: high
+    acceptance_criteria:
+      - Production build успешно собирается без ошибок
+      - Сервер отвечает на https://my.magazin-tour.ru
+      - Оплата через Т-банк работает (редирект на страницу Т-банка)
+      - Автоматический деплой из SourceCraft работает
+    depends_on: []
+    related_feature: Техническое сопровождение
+    status: pending
+    summary: null
