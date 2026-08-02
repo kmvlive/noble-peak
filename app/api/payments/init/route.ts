@@ -146,10 +146,12 @@ export async function POST(request: NextRequest) {
 
     const amountKopecks = Math.round(amount * 100);
     await loadPaymentSettings();
+    const baseUrl = request.nextUrl.origin;
     const tinkoffRes = await initPayment(
       booking.id,
       amountKopecks,
-      activity.title
+      activity.title,
+      baseUrl
     );
 
     if (

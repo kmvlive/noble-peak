@@ -62,11 +62,12 @@ export interface TinkoffGetStateResponse {
 export async function initPayment(
   orderId: string,
   amountKopecks: number,
-  description: string
+  description: string,
+  baseUrl?: string
 ): Promise<TinkoffInitResponse> {
   const terminalKey = getTerminalKey();
   const password = getPassword();
-  const baseUrl = getBaseUrl();
+  const resolvedBaseUrl = baseUrl ?? getBaseUrl();
 
   if (!terminalKey || !password) {
     return {
@@ -81,9 +82,9 @@ export async function initPayment(
     Amount: amountKopecks,
     OrderId: orderId,
     Description: description,
-    NotificationURL: `${baseUrl}/api/payments/callback`,
-    SuccessURL: `${baseUrl}/payment/success?bookingId=${orderId}`,
-    FailURL: `${baseUrl}/payment/fail?bookingId=${orderId}`,
+    NotificationURL: `${resolvedBaseUrl}/api/payments/callback`,
+    SuccessURL: `${resolvedBaseUrl}/payment/success?bookingId=${orderId}`,
+    FailURL: `${resolvedBaseUrl}/payment/fail?bookingId=${orderId}`,
   };
 
   params.Token = generateToken(params, password);
