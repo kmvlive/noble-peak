@@ -8,6 +8,7 @@ import {
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { TableName, IndexName } from "./schema";
+import type { InfoPageRecord, InfoPageTarget } from "./schema";
 import { randomUUID } from "node:crypto";
 import { sendVkNotification } from "./vk-notify";
 import { sendTelegramNotification } from "./telegram-notify";
@@ -1871,4 +1872,107 @@ export async function getChatThreadsForPartner(
     })
   );
   return (result.Items as ChatMessageRecord[]) ?? [];
+}
+
+export async function getInfoPagesByTarget(
+  target: InfoPageTarget
+): Promise<InfoPageRecord[]> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.INFO_PAGES,
+      IndexName: IndexName.INFO_PAGES_TARGET,
+      KeyConditionExpression: "#target = :target",
+      ExpressionAttributeNames: { "#target": "target" },
+      ExpressionAttributeValues: { ":target": target },
+    })
+  );
+  return (result.Items as InfoPageRecord[]) ?? [];
+}
+
+export async function getAllInfoPages(): Promise<InfoPageRecord[]> {
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.INFO_PAGES,
+    })
+  );
+  return (result.Items as InfoPageRecord[]) ?? [];
+}
+
+export async function getInfoPageById(
+  id: string
+): Promise<InfoPageRecord | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TableName.INFO_PAGES,
+      Key: { id },
+    })
+  );
+  return (result.Item as InfoPageRecord) ?? null;
+}
+
+export async function createInfoPage(
+  data: Omit<InfoPageRecord, "createdAt" | "updatedAt">
+): Promise<InfoPageRecord> {
+  const now = new Date().toISOString();
+  const page: InfoPageRecord = {
+    ...data,
+    createdAt: now,
+    updatedAt: now,
+  };
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.INFO_PAGES,
+      Item: page,
+    })
+  );
+  return page;
+}
+
+export async function updateInfoPage(
+  id: string,
+  data: Partial<Pick<InfoPageRecord, "title" | "content" | "target">>
+): Promise<InfoPageRecord> {
+  const updateExpr: string[] = [];
+  const exprValues: Record<string, unknown> = {};
+  const exprNames: Record<string, string> = {};
+
+  if (data.title !== undefined) {
+    updateExpr.push("#title = :title");
+    exprValues[":title"] = data.title;
+    exprNames["#title"] = "title";
+  }
+  if (data.content !== undefined) {
+    updateExpr.push("#content = :content");
+    exprValues[":content"] = data.content;
+    exprNames["#content"] = "content";
+  }
+  if (data.target !== undefined) {
+    updateExpr.push("#target = :target");
+    exprValues[":target"] = data.target;
+    exprNames["#target"] = "target";
+  }
+
+  updateExpr.push("updatedAt = :updatedAt");
+  exprValues[":updatedAt"] = new Date().toISOString();
+
+  const result = await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.INFO_PAGES,
+      Key: { id },
+      UpdateExpression: `set ${updateExpr.join(", ")}`,
+      ExpressionAttributeValues: exprValues,
+      ExpressionAttributeNames: exprNames,
+      ReturnValues: "ALL_NEW",
+    })
+  );
+  return result.Attributes as InfoPageRecord;
+}
+
+export async function deleteInfoPage(id: string): Promise<void> {
+  await docClient.send(
+    new DeleteCommand({
+      TableName: TableName.INFO_PAGES,
+      Key: { id },
+    })
+  );
 }

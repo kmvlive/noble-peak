@@ -25,6 +25,7 @@ export const TableName = {
   SLIDER_IMAGES: "slider_images",
   ORDER_SETTINGS: "order_settings",
   CITIES: "cities",
+  INFO_PAGES: "info_pages",
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];
@@ -281,6 +282,22 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
     keySchema: [{ AttributeName: "name", KeyType: "HASH" }],
     attributeDefinitions: [{ AttributeName: "name", AttributeType: "S" }],
   },
+
+  [TableName.INFO_PAGES]: {
+    name: TableName.INFO_PAGES,
+    keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+    attributeDefinitions: [
+      { AttributeName: "id", AttributeType: "S" },
+      { AttributeName: "target", AttributeType: "S" },
+    ],
+    globalSecondaryIndexes: [
+      {
+        IndexName: "target-index",
+        KeySchema: [{ AttributeName: "target", KeyType: "HASH" }],
+        Projection: { ProjectionType: "ALL" },
+      },
+    ],
+  },
 };
 
 export const TABLE_NAMES: TableName[] = Object.values(TableName);
@@ -301,6 +318,7 @@ export const IndexName = {
   ORDERS_ACTIVITY_ID: "activityId-index",
   ORDERS_STATUS: "status-index",
   ORDER_SETTINGS_ID: "id",
+  INFO_PAGES_TARGET: "target-index",
 } as const;
 
 export type IndexName = (typeof IndexName)[keyof typeof IndexName];

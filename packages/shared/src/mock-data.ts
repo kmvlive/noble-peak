@@ -17,6 +17,7 @@ import type {
   ReviewRecord,
   CityRecord,
   ChatMessageRecord,
+  InfoPageRecord,
 } from "./models";
 import type { SliderImage, OrderSettingsRecord } from "./models";
 
@@ -693,6 +694,36 @@ export const mockCities: CityRecord[] = [
   { name: "Ялта", createdAt: new Date("2024-01-01").toISOString() },
   { name: "Москва", createdAt: new Date("2024-01-01").toISOString() },
   { name: "Санкт-Петербург", createdAt: new Date("2024-01-01").toISOString() },
+];
+
+export const mockInfoPages: InfoPageRecord[] = [
+  {
+    id: "info-partner-1",
+    target: "partner",
+    title: "Как добавлять активности",
+    content:
+      "<p>Для добавления новой активности перейдите в раздел <strong>«Добавить активность»</strong> в боковом меню. Заполните название, описание, загрузите фотографии и укажите цену. После отправки активность будет проверена модератором.</p>",
+    createdAt: new Date("2025-01-01").toISOString(),
+    updatedAt: new Date("2025-01-01").toISOString(),
+  },
+  {
+    id: "info-partner-2",
+    target: "partner",
+    title: "Правила размещения",
+    content:
+      "<p>Все активности проходят модерацию перед публикацией. Запрещено размещать активности, противоречащие законодательству РФ. Фотографии должны быть хорошего качества и соответствовать содержанию активности.</p>",
+    createdAt: new Date("2025-01-02").toISOString(),
+    updatedAt: new Date("2025-01-02").toISOString(),
+  },
+  {
+    id: "info-partner-3",
+    target: "partner",
+    title: "Комиссия и выплаты",
+    content:
+      "<p>Комиссия платформы составляет <strong>10%</strong> от стоимости каждой проданной активности. Выплаты производятся ежемесячно при сумме от 1000₽. Подробнее в разделе «Финансы».</p>",
+    createdAt: new Date("2025-01-03").toISOString(),
+    updatedAt: new Date("2025-01-03").toISOString(),
+  },
 ];
 
 export const mockOrders: OrderRecord[] = [

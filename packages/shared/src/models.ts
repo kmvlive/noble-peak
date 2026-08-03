@@ -237,3 +237,14 @@ export interface ChatMessageRecord {
   partnerEmail: string;
   createdAt: string;
 }
+
+export type InfoPageTarget = "partner" | "tourist";
+
+export interface InfoPageRecord {
+  id: string;
+  target: InfoPageTarget;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
