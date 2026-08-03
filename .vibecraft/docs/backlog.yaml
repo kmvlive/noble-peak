@@ -4964,3 +4964,20 @@ tasks:
     related_feature: Техническое сопровождение
     status: pending
     summary: null
+  - id: task-230
+    phase: mvp
+    title: Запушить код 224-226 в kmvlive/noble-peak
+    description: Запушить актуальный код из репозитория SourceCraft в репозиторий
+      сервера kmvlive/noble-peak, чтобы изменения задач 224-226 (запрет
+      партнёрам бронировать, загрузка фото профиля, юридические данные) доехали
+      до production-сервера. После пуша сервер должен подтянуть код через git
+      pull и пересобраться.
+    priority: high
+    acceptance_criteria:
+      - Код задач 224-226 запушен в kmvlive/noble-peak
+      - На сервере /opt/noble-peak файлы содержат реализацию 224-226 (grep > 0)
+      - Сервер пересобран и отвечает на https://my.magazin-tour.ru
+    depends_on: []
+    related_feature: Техническое сопровождение
+    status: pending
+    summary: null
