@@ -11,26 +11,21 @@ workflows:
           - name: full-deploy
             script:
               - echo "=== SSH into production server and deploy ==="
-              - ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 ubuntu@my.magazin-tour.ru "
+              - ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 root@my.magazin-tour.ru "
                 set -e
                 echo '=== Connected to server ==='
-                cd /home/ubuntu/app
+                cd /opt/noble-peak
 
                 echo '=== git pull ==='
                 git pull origin main
 
-                echo '=== npm install ==='
-                npm install
-
-                echo '=== npm run build ==='
-                npm run build
-
                 echo '=== Setting env vars ==='
-                echo 'DEPLOY_SECRET=3724841febb66a37c1f25c9c8157a6521ccd9166c848e2371462a37f85f94852' >> .env.production
-                echo 'RECEIVE_CODE_TOKEN=src-ci-deploy-token-2026' >> .env.production
+                grep -q '^DEPLOY_SECRET=' .env.production 2>/dev/null || echo 'DEPLOY_SECRET=3724841febb66a37c1f25c9c8157a6521ccd9166c848e2371462a37f85f94852' >> .env.production
+                grep -q '^RECEIVE_CODE_TOKEN=' .env.production 2>/dev/null || echo 'RECEIVE_CODE_TOKEN=src-ci-deploy-token-2026' >> .env.production
 
-                echo '=== Restarting app ==='
-                pm2 restart all || docker compose -f docker-compose.prod.yml down && docker compose -f docker-compose.prod.yml up -d
+                echo '=== Rebuilding and restarting app ==='
+                docker compose -f docker-compose.prod.yml build
+                docker compose -f docker-compose.prod.yml up -d --force-recreate
 
                 echo '=== DEPLOY COMPLETE ==='
                 "
