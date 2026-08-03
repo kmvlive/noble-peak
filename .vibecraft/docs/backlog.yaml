@@ -5058,5 +5058,13 @@ tasks:
       - Сохранённые данные отображаются
     depends_on: []
     related_feature: Кабинет партнёра
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Компонент PartnerLegalForm встроен на страницу профиля партнёра
+      /partner/profile ниже «Анкеты партнёра» (разделитель между блоками).
+      Юрданные можно заполнять и сохранять через PATCH /api/partner/legal,
+      после сохранения отображаются в виде защищённой сводки. Пункт меню
+      «Юридические данные» /partner/legal убран из мок-данных меню партнёра
+      (packages/shared/src/mock-data.ts, mock-partner-legal). Основная
+      реализация: app/partner/profile/page.tsx,
+      components/partner-legal-form.tsx. typecheck, lint, build проходят.
