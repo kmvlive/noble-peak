@@ -130,7 +130,8 @@ export function ClientLoginForm() {
         return;
       }
 
-      toast.success("Регистрация прошла успешно! Проверьте вашу почту.");
+      sessionStorage.setItem("reg_email", regEmail);
+      sessionStorage.setItem("reg_password", regPassword);
       setClientToken(data.token);
       router.replace("/client");
     } catch {

@@ -4840,5 +4840,5 @@ tasks:
       - Тост показывается в дашборде после регистрации
     depends_on: []
     related_feature: Личный кабинет клиента
-    status: pending
-    summary: null
+    status: completed
+    summary: "После регистрации email и пароль сохраняются в sessionStorage и показываются в дашборде (клиента или партнёра) в виде тоста с duration: Infinity — тост не исчезает, пока пользователь не закроет его вручную. Основные изменения: components/client-login-form.tsx, components/partner-login-form.tsx (сохранение credentials), components/client-dashboard.tsx, components/partner-dashboard.tsx (показ тоста)."

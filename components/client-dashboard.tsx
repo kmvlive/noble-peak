@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CalendarCheck, Bell, User, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClientTouristInfo } from "@/components/client-tourist-info";
+import { toast } from "sonner";
 
 export function ClientDashboard() {
   const [clientName, setClientName] = useState<string | null>(null);
@@ -20,6 +21,18 @@ export function ClientDashboard() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const email = sessionStorage.getItem("reg_email");
+    const password = sessionStorage.getItem("reg_password");
+    if (email && password) {
+      sessionStorage.removeItem("reg_email");
+      sessionStorage.removeItem("reg_password");
+      toast(`Ваш логин (email): ${email}\nВаш пароль: ${password}`, {
+        duration: Infinity,
+      });
+    }
   }, []);
 
   return (

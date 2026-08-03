@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getToken } from "@/components/partner-layout-client";
+import { toast } from "sonner";
 
 interface Notification {
   id: string;
@@ -133,6 +134,18 @@ export function PartnerDashboard() {
         setInfoLoading(false);
       });
   }, [router]);
+
+  useEffect(() => {
+    const email = sessionStorage.getItem("reg_email");
+    const password = sessionStorage.getItem("reg_password");
+    if (email && password) {
+      sessionStorage.removeItem("reg_email");
+      sessionStorage.removeItem("reg_password");
+      toast(`Ваш логин (email): ${email}\nВаш пароль: ${password}`, {
+        duration: Infinity,
+      });
+    }
+  }, []);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">

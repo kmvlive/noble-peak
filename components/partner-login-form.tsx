@@ -125,7 +125,8 @@ export function PartnerLoginForm() {
         return;
       }
 
-      toast.success("Регистрация прошла успешно! Проверьте вашу почту.");
+      sessionStorage.setItem("reg_email", regEmail);
+      sessionStorage.setItem("reg_password", regPassword);
       localStorage.setItem("partner_token", data.token);
       router.replace("/partner");
     } catch {
