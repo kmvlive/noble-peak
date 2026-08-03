@@ -5167,5 +5167,16 @@ tasks:
       - Сервер пересобран и отвечает на https://my.magazin-tour.ru
     depends_on: []
     related_feature: Техническое сопровождение
-    status: pending
-    summary: null
+    status: failed
+    summary: >-
+      Код задач 224-226 готов в SourceCraft main (HEAD aa5cb8e) и проходит
+      typecheck, lint (0 errors), build, но запушен в kmvlive/noble-peak не был.
+      Блокер инфраструктурный и повторяет задачи 220/221/222/227/229: в
+      окружении CI отсутствует GITHUB_TOKEN и SSH-ключи. Прямой push в GitHub
+      завершается «could not read Username for https://github.com», SSH
+      root@my.magazin-tour.ru недоступен (нет приватного ключа), а workflow
+      deploy SourceCraft падает на SSH (run 386, full-deploy 0 сек). github main
+      kmvlive/noble-peak остаётся на 9204bbc (есть только 226, нет 224-225).
+      Сервер отвечает 200 на https://my.magazin-tour.ru, но без реализации
+      224-225. Требуется внеплановый доступ: настроить GITHUB_TOKEN или SSH-ключ
+      для пуша в kmvlive/noble-peak и SSH/ключ к серверу.
