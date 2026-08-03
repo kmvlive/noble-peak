@@ -1,4 +1,5 @@
-import { docClient } from "./db";
+import { docClient, isDatabaseAvailable } from "./db";
+import { mockInfoPages } from "./mock-data";
 import {
   GetCommand,
   PutCommand,
@@ -1877,6 +1878,10 @@ export async function getChatThreadsForPartner(
 export async function getInfoPagesByTarget(
   target: InfoPageTarget
 ): Promise<InfoPageRecord[]> {
+  const dbAvailable = await isDatabaseAvailable();
+  if (!dbAvailable) {
+    return mockInfoPages.filter((p) => p.target === target);
+  }
   const result = await docClient.send(
     new QueryCommand({
       TableName: TableName.INFO_PAGES,
@@ -1890,6 +1895,10 @@ export async function getInfoPagesByTarget(
 }
 
 export async function getAllInfoPages(): Promise<InfoPageRecord[]> {
+  const dbAvailable = await isDatabaseAvailable();
+  if (!dbAvailable) {
+    return mockInfoPages;
+  }
   const result = await docClient.send(
     new ScanCommand({
       TableName: TableName.INFO_PAGES,
@@ -1901,6 +1910,10 @@ export async function getAllInfoPages(): Promise<InfoPageRecord[]> {
 export async function getInfoPageById(
   id: string
 ): Promise<InfoPageRecord | null> {
+  const dbAvailable = await isDatabaseAvailable();
+  if (!dbAvailable) {
+    return mockInfoPages.find((p) => p.id === id) ?? null;
+  }
   const result = await docClient.send(
     new GetCommand({
       TableName: TableName.INFO_PAGES,
