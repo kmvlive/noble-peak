@@ -15,6 +15,7 @@ import {
   getClientEmailFromRequest,
   createClientToken,
 } from "@/lib/client-auth";
+import { getPartnerEmailFromRequest } from "@/lib/partner-auth";
 import { sendEmail } from "@/lib/email";
 import { appName } from "@/lib/app-name";
 import { getMainAdminEmail } from "@/lib/auth";
@@ -38,6 +39,14 @@ function generateGuestEmail(phone: string): string {
 
 export async function POST(request: NextRequest) {
   try {
+    const authPartnerEmail = getPartnerEmailFromRequest(request);
+    if (authPartnerEmail) {
+      return NextResponse.json(
+        { error: "Бронирование доступно только клиентам" },
+        { status: 403 }
+      );
+    }
+
     const clientEmail = getClientEmailFromRequest(request);
     const parsed = createBookingSchema.safeParse(await request.json());
     if (!parsed.success) {

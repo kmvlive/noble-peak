@@ -11,6 +11,7 @@ import {
   Map,
   User,
   CalendarRange,
+  Info,
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +36,7 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
   } | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [isPartner, setIsPartner] = useState(false);
 
   const isImageUrl = (url: string) => {
     return url.startsWith("http") || url.startsWith("/uploads/");
@@ -55,7 +57,13 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
         /* not logged in */
       }
     };
+    const checkPartner = () => {
+      setIsPartner(Boolean(localStorage.getItem("partner_token")));
+    };
     fetchClient();
+    checkPartner();
+    window.addEventListener("storage", checkPartner);
+    return () => window.removeEventListener("storage", checkPartner);
   }, []);
 
   const handleLike = () => {
@@ -255,29 +263,46 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
           </div>
         </div>
 
-        {showBookingForm && (
-          <div className="pt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <BookingForm
-              activityId={activity.id}
-              activityTitle={activity.title}
-              date={selectedDate!}
-              time={selectedTime}
-              clientName={clientData?.name ?? ""}
-              clientPhone={clientData?.phone ?? ""}
-              price={activity.price}
-            />
+        {isPartner ? (
+          <div className="flex items-start gap-3 rounded-lg border border-muted bg-muted/40 p-4">
+            <Info className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
+            <div className="space-y-1">
+              <p className="text-sm font-medium">
+                Бронирование доступно только клиентам
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Вы вошли как партнёр. Чтобы купить или забронировать активность,
+                войдите как клиент.
+              </p>
+            </div>
           </div>
-        )}
+        ) : (
+          <>
+            {showBookingForm && (
+              <div className="pt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <BookingForm
+                  activityId={activity.id}
+                  activityTitle={activity.title}
+                  date={selectedDate!}
+                  time={selectedTime}
+                  clientName={clientData?.name ?? ""}
+                  clientPhone={clientData?.phone ?? ""}
+                  price={activity.price}
+                />
+              </div>
+            )}
 
-        {showPaymentRedirect && (
-          <div className="pt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <Link
-              href={`/payment?activityId=${activity.id}&date=${selectedDate}&time=${selectedTime || ""}`}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary min-h-[48px] px-4 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
-              Перейти к оплате — {activity.price.toLocaleString("ru-RU")} ₽
-            </Link>
-          </div>
+            {showPaymentRedirect && (
+              <div className="pt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <Link
+                  href={`/payment?activityId=${activity.id}&date=${selectedDate}&time=${selectedTime || ""}`}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary min-h-[48px] px-4 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                >
+                  Перейти к оплате — {activity.price.toLocaleString("ru-RU")} ₽
+                </Link>
+              </div>
+            )}
+          </>
         )}
 
         <div className="pt-6">

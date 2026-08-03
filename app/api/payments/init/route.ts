@@ -15,6 +15,7 @@ import {
   getClientEmailFromRequest,
   createClientToken,
 } from "@/lib/client-auth";
+import { getPartnerEmailFromRequest } from "@/lib/partner-auth";
 import { initPayment, loadPaymentSettings } from "@/lib/payment";
 
 const initPaymentSchema = z.object({
@@ -37,6 +38,15 @@ function generateGuestEmail(phone: string): string {
 export async function POST(request: NextRequest) {
   try {
     const clientEmail = getClientEmailFromRequest(request);
+
+    const authPartnerEmail = getPartnerEmailFromRequest(request);
+    if (authPartnerEmail) {
+      return NextResponse.json(
+        { error: "Оплата доступна только клиентам" },
+        { status: 403 }
+      );
+    }
+
     const parsed = initPaymentSchema.safeParse(await request.json());
     if (!parsed.success) {
       console.error(
