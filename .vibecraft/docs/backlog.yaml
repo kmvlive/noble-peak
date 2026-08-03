@@ -5032,8 +5032,17 @@ tasks:
       - Фото отображается на публичной странице партнёра
     depends_on: []
     related_feature: Кабинет партнёра
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      В разделе «Публичный профиль» кабинета партнёра
+      (components/partner-public-profile-editor.tsx) добавлена кнопка «Загрузить
+      фото с компьютера» с выбором файла и предпросмотром. Загрузка идёт через
+      существующий API /api/admin/upload (расширен авторизацией по токену
+      партнёра через lib/partner-auth.ts). Загруженный URL /uploads/... сразу
+      подставляется в поле фото и сохраняется через PATCH /api/partner/profile.
+      Фото отображается на публичной странице партнёра /partners/[slug]
+      (components/partner-public-profile-content.tsx). typecheck, lint, build
+      проходят.
   - id: task-226
     phase: mvp
     title: Юридические данные на странице профиля партнёра

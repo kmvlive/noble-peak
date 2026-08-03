@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { verifyToken } from "@/lib/auth";
+import { verifyPartnerToken } from "@/lib/partner-auth";
+
+function isAuthorized(token: string | null): boolean {
+  if (!token) return false;
+  return Boolean(verifyToken(token) || verifyPartnerToken(token));
+}
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -16,7 +22,7 @@ function getTokenFromRequest(request: NextRequest): string | null {
 
 export async function POST(request: NextRequest) {
   const token = getTokenFromRequest(request);
-  if (!token || !verifyToken(token)) {
+  if (!isAuthorized(token)) {
     return NextResponse.json({ error: "Неавторизован" }, { status: 401 });
   }
 

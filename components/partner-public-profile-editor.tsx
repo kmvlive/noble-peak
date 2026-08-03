@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Copy,
@@ -33,10 +33,12 @@ export function PartnerPublicProfileEditor() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [photo, setPhoto] = useState("");
   const [description, setDescription] = useState("");
   const [slug, setSlug] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const token = getToken();
@@ -98,6 +100,42 @@ export function PartnerPublicProfileEditor() {
       });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const token = getToken();
+    if (!token) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Ошибка загрузки");
+        return;
+      }
+
+      if (data.urls && data.urls.length > 0) {
+        setPhoto(data.urls[0]);
+        toast.success("Фото загружено");
+      }
+    } catch {
+      toast.error("Ошибка загрузки фото");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -224,6 +262,36 @@ export function PartnerPublicProfileEditor() {
         </div>
         <p className="text-xs text-muted-foreground">
           Укажите URL изображения. Рекомендуемый размер: 500x500px.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Загрузить фото с компьютера</Label>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+          >
+            {uploading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Camera className="mr-2 h-4 w-4" />
+            )}
+            Загрузить фото с компьютера
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            className="hidden"
+            onChange={handleFileUpload}
+          />
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Выберите изображение с компьютера. Допустимы JPEG, PNG, WebP, GIF до
+          10 MB.
         </p>
       </div>
 
