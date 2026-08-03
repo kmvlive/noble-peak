@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -12,6 +12,7 @@ import {
   Sparkles,
   ChevronRight,
   FileText,
+  X,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getToken } from "@/components/partner-layout-client";
@@ -78,6 +79,17 @@ export function PartnerDashboard() {
   const [notifLoading, setNotifLoading] = useState(true);
   const [infoPages, setInfoPages] = useState<InfoPage[]>([]);
   const [infoLoading, setInfoLoading] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(() => {
+    if (typeof window !== "undefined") {
+      return !localStorage.getItem("partner_welcome_seen");
+    }
+    return false;
+  });
+
+  const dismissWelcome = useCallback(() => {
+    setShowWelcome(false);
+    localStorage.setItem("partner_welcome_seen", "true");
+  }, []);
 
   useEffect(() => {
     const token = getToken();
@@ -140,6 +152,32 @@ export function PartnerDashboard() {
         </div>
       </div>
 
+      {showWelcome && (
+        <div className="rounded-xl border bg-gradient-to-r from-primary/5 to-primary/10 p-6">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10">
+              <Sparkles className="h-6 w-6 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg font-semibold">
+                Добро пожаловать в кабинет партнёра
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Здесь вы можете добавлять активности, управлять заказами и
+                отслеживать свой календарь.
+              </p>
+            </div>
+            <button
+              onClick={dismissWelcome}
+              className="shrink-0 rounded-lg p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+              aria-label="Закрыть приветствие"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -152,7 +190,7 @@ export function PartnerDashboard() {
             href="/partner/notifications"
             className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
           >
-            Все уведомления
+            Перейти в раздел Уведомления
             <ChevronRight className="h-4 w-4" />
           </Link>
         </div>

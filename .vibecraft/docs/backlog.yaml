@@ -4787,16 +4787,14 @@ tasks:
       - Блок «Информация для партнёров» с контентом из админки
     depends_on: []
     status: completed
-    summary:
-      "Переделан дашборд партнёра (/partner): добавлено приветствие «Добро
-      пожаловать в кабинет партнёра...», блок последних 5 уведомлений со ссылкой
-      на /partner/notifications, блок «Информация для партнёров» с контентом из
-      админ-панели (info pages с target=partner). Создан Partner API
-      (app/api/partner/info/route.ts), админ-страница управления информацией
-      (app/admin/info/page.tsx, components/admin-info-manager.tsx) с CRUD и
-      выбором target (partner/tourist), компонент дашборда
-      (components/partner-dashboard.tsx) с состояниями загрузки и пустыми
-      состояниями. typecheck, lint, build проходят."
+    summary: >-
+      Реализовано приветствие при первом входе через localStorage
+      (partner_welcome_seen): баннер с текстом «Добро пожаловать в кабинет
+      партнёра...» и кнопкой закрытия. Блок последних 5 уведомлений со ссылкой
+      «Перейти в раздел Уведомления» на /partner/notifications. Блок «Информация
+      для партнёров» загружает контент из /api/partner/info (info pages с
+      target=partner). Основная реализация: components/partner-dashboard.tsx.
+  - id: task-211
     phase: mvp
     title: "Дашборд клиента: информация для туристов"
     description: Добавить на дашборд клиента (/client) блок «Информация для
