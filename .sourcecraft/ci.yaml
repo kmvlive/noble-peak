@@ -24,6 +24,6 @@ workflows:
             script:
               - echo "=== Verifying deployment ==="
               - sleep 30
-              - curl -sf -o /dev/null -w "Health: %{http_code}\n" https://my.magazin-tour.ru/api/health || echo "HEALTH_CHECK_FAILED"
-              - curl -sf -o /dev/null -w "TouristInfo: %{http_code}\n" https://my.magazin-tour.ru/api/client/tourist-info || echo "TOURIST_INFO_FAILED"
-              - curl -sf -o /dev/null -w "AdminInfo: %{http_code}\n" https://my.magazin-tour.ru/api/admin/info || echo "ADMIN_INFO_FAILED"
+              - curl -sf https://my.magazin-tour.ru/api/health > /dev/null && echo "HEALTH_OK" || echo "HEALTH_CHECK_FAILED"
+              - curl -sf https://my.magazin-tour.ru/api/client/tourist-info > /dev/null && echo "TOURIST_INFO_OK" || echo "TOURIST_INFO_FAILED"
+              - curl -sf https://my.magazin-tour.ru/api/admin/info > /dev/null && echo "ADMIN_INFO_OK" || echo "ADMIN_INFO_FAILED"
