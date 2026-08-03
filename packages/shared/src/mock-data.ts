@@ -724,6 +724,114 @@ export const mockInfoPages: InfoPageRecord[] = [
     createdAt: new Date("2025-01-03").toISOString(),
     updatedAt: new Date("2025-01-03").toISOString(),
   },
+  {
+    id: "info-tourist-1",
+    target: "tourist",
+    title: "Как забронировать активность",
+    content:
+      "<p>Чтобы забронировать активность, выберите понравившийся тур или мероприятие на главной странице, нажмите «Забронировать» и следуйте инструкциям. После подтверждения бронирования вы получите уведомление.</p>",
+    createdAt: new Date("2025-02-01").toISOString(),
+    updatedAt: new Date("2025-02-01").toISOString(),
+  },
+  {
+    id: "info-tourist-2",
+    target: "tourist",
+    title: "Правила отмены бронирования",
+    content:
+      "<p>Отмена бронирования возможна не позднее чем за <strong>24 часа</strong> до начала активности. При отмене позднее этого срока стоимость может быть удержана полностью. Для отмены перейдите в раздел «Мои бронирования».</p>",
+    createdAt: new Date("2025-02-02").toISOString(),
+    updatedAt: new Date("2025-02-02").toISOString(),
+  },
+  {
+    id: "info-tourist-3",
+    target: "tourist",
+    title: "Способы оплаты",
+    content:
+      "<p>Мы принимаем оплату банковскими картами <strong>Visa, Mastercard, МИР</strong>, а также через СБП (Система быстрых платежей). Все платежи защищены и проходят через безопасный шлюз.</p>",
+    createdAt: new Date("2025-02-03").toISOString(),
+    updatedAt: new Date("2025-02-03").toISOString(),
+  },
+  {
+    id: "info-tourist-4",
+    target: "tourist",
+    title: "Что взять с собой на активность",
+    content:
+      "<p>Рекомендуем взять с собой удобную одежду по погоде, бутылку воды, головной убор в солнечную погоду. Для некоторых активностей может потребоваться специальное снаряжение — уточняйте у организатора.</p>",
+    createdAt: new Date("2025-02-04").toISOString(),
+    updatedAt: new Date("2025-02-04").toISOString(),
+  },
+  {
+    id: "info-tourist-5",
+    target: "tourist",
+    title: "Безопасность на мероприятиях",
+    content:
+      "<p>Все организаторы проходят проверку перед размещением. Активности маркируются по уровню сложности. Если активность помечена <strong>18+</strong>, участвовать могут только совершеннолетние.</p>",
+    createdAt: new Date("2025-02-05").toISOString(),
+    updatedAt: new Date("2025-02-05").toISOString(),
+  },
+  {
+    id: "info-tourist-6",
+    target: "tourist",
+    title: "Как оставить отзыв",
+    content:
+      "<p>После завершения активности вы можете оставить отзыв в разделе «Мои бронирования». Оценки и отзывы помогают другим туристам выбрать лучшее мероприятие.</p>",
+    createdAt: new Date("2025-02-06").toISOString(),
+    updatedAt: new Date("2025-02-06").toISOString(),
+  },
+  {
+    id: "info-tourist-7",
+    target: "tourist",
+    title: "Связь с организатором",
+    content:
+      "<p>Если у вас возникли вопросы до или во время активности, вы можете связаться с организатором через чат в разделе «Уведомления и чат». Организатор ответит в рабочее время.</p>",
+    createdAt: new Date("2025-02-07").toISOString(),
+    updatedAt: new Date("2025-02-07").toISOString(),
+  },
+  {
+    id: "info-tourist-8",
+    target: "tourist",
+    title: "Программа лояльности",
+    content:
+      "<p>За каждую оплаченную активность вы получаете <strong>бонусные баллы</strong>. Баллы можно использовать для частичной оплаты следующих бронирований. Подробнее в личном кабинете.</p>",
+    createdAt: new Date("2025-02-08").toISOString(),
+    updatedAt: new Date("2025-02-08").toISOString(),
+  },
+  {
+    id: "info-tourist-9",
+    target: "tourist",
+    title: "Групповые и индивидуальные активности",
+    content:
+      "<p>Активности бывают <strong>групповые</strong> (вы присоединяетесь к группе) и <strong>индивидуальные</strong> (только вы и ваша компания). Выбирайте подходящий формат на странице мероприятия.</p>",
+    createdAt: new Date("2025-02-09").toISOString(),
+    updatedAt: new Date("2025-02-09").toISOString(),
+  },
+  {
+    id: "info-tourist-10",
+    target: "tourist",
+    title: "Погода и перенос активности",
+    content:
+      "<p>При неблагоприятных погодных условиях организатор может перенести или отменить активность. В этом случае вам будет предложена альтернативная дата или полный возврат средств.</p>",
+    createdAt: new Date("2025-02-10").toISOString(),
+    updatedAt: new Date("2025-02-10").toISOString(),
+  },
+  {
+    id: "info-tourist-11",
+    target: "tourist",
+    title: "Как добраться до места",
+    content:
+      "<p>Подробные инструкции по проезду и точное место сбора отображаются в карточке активности после бронирования. При необходимости воспользуйтесь картами или такси.</p>",
+    createdAt: new Date("2025-02-11").toISOString(),
+    updatedAt: new Date("2025-02-11").toISOString(),
+  },
+  {
+    id: "info-tourist-12",
+    target: "tourist",
+    title: "Фото и видео на мероприятиях",
+    content:
+      "<p>Вы можете делать фото и видео во время активности, если это не оговорено отдельно. Делитесь впечатлениями в соцсетях и отмечайте организатора!</p>",
+    createdAt: new Date("2025-02-12").toISOString(),
+    updatedAt: new Date("2025-02-12").toISOString(),
+  },
 ];
 
 export const mockOrders: OrderRecord[] = [

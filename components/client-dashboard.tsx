@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { CalendarCheck, Bell, User, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ClientTouristInfo } from "@/components/client-tourist-info";
 
 export function ClientDashboard() {
   const [clientName, setClientName] = useState<string | null>(null);
@@ -86,6 +87,8 @@ export function ClientDashboard() {
           <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
         </Link>
       </div>
+
+      <ClientTouristInfo />
     </div>
   );
 }

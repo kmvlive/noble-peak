@@ -4806,8 +4806,8 @@ tasks:
       - Пагинация 10
     depends_on: []
     related_feature: Личный кабинет клиента
-    status: pending
-    summary: null
+    status: completed
+    summary: "На дашборд клиента добавлен блок «Информация для туристов». API-роут app/api/client/tourist-info/route.ts, компонент components/client-tourist-info.tsx, интеграция в components/client-dashboard.tsx, 12 mock-записей для туристов."
   - id: task-212
     phase: mvp
     title: "Админ-панель: разделы «Информация для партнёров» и «Информация для
@@ -4821,8 +4821,7 @@ tasks:
       - В админ-панели есть раздел «Информация для туристов» с WYSIWYG
       - Можно создавать, редактировать и удалять записи
       - Записи отображаются в дашбордах партнёра и клиента
-    depends_on: []
-    related_feature: Админ-панель
+    related_feature: Личный кабинет клиента
     status: pending
     summary: null
   - id: task-213
