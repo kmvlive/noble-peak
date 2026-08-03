@@ -75,10 +75,12 @@ export async function GET(
   const cityLower = cityDecoded.toLowerCase().replace(/^г\.\s*/, "");
   const cityFullLower = cityDecoded.toLowerCase();
 
-  const cityActivities = activities.filter((a) => {
-    const loc = (a.location || "").toLowerCase();
-    return loc.includes(cityFullLower) || loc.includes(cityLower);
-  });
+  const cityActivities = activities
+    .filter((a) => {
+      const loc = (a.location || "").toLowerCase();
+      return loc.includes(cityFullLower) || loc.includes(cityLower);
+    })
+    .slice(0, 25);
 
   if (cityActivities.length === 0) {
     return NextResponse.json({ error: "Город не найден" }, { status: 404 });

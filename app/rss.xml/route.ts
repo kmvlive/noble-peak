@@ -65,7 +65,9 @@ export async function GET() {
     activities = mockActivities;
   }
 
-  const activeActivities = activities.filter((a) => a.status === "active");
+  const activeActivities = activities
+    .filter((a) => a.status === "active")
+    .slice(0, 25);
 
   const xml = buildRssXml(activeActivities, baseUrl);
 

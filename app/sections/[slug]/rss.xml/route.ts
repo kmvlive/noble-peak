@@ -83,13 +83,15 @@ export async function GET(
   const section = sections.find((s) => s.id === slug);
   if (!section) notFound();
 
-  const sectionActivities = activities.filter(
-    (a) =>
-      a.status === "active" &&
-      (a.section === section.category ||
-        a.section === section.id ||
-        a.section === section.name)
-  );
+  const sectionActivities = activities
+    .filter(
+      (a) =>
+        a.status === "active" &&
+        (a.section === section.category ||
+          a.section === section.id ||
+          a.section === section.name)
+    )
+    .slice(0, 25);
 
   const xml = buildRssXml(sectionActivities, section, baseUrl);
 
