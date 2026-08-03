@@ -4698,3 +4698,25 @@ tasks:
     related_feature: Техническое сопровождение
     status: pending
     summary: null
+  - id: task-215
+    phase: mvp
+    title: Отправить недостающие файлы на сервер через receive-code
+    description: "Отправить файлы task-211, 212, 213 на production-сервер
+      my.magazin-tour.ru через POST /api/receive-code. Файлы:
+      components/client-tourist-info.tsx, app/api/client/tourist-info/route.ts,
+      components/admin-info-manager.tsx, app/admin/info/partners/page.tsx,
+      app/admin/info/tourists/page.tsx, app/api/admin/info/route.ts,
+      app/api/admin/info/[id]/route.ts, app/api/partner/info/route.ts,
+      обновлённые components/client-dashboard.tsx,
+      components/partner-dashboard.tsx, components/client-login-form.tsx,
+      components/partner-login-form.tsx."
+    priority: high
+    acceptance_criteria:
+      - На дашборде клиента отображается блок «Информация для туристов»
+      - В админ-панели есть разделы «Информация партнёрам» и «Информация
+        туристам» с WYSIWYG
+      - После регистрации в дашборде показывается тост с логином/паролем
+    depends_on: []
+    related_feature: Техническое сопровождение
+    status: pending
+    summary: null
