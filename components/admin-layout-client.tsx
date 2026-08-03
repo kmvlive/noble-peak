@@ -173,7 +173,16 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
       label: "Нижнее меню",
       icon: ArrowDownFromLine,
     },
-    { href: "/admin/info", label: "Информация", icon: FileText },
+    {
+      href: "/admin/info/partners",
+      label: "Информация партнёрам",
+      icon: FileText,
+    },
+    {
+      href: "/admin/info/tourists",
+      label: "Информация туристам",
+      icon: FileText,
+    },
     { href: "/admin/clients", label: "Клиенты", icon: Users },
     { href: "/admin/partners", label: "Партнёры", icon: Users },
     { href: "/admin/orders", label: "Отчёты", icon: FileText },

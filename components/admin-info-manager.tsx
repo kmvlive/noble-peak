@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { getToken } from "./admin-layout-client";
+import { WysiwygEditor } from "./wysiwyg-editor";
 
 interface InfoPage {
   id: string;
@@ -16,22 +17,24 @@ interface InfoPage {
   updatedAt: string;
 }
 
-export function AdminInfoManager() {
+interface AdminInfoManagerProps {
+  target: "partner" | "tourist";
+}
+
+export function AdminInfoManager({ target }: AdminInfoManagerProps) {
   const [pages, setPages] = useState<InfoPage[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [target, setTarget] = useState<"partner" | "tourist">("partner");
   const [creating, setCreating] = useState(false);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
-  const [editTarget, setEditTarget] = useState<"partner" | "tourist">(
-    "partner"
-  );
   const [saving, setSaving] = useState(false);
+
+  const targetLabel = target === "partner" ? "Партнёры" : "Туристы";
 
   useEffect(() => {
     fetchPages();
@@ -44,7 +47,8 @@ export function AdminInfoManager() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      setPages(Array.isArray(data) ? data : []);
+      const allPages: InfoPage[] = Array.isArray(data) ? data : [];
+      setPages(allPages.filter((p) => p.target === target));
     } catch {
       toast.error("Ошибка загрузки страниц");
     } finally {
@@ -87,7 +91,6 @@ export function AdminInfoManager() {
       toast.success(`Страница «${title}» создана`);
       setTitle("");
       setContent("");
-      setTarget("partner");
       fetchPages();
     } catch {
       toast.error("Ошибка создания страницы");
@@ -100,14 +103,12 @@ export function AdminInfoManager() {
     setEditingId(page.id);
     setEditTitle(page.title);
     setEditContent(page.content);
-    setEditTarget(page.target);
   };
 
   const cancelEditing = () => {
     setEditingId(null);
     setEditTitle("");
     setEditContent("");
-    setEditTarget("partner");
   };
 
   const handleSave = async (id: string) => {
@@ -129,7 +130,6 @@ export function AdminInfoManager() {
         body: JSON.stringify({
           title: editTitle.trim(),
           content: editContent.trim(),
-          target: editTarget,
         }),
       });
 
@@ -173,9 +173,6 @@ export function AdminInfoManager() {
     }
   };
 
-  const targetLabel = (t: "partner" | "tourist") =>
-    t === "partner" ? "Партнёры" : "Туристы";
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20 text-muted-foreground">
@@ -188,48 +185,28 @@ export function AdminInfoManager() {
     <div className="space-y-6">
       <form onSubmit={handleCreate} className="space-y-4 rounded-lg border p-4">
         <h2 className="text-sm font-semibold text-muted-foreground">
-          Создать страницу
+          Создать страницу для {targetLabel.toLowerCase()}
         </h2>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <label htmlFor="info-title" className="text-sm font-medium">
-              Заголовок
-            </label>
-            <Input
-              id="info-title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Как добавлять активности"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Для кого</label>
-            <select
-              value={target}
-              onChange={(e) =>
-                setTarget(e.target.value as "partner" | "tourist")
-              }
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              <option value="partner">Партнёры</option>
-              <option value="tourist">Туристы</option>
-            </select>
-          </div>
+        <div className="space-y-2">
+          <label htmlFor="info-title" className="text-sm font-medium">
+            Заголовок
+          </label>
+          <Input
+            id="info-title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Как добавлять активности"
+          />
         </div>
 
         <div className="space-y-2">
           <label htmlFor="info-content" className="text-sm font-medium">
-            Содержание (HTML)
+            Содержание
           </label>
-          <textarea
-            id="info-content"
+          <WysiwygEditor
             value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="<p>Текст информации...</p>"
-            rows={6}
-            className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            onChange={(html) => setContent(html)}
           />
         </div>
 
@@ -256,28 +233,14 @@ export function AdminInfoManager() {
             >
               {editingId === page.id ? (
                 <div className="space-y-3">
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <Input
-                      value={editTitle}
-                      onChange={(e) => setEditTitle(e.target.value)}
-                      placeholder="Заголовок"
-                    />
-                    <select
-                      value={editTarget}
-                      onChange={(e) =>
-                        setEditTarget(e.target.value as "partner" | "tourist")
-                      }
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    >
-                      <option value="partner">Партнёры</option>
-                      <option value="tourist">Туристы</option>
-                    </select>
-                  </div>
-                  <textarea
+                  <Input
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    placeholder="Заголовок"
+                  />
+                  <WysiwygEditor
                     value={editContent}
-                    onChange={(e) => setEditContent(e.target.value)}
-                    rows={6}
-                    className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    onChange={(html) => setEditContent(html)}
                   />
                   <div className="flex items-center gap-2">
                     <Button
@@ -298,12 +261,7 @@ export function AdminInfoManager() {
                 <>
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-medium">{page.title}</h3>
-                        <span className="rounded bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                          {targetLabel(page.target)}
-                        </span>
-                      </div>
+                      <h3 className="font-medium">{page.title}</h3>
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
                       <Button
