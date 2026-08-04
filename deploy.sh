@@ -57,4 +57,9 @@ else
   exit 1
 fi
 
+# ── Проверка и исправление схемы DynamoDB ───────────────────
+info "Проверка и исправление схемы DynamoDB..."
+ssh "${REMOTE_USER}@${REMOTE_HOST}" \
+  "cd ${REMOTE_DIR} && docker compose -f ${COMPOSE_FILE} exec -T app npm run db:verify"
+
 ok "Деплой завершён успешно!"
