@@ -4,7 +4,7 @@ tokens:
     scope: org
 
 workflows:
-  push-to-github:
+  deploy:
     tasks:
       - name: push-code-to-github
         cubes:
@@ -21,18 +21,8 @@ workflows:
               - git remote add github "${GITHUB_URL}"
               - git push --force github HEAD:main
               - echo "=== PUSH TO GITHUB COMPLETE ==="
-  deliver:
-    tasks:
-      - name: deliver-code-via-receive-api
-        cubes:
-          - name: deliver-code
-            script:
-              - echo "=== Delivering source files to production via /api/receive-code ==="
-              - RECEIVE_CODE_URL=https://my.magazin-tour.ru/api/receive-code RECEIVE_CODE_TOKEN=src-ci-deploy-token-2026 npm run deliver:code
-              - echo "=== DELIVER COMPLETE ==="
-  deploy:
-    tasks:
       - name: deploy-via-ssh
+        needs: [push-code-to-github]
         cubes:
           - name: full-deploy
             script:
@@ -63,3 +53,12 @@ workflows:
               - curl -sf https://my.magazin-tour.ru/api/health > /dev/null && echo "HEALTH_OK" || echo "HEALTH_CHECK_FAILED"
               - curl -sf https://my.magazin-tour.ru/api/client/tourist-info > /dev/null && echo "TOURIST_INFO_OK" || echo "TOURIST_INFO_FAILED"
               - curl -sf https://my.magazin-tour.ru/api/admin/info > /dev/null && echo "ADMIN_INFO_OK" || echo "ADMIN_INFO_FAILED"
+  deliver:
+    tasks:
+      - name: deliver-code-via-receive-api
+        cubes:
+          - name: deliver-code
+            script:
+              - echo "=== Delivering source files to production via /api/receive-code ==="
+              - RECEIVE_CODE_URL=https://my.magazin-tour.ru/api/receive-code RECEIVE_CODE_TOKEN=src-ci-deploy-token-2026 npm run deliver:code
+              - echo "=== DELIVER COMPLETE ==="
