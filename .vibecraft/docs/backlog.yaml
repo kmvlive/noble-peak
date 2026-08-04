@@ -5573,8 +5573,18 @@ tasks:
       - При удалении заказа клиентом партнёр получает уведомление об удалении
     depends_on: []
     related_feature: Личный кабинет клиента
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Клиент может удалять свои заказы в разделе «Мои бронирования» личного
+      кабинета. При удалении партнёр получает уведомление об удалении.
+      Добавлен DELETE /api/client/bookings/[id] с проверкой авторизации клиента
+      и правом на заказ. При удалении deleteBooking (lib/models.ts) удаляет запись
+      из таблиц bookings и orders, сервер подставляет partnerEmail активности и
+      createNotification уведомляет партнёра (тип booking_status, текст «Заказ
+      удалён»). В UI (components/client-bookings-list.tsx) добавлена кнопка
+      удаления с подтверждением через sonner и обновлением списка. Основная
+      реализация: app/api/client/bookings/[id]/route.ts,
+      components/client-bookings-list.tsx, lib/models.ts.
   - id: task-246
     phase: mvp
     title: Порядковые номера, статусы и отчёты по заказам

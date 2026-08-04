@@ -10,8 +10,10 @@ import {
   CreditCard,
   ArrowUpDown,
   SlidersHorizontal,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 interface Booking {
   id: string;
@@ -60,6 +62,32 @@ export function ClientBookingsList() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");
   const [sortAsc, setSortAsc] = useState(false);
+
+  const handleDeleteBooking = (booking: Booking) => {
+    toast("Удалить заказ?", {
+      description: `«${booking.activityTitle}» на ${booking.date}`,
+      action: {
+        label: "Удалить",
+        onClick: async () => {
+          const loadingId = toast.loading("Удаляем заказ...");
+          try {
+            const res = await fetch(`/api/client/bookings/${booking.id}`, {
+              method: "DELETE",
+            });
+            if (!res.ok) {
+              const data = await res.json().catch(() => ({}));
+              throw new Error(data.error || "Ошибка удаления заказа");
+            }
+            setBookings((prev) => prev.filter((b) => b.id !== booking.id));
+            toast.success("Заказ удалён", { id: loadingId });
+          } catch (err) {
+            toast.error((err as Error).message, { id: loadingId });
+          }
+        },
+      },
+      cancel: { label: "Отмена", onClick: () => {} },
+    });
+  };
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -176,42 +204,53 @@ export function ClientBookingsList() {
       ) : (
         <div className="space-y-3">
           {filteredBookings.map((booking) => (
-            <Link
+            <div
               key={booking.id}
-              href={`/client/bookings/${booking.id}`}
-              className="block rounded-lg border p-4 transition-colors hover:bg-accent/50"
+              className="relative rounded-lg border transition-colors hover:bg-accent/50"
             >
-              <div className="flex items-start justify-between gap-2">
-                <div className="space-y-1.5">
-                  <h3 className="text-sm font-semibold">
-                    {booking.activityTitle}
-                  </h3>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                    <span className="inline-flex items-center gap-1">
-                      <CalendarDays className="h-3 w-3" />
-                      {booking.date}
-                    </span>
-                    {booking.time && (
+              <Link
+                href={`/client/bookings/${booking.id}`}
+                className="block p-4 pr-12"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="space-y-1.5">
+                    <h3 className="text-sm font-semibold">
+                      {booking.activityTitle}
+                    </h3>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                       <span className="inline-flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {booking.time}
+                        <CalendarDays className="h-3 w-3" />
+                        {booking.date}
                       </span>
+                      {booking.time && (
+                        <span className="inline-flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {booking.time}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    {booking.status === "pending_payment" && (
+                      <CreditCard className="h-3 w-3 text-amber-500" />
                     )}
+                    <span
+                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${getStatusColor(booking.status, booking.paymentStatus)}`}
+                    >
+                      {getStatusLabel(booking.status, booking.paymentStatus)}
+                    </span>
+                    <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  {booking.status === "pending_payment" && (
-                    <CreditCard className="h-3 w-3 text-amber-500" />
-                  )}
-                  <span
-                    className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${getStatusColor(booking.status, booking.paymentStatus)}`}
-                  >
-                    {getStatusLabel(booking.status, booking.paymentStatus)}
-                  </span>
-                  <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
-                </div>
-              </div>
-            </Link>
+              </Link>
+              <button
+                onClick={() => handleDeleteBooking(booking)}
+                aria-label="Удалить заказ"
+                className="absolute right-2 top-2 rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
           ))}
         </div>
       )}
