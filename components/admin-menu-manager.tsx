@@ -138,7 +138,7 @@ export function AdminMenuManager({
     }
   };
 
-  const moveItem = async (item: MenuItem, newOrder: number) => {
+  const moveItem = async (item: MenuItem, direction: "up" | "down") => {
     const token = getToken();
 
     try {
@@ -150,7 +150,7 @@ export function AdminMenuManager({
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ order: newOrder }),
+          body: JSON.stringify({ direction }),
         }
       );
 
@@ -166,14 +166,11 @@ export function AdminMenuManager({
   };
 
   const handleMoveUp = (item: MenuItem) => {
-    const newOrder = item.order - 1;
-    if (newOrder < 0) return;
-    moveItem(item, newOrder);
+    moveItem(item, "up");
   };
 
   const handleMoveDown = (item: MenuItem) => {
-    const newOrder = item.order + 1;
-    moveItem(item, newOrder);
+    moveItem(item, "down");
   };
 
   if (loading) {

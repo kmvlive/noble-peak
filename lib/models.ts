@@ -1312,16 +1312,61 @@ export async function updateMenuItem(
   return result.Attributes as MenuItemRecord;
 }
 
+export async function renumberMenuItems(
+  menuType: "admin" | "client" | "partner" | "footer",
+  expected: MenuItemRecord[]
+): Promise<MenuItemRecord[]> {
+  const items = expected.length > 0 ? expected : await getMenuItems(menuType);
+  const writes = items.flatMap((item, index) =>
+    item.order === index
+      ? []
+      : [updateMenuItem(menuType, item.id, { order: index })]
+  );
+  await Promise.all(writes);
+  return items.map((item, index) =>
+    item.order === index ? item : { ...item, order: index }
+  );
+}
+
+export async function moveMenuItem(
+  menuType: "admin" | "client" | "partner" | "footer",
+  id: string,
+  direction: "up" | "down"
+): Promise<MenuItemRecord[]> {
+  const items = await getMenuItems(menuType);
+  const index = items.findIndex((item) => item.id === id);
+  if (items.length === 0) throw new Error("Menu item not found");
+
+  const targetIndex = direction === "up" ? index - 1 : index + 1;
+  if (index < 0 || targetIndex < 0 || targetIndex >= items.length) return items;
+
+  const reordered = [...items];
+  const [moved] = reordered.splice(index, 1);
+  reordered.splice(targetIndex, 0, moved);
+
+  return renumberMenuItems(
+    menuType,
+    reordered.map((item, i) => ({ ...item, order: i }))
+  );
+}
+
 export async function deleteMenuItem(
-  menuType: string,
+  menuType: "admin" | "client" | "partner" | "footer",
   id: string
-): Promise<void> {
+): Promise<MenuItemRecord[]> {
   await docClient.send(
     new DeleteCommand({
       TableName: TableName.MENU_ITEMS,
       Key: { menuType, id },
     })
   );
+
+  const remaining = await getMenuItems(menuType);
+  await renumberMenuItems(
+    menuType,
+    remaining.map((item, i) => ({ ...item, order: i }))
+  );
+  return remaining;
 }
 
 export interface AnalyticsCounterRecord {

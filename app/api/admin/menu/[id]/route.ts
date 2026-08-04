@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isDatabaseAvailable } from "@/lib/db";
-import { updateMenuItem, deleteMenuItem } from "@/lib/models";
+import {
+  updateMenuItem,
+  deleteMenuItem,
+  moveMenuItem,
+  getMenuItems,
+  renumberMenuItems,
+} from "@/lib/models";
 import { verifyToken } from "@/lib/auth";
 import { z } from "zod";
 
@@ -8,6 +14,7 @@ const updateMenuItemSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   url: z.string().min(1).max(500).optional(),
   order: z.number().int().min(0).optional(),
+  direction: z.enum(["up", "down"]).optional(),
 });
 
 function getTokenFromRequest(request: NextRequest): string | null {
@@ -62,7 +69,27 @@ export async function PUT(
       );
     }
 
-    const menuItem = await updateMenuItem(menuType, id, parsed.data);
+    const typedMenuType = menuType as "admin" | "client" | "partner" | "footer";
+
+    if (parsed.data.direction !== undefined) {
+      const items = await moveMenuItem(
+        typedMenuType,
+        id,
+        parsed.data.direction
+      );
+      return NextResponse.json(items);
+    }
+
+    if (parsed.data.order !== undefined) {
+      await updateMenuItem(typedMenuType, id, { order: parsed.data.order });
+      const items = await renumberMenuItems(
+        typedMenuType,
+        await getMenuItems(typedMenuType)
+      );
+      return NextResponse.json(items);
+    }
+
+    const menuItem = await updateMenuItem(typedMenuType, id, parsed.data);
 
     return NextResponse.json(menuItem);
   } catch (error) {
@@ -107,9 +134,12 @@ export async function DELETE(
       );
     }
 
-    await deleteMenuItem(menuType, id);
+    const remaining = await deleteMenuItem(
+      menuType as "admin" | "client" | "partner" | "footer",
+      id
+    );
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, items: remaining });
   } catch (error) {
     console.error("Ошибка удаления пункта меню:", error);
     return NextResponse.json(
