@@ -5,48 +5,47 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Bell,
-  BellRing,
   PackageOpen,
-  AlertTriangle,
-  Info,
   Sparkles,
   ChevronRight,
   FileText,
   X,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { getToken } from "@/components/partner-layout-client";
 import { toast } from "sonner";
 
-interface Notification {
+interface OrderNotification {
   id: string;
-  recipientEmail: string;
-  type: "booking_status" | "new_order" | "activity_status" | "system";
-  title: string;
-  message: string;
-  link?: string;
-  isRead: boolean;
+  orderNumber: string;
+  activityTitle: string;
+  clientName: string;
+  date: string;
+  time: string | null;
+  orderStatus: string;
   createdAt: string;
 }
+
+const statusBadge: Record<
+  string,
+  {
+    label: string;
+    variant: "default" | "secondary" | "destructive" | "outline";
+  }
+> = {
+  pending_payment: { label: "Не оплачен", variant: "outline" },
+  paid: { label: "Оплачен", variant: "default" },
+  confirmed: { label: "Оплачен", variant: "default" },
+  completed: { label: "Исполнен", variant: "default" },
+  cancelled: { label: "Отменён", variant: "destructive" },
+};
 
 interface InfoPage {
   id: string;
   target: "partner" | "tourist";
   title: string;
   content: string;
-}
-
-function getTypeIcon(type: Notification["type"]) {
-  switch (type) {
-    case "booking_status":
-      return PackageOpen;
-    case "new_order":
-      return BellRing;
-    case "activity_status":
-      return AlertTriangle;
-    case "system":
-      return Info;
-  }
 }
 
 function formatDate(dateStr: string): string {
@@ -76,8 +75,10 @@ function formatDate(dateStr: string): string {
 export function PartnerDashboard() {
   const router = useRouter();
   const [partnerName] = useState("");
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [notifLoading, setNotifLoading] = useState(true);
+  const [orderNotifications, setOrderNotifications] = useState<
+    OrderNotification[]
+  >([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
   const [infoPages, setInfoPages] = useState<InfoPage[]>([]);
   const [infoLoading, setInfoLoading] = useState(true);
   const [showWelcome, setShowWelcome] = useState(() => {
@@ -99,7 +100,7 @@ export function PartnerDashboard() {
       return;
     }
 
-    fetch("/api/partner/notifications", {
+    fetch("/api/partner/orders", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
@@ -107,16 +108,16 @@ export function PartnerDashboard() {
         return res.json();
       })
       .then((data) => {
-        const all: Notification[] = Array.isArray(data) ? data : [];
+        const all: OrderNotification[] = Array.isArray(data) ? data : [];
         all.sort(
           (a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
-        setNotifications(all.slice(0, 5));
-        setNotifLoading(false);
+        setOrderNotifications(all.slice(0, 5));
+        setOrdersLoading(false);
       })
       .catch(() => {
-        setNotifLoading(false);
+        setOrdersLoading(false);
       });
 
     fetch("/api/partner/info", {
@@ -196,7 +197,7 @@ export function PartnerDashboard() {
           <div className="flex items-center gap-2">
             <Bell className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-semibold tracking-tight">
-              Последние уведомления
+              Последние уведомления из заказов
             </h2>
           </div>
           <Link
@@ -208,63 +209,60 @@ export function PartnerDashboard() {
           </Link>
         </div>
 
-        {notifLoading ? (
+        {ordersLoading ? (
           <div className="space-y-2">
             {Array.from({ length: 3 }).map((_, i) => (
               <Skeleton key={i} className="h-16 w-full rounded-xl" />
             ))}
           </div>
-        ) : notifications.length === 0 ? (
+        ) : orderNotifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-12 text-center">
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-muted">
               <Bell className="h-5 w-5 text-muted-foreground" />
             </div>
             <p className="text-sm text-muted-foreground">
-              Уведомлений пока нет
+              Уведомлений из заказов пока нет
             </p>
           </div>
         ) : (
           <div className="space-y-2">
-            {notifications.map((notification) => {
-              const Icon = getTypeIcon(notification.type);
+            {orderNotifications.map((order) => {
+              const badge = statusBadge[order.orderStatus] ?? {
+                label: order.orderStatus,
+                variant: "outline" as const,
+              };
               return (
                 <div
-                  key={notification.id}
-                  className={`rounded-xl border bg-card p-3 transition-colors ${
-                    !notification.isRead
-                      ? "bg-accent/30 border-accent"
-                      : "hover:bg-accent/30"
-                  }`}
+                  key={order.id}
+                  className="rounded-xl border bg-card p-3 transition-colors hover:bg-accent/30"
                 >
                   <div className="flex items-start gap-3">
-                    <div
-                      className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                        !notification.isRead
-                          ? "bg-primary/10 text-primary"
-                          : "bg-muted text-muted-foreground"
-                      }`}
-                    >
-                      <Icon className="h-4 w-4" />
+                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                      <PackageOpen className="h-4 w-4" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <p
-                            className={`text-sm ${
-                              !notification.isRead
-                                ? "font-semibold"
-                                : "text-muted-foreground"
-                            }`}
-                          >
-                            {notification.title}
+                          <p className="text-sm font-semibold">
+                            Заказ №{order.orderNumber} · {order.activityTitle}
                           </p>
                           <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
-                            {notification.message}
+                            {order.clientName} ·{" "}
+                            {new Date(
+                              order.date + "T00:00:00Z"
+                            ).toLocaleDateString("ru-RU", {
+                              day: "numeric",
+                              month: "long",
+                            })}
+                            {order.time ? ` · ${order.time}` : " · весь день"}
                           </p>
                         </div>
-                        <span className="shrink-0 whitespace-nowrap text-[10px] text-muted-foreground">
-                          {formatDate(notification.createdAt)}
-                        </span>
+                        <div className="flex shrink-0 flex-col items-end gap-1">
+                          <Badge variant={badge.variant}>{badge.label}</Badge>
+                          <span className="whitespace-nowrap text-[10px] text-muted-foreground">
+                            {formatDate(order.createdAt)}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
