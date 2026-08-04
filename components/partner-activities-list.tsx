@@ -9,6 +9,7 @@ import {
   ExternalLink,
   Search,
   Award,
+  Pencil,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
@@ -188,16 +189,28 @@ export function PartnerActivitiesList() {
                   </div>
                 )}
               </div>
-              {activity.status === "active" && (
-                <a
-                  href={`/activities/${activity.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-1 shrink-0 text-muted-foreground transition-colors hover:text-primary"
+              <div className="mt-1 flex shrink-0 items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push(`/partner/activities/${activity.id}/edit`)
+                  }
+                  title="Редактировать"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md border text-muted-foreground transition-colors hover:border-primary hover:text-primary"
                 >
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-              )}
+                  <Pencil className="h-4 w-4" />
+                </button>
+                {activity.status === "active" && (
+                  <a
+                    href={`/activities/${activity.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="shrink-0 text-muted-foreground transition-colors hover:text-primary"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         );
