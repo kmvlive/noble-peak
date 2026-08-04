@@ -1,4 +1,19 @@
 services:
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath /home/dynamodblocal/"
+    healthcheck:
+      test:
+        ["CMD-SHELL", "curl -s -o /dev/null http://localhost:8000/ || exit 1"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - dynamodb-data:/home/dynamodblocal/
+
   app:
     build:
       context: .
@@ -40,6 +55,10 @@ services:
       start_period: 15s
     volumes:
       - uploads-data:/app/public/uploads
+    depends_on:
+      dynamodb-local:
+        condition: service_healthy
 
 volumes:
+  dynamodb-data:
   uploads-data:
