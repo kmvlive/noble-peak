@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Download } from "lucide-react";
+import { Search, Download, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import { getToken } from "@/components/partner-layout-client";
 
 interface Order {
@@ -76,6 +77,33 @@ export function PartnerOrdersList({
     if (loading || !selectedOrderId || !selectedRef.current) return;
     selectedRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [loading, selectedOrderId]);
+
+  const handleDeleteOrder = (order: Order) => {
+    toast("Удалить заказ?", {
+      description: `«${order.activityTitle}» от ${order.clientName}`,
+      action: {
+        label: "Удалить",
+        onClick: async () => {
+          const loadingId = toast.loading("Удаляем заказ...");
+          try {
+            const res = await fetch(`/api/partner/orders/${order.id}`, {
+              method: "DELETE",
+              headers: { Authorization: `Bearer ${getToken()}` },
+            });
+            if (!res.ok) {
+              const data = await res.json().catch(() => ({}));
+              throw new Error(data.error || "Ошибка удаления заказа");
+            }
+            setOrders((prev) => prev.filter((o) => o.id !== order.id));
+            toast.success("Заказ удалён", { id: loadingId });
+          } catch (err) {
+            toast.error((err as Error).message, { id: loadingId });
+          }
+        },
+      },
+      cancel: { label: "Отмена", onClick: () => {} },
+    });
+  };
 
   const handleExportCSV = async () => {
     try {
@@ -217,6 +245,15 @@ export function PartnerOrdersList({
                   </p>
                 </div>
               </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="shrink-0 text-muted-foreground hover:text-destructive"
+                aria-label="Удалить заказ"
+                onClick={() => handleDeleteOrder(order)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         );

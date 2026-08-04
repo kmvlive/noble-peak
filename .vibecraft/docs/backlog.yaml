@@ -5550,8 +5550,18 @@ tasks:
       - При удалении заказа партнёром клиент получает уведомление об удалении
     depends_on: []
     related_feature: Кабинет партнёра
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Партнёр может удалять заказы в разделе «Заказы» кабинета партнёра. При
+      удалении клиент получает уведомление об удалении. Добавлен DELETE
+      /api/partner/orders/[id] с проверкой авторизации партнёра и права на
+      заказ. Модель deleteBooking (lib/models.ts) удаляет запись из таблицы
+      bookings и связанную запись из orders. createNotification уведомляет
+      клиента (тип booking_status, текст «Заказ удалён»). В UI
+      (components/partner-orders-list.tsx) добавлена кнопка удаления с
+      подтверждением через sonner и обновлением списка. Основная реализация:
+      app/api/partner/orders/[id]/route.ts, components/partner-orders-list.tsx,
+      lib/models.ts.
   - id: task-245
     phase: mvp
     title: Клиент может удалять заказ с уведомлением партнёру

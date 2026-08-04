@@ -727,6 +727,40 @@ export async function failBookingPayment(
   );
 }
 
+export async function deleteBooking(id: string): Promise<void> {
+  await docClient.send(
+    new DeleteCommand({
+      TableName: TableName.BOOKINGS,
+      Key: { id },
+    })
+  );
+
+  const orders = await getAllOrdersById(id);
+  await Promise.all(
+    orders.map((o) =>
+      docClient.send(
+        new DeleteCommand({
+          TableName: TableName.ORDERS,
+          Key: { id: o.id },
+        })
+      )
+    )
+  );
+}
+
+async function getAllOrdersById(bookingId: string): Promise<OrderRecord[]> {
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.ORDERS,
+      FilterExpression: "bookingId = :bookingId",
+      ExpressionAttributeValues: {
+        ":bookingId": bookingId,
+      },
+    })
+  );
+  return (result.Items as OrderRecord[]) ?? [];
+}
+
 export interface EmailSettingsRecord {
   id: string;
   emails: string[];
