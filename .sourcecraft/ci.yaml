@@ -4,6 +4,23 @@ tokens:
     scope: org
 
 workflows:
+  push-to-github:
+    tasks:
+      - name: push-code-to-github
+        cubes:
+          - name: push
+            script:
+              - set -e
+              - echo "=== Pushing SourceCraft code to GitHub kmvlive/noble-peak ==="
+              - GITHUB_TOKEN=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
+              - GITHUB_URL="https://kmvlive:${GITHUB_TOKEN}@github.com/kmvlive/noble-peak.git"
+              - echo "=== Unshallowing sourcecraft clone if needed ==="
+              - git fetch --unshallow origin 2>/dev/null || true
+              - echo "=== Configuring github remote ==="
+              - git remote remove github 2>/dev/null || true
+              - git remote add github "${GITHUB_URL}"
+              - git push --force github HEAD:main
+              - echo "=== PUSH TO GITHUB COMPLETE ==="
   deliver:
     tasks:
       - name: deliver-code-via-receive-api
