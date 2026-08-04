@@ -74,7 +74,6 @@ function formatDate(dateStr: string): string {
 
 export function PartnerDashboard() {
   const router = useRouter();
-  const [partnerName] = useState("");
   const [orderNotifications, setOrderNotifications] = useState<
     OrderNotification[]
   >([]);
@@ -151,18 +150,13 @@ export function PartnerDashboard() {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <Sparkles className="h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              Добро пожаловать{partnerName ? `, ${partnerName}` : ""}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Кабинет партнёра — управляйте активностями, заказами и календарём
-            </p>
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Кабинет партнёра
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Управляйте активностями, заказами и календарём
+          </p>
         </div>
       </div>
 
