@@ -5163,3 +5163,21 @@ tasks:
     related_feature: Техническое сопровождение
     status: pending
     summary: null
+  - id: task-237
+    phase: support
+    title: Настроить CI-шаг SourceCraft для пуша кода в GitHub kmvlive/noble-peak
+    description: Код реализуется в SourceCraft, но не доезжает до production-сервера
+      my.magazin-tour.ru, потому что пуш в GitHub kmvlive/noble-peak невозможен.
+      Нужно добавить в .sourcecraft/ci.yaml workflow push-to-github, который
+      пушит код SourceCraft в GitHub kmvlive/noble-peak с использованием
+      GitHub-токена пользователя (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).
+      После пуша сервер сможет подтянуть код через git pull.
+    priority: high
+    acceptance_criteria:
+      - В .sourcecraft/ci.yaml добавлен workflow push-to-github
+      - Workflow пушит код SourceCraft в GitHub kmvlive/noble-peak
+      - Код SourceCraft запушен в GitHub kmvlive/noble-peak
+    depends_on: []
+    related_feature: Техническое сопровождение
+    status: pending
+    summary: null
