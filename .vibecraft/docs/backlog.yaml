@@ -5677,8 +5677,14 @@ tasks:
       - Вместо серого фона показывается само фото
     depends_on: []
     related_feature: Просмотр и каталог активностей
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Исправлено отображение фотографий в слайдере hero-секции: вместо CSS
+      background-image, которая некорректно рендерилась (серый фон) в ряде
+      браузеров, слайды теперь выводятся через нативные теги <img> с
+      object-cover и object-position. Надёжно показывает фото во всех
+      браузерах. Основная реализация — components/hero-slider.tsx. typecheck,
+      lint, build проходят.
   - id: task-250
     phase: mvp
     title:

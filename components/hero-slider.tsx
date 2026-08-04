@@ -45,12 +45,15 @@ export function HeroSlider({ children }: HeroSliderProps) {
       {images.length > 0 && (
         <>
           {images.map((img, index) => (
-            <div
+            <img
               key={img.id}
-              className="absolute inset-0 h-full w-full bg-cover transition-opacity duration-1000"
+              src={img.imageUrl}
+              alt=""
+              aria-hidden="true"
+              sizes="100vw"
+              className="absolute inset-0 block h-full w-full object-cover transition-opacity duration-1000"
               style={{
-                backgroundImage: `url(${img.imageUrl})`,
-                backgroundPosition: img.position || "center",
+                objectPosition: img.position || "center",
                 opacity: index === currentIndex ? 1 : 0,
                 zIndex: 0,
               }}
