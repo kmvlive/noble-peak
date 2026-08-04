@@ -24,9 +24,9 @@ async function handleTriggerDeploy(request: NextRequest) {
     try {
       const raw = fs.readFileSync(webhooksPath, "utf-8");
       const data = yaml.load(raw) as {
-        webhooks?: Array<{ secret: string }>;
+        webhooks?: { hooks?: Array<{ secret: string }> };
       };
-      const webhook = data?.webhooks?.[0];
+      const webhook = data?.webhooks?.hooks?.[0];
       if (!webhook?.secret) {
         return NextResponse.json(
           { error: "Секрет не найден в webhooks.yaml" },
