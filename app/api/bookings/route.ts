@@ -145,7 +145,8 @@ export async function POST(request: NextRequest) {
       date,
       time,
       price,
-      status: booking.status,
+      status: "pending_payment",
+      wasPaid: false,
     }).catch((e) => console.error("Ошибка создания заказа:", e));
 
     removeBookedSlotFromCalendar(activityId, date, time).catch((e) =>

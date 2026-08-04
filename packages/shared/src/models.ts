@@ -181,7 +181,8 @@ export interface OrderRecord {
   date: string;
   time: string | null;
   price: number;
-  status: string;
+  status: "pending_payment" | "paid" | "completed" | "cancelled";
+  wasPaid?: boolean;
   createdAt: string;
 }
 

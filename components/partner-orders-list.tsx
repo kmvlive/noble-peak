@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Download, Trash2 } from "lucide-react";
+import { Search, Download, Trash2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
@@ -21,7 +21,10 @@ interface Order {
   time: string | null;
   details: string;
   price: number;
-  status: "pending_payment" | "confirmed" | "cancelled";
+  status: string;
+  orderNumber: string;
+  orderStatus: string;
+  wasPaid?: boolean;
   createdAt: string;
 }
 
@@ -32,8 +35,10 @@ const statusBadge: Record<
     variant: "default" | "secondary" | "destructive" | "outline";
   }
 > = {
-  pending_payment: { label: "Ожидает оплаты", variant: "outline" },
-  confirmed: { label: "Подтверждён", variant: "default" },
+  pending_payment: { label: "Не оплачен", variant: "outline" },
+  paid: { label: "Оплачен", variant: "default" },
+  confirmed: { label: "Оплачен", variant: "default" },
+  completed: { label: "Исполнен", variant: "default" },
   cancelled: { label: "Отменён", variant: "destructive" },
 };
 
@@ -103,6 +108,30 @@ export function PartnerOrdersList({
       },
       cancel: { label: "Отмена", onClick: () => {} },
     });
+  };
+
+  const handleConfirmOrder = async (order: Order) => {
+    const loadingId = toast.loading("Подтверждаем выполнение...");
+    try {
+      const res = await fetch(`/api/partner/orders/${order.id}`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Ошибка подтверждения заказа");
+      }
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === order.id
+            ? { ...o, status: "completed", orderStatus: "completed" }
+            : o
+        )
+      );
+      toast.success("Активность исполнена", { id: loadingId });
+    } catch (err) {
+      toast.error((err as Error).message, { id: loadingId });
+    }
   };
 
   const handleExportCSV = async () => {
@@ -193,7 +222,13 @@ export function PartnerOrdersList({
       )}
 
       {filtered.map((order) => {
-        const badge = statusBadge[order.status] || statusBadge.cancelled;
+        const badge =
+          statusBadge[order.orderStatus] ||
+          statusBadge[order.status] ||
+          statusBadge.cancelled;
+        const canConfirm =
+          order.orderStatus !== "completed" &&
+          order.orderStatus !== "cancelled";
 
         return (
           <div
@@ -209,6 +244,9 @@ export function PartnerOrdersList({
               <div className="min-w-0 flex-1">
                 <div className="mb-1.5 flex items-center gap-2">
                   <Badge variant={badge.variant}>{badge.label}</Badge>
+                  <span className="text-xs text-muted-foreground font-mono">
+                    Заказ №{order.orderNumber}
+                  </span>
                 </div>
                 <h3 className="font-semibold leading-tight">
                   {order.activityTitle}
@@ -255,6 +293,18 @@ export function PartnerOrdersList({
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
+            {canConfirm && (
+              <div className="mt-3 flex justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleConfirmOrder(order)}
+                >
+                  <CheckCircle2 className="h-4 w-4 mr-1" />
+                  Подтвердить выполнение
+                </Button>
+              </div>
+            )}
           </div>
         );
       })}

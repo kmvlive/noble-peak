@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     }
 
     const confirmedOrderIds = mockOrders
-      .filter((o) => o.clientEmail === clientEmail && o.status === "confirmed")
+      .filter((o) => o.clientEmail === clientEmail && o.status === "paid")
       .map((o) => o.id);
     const threads = mockChatMessages.filter((m) =>
       confirmedOrderIds.includes(m.orderId)

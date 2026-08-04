@@ -23,34 +23,42 @@ interface Booking {
   clientName: string;
   clientPhone: string;
   status: string;
-  paymentStatus: string | null;
   createdAt: string;
+  orderNumber?: string;
+  orderStatus?: string;
 }
 
-type StatusFilter = "all" | "confirmed" | "pending_payment" | "cancelled";
+type StatusFilter =
+  | "all"
+  | "confirmed"
+  | "pending_payment"
+  | "cancelled"
+  | "completed";
 type DateFilter = "all" | "upcoming" | "past";
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: "all", label: "Все" },
-  { value: "confirmed", label: "Подтверждённые" },
-  { value: "pending_payment", label: "Ожидают оплаты" },
+  { value: "completed", label: "Исполненные" },
+  { value: "confirmed", label: "Оплаченные" },
+  { value: "pending_payment", label: "Не оплаченные" },
   { value: "cancelled", label: "Отменённые" },
 ];
 
-function getStatusLabel(status: string, paymentStatus: string | null): string {
-  if (status === "pending_payment") return "Ожидает оплаты";
-  if (status === "confirmed" && paymentStatus === "CONFIRMED")
-    return "Оплачено";
-  if (status === "confirmed") return "Подтверждено";
-  return "Отменено";
+function effectiveStatus(booking: Booking): string {
+  return booking.orderStatus ?? booking.status ?? "confirmed";
 }
 
-function getStatusColor(status: string, paymentStatus: string | null): string {
+function getStatusLabel(status: string): string {
+  if (status === "completed") return "Исполнен";
+  if (status === "paid" || status === "confirmed") return "Оплачен";
+  if (status === "pending_payment") return "Не оплачен";
+  return "Отменён";
+}
+
+function getStatusColor(status: string): string {
   if (status === "pending_payment")
     return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400";
-  if (status === "confirmed" && paymentStatus === "CONFIRMED")
-    return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
-  if (status === "confirmed")
+  if (status === "completed" || status === "paid" || status === "confirmed")
     return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
   return "bg-muted text-muted-foreground";
 }
@@ -64,6 +72,13 @@ export function ClientBookingsList() {
   const [sortAsc, setSortAsc] = useState(false);
 
   const handleDeleteBooking = (booking: Booking) => {
+    const status = effectiveStatus(booking);
+    if (status === "paid" || status === "completed") {
+      toast.error(
+        "Оплаченный заказ нельзя удалить. Для отмены обратитесь к администратору."
+      );
+      return;
+    }
     toast("Удалить заказ?", {
       description: `«${booking.activityTitle}» на ${booking.date}`,
       action: {
@@ -115,7 +130,12 @@ export function ClientBookingsList() {
     let result = [...bookings];
 
     if (statusFilter !== "all") {
-      result = result.filter((b) => b.status === statusFilter);
+      result = result.filter((b) => {
+        const s = effectiveStatus(b);
+        if (statusFilter === "confirmed")
+          return s === "paid" || s === "confirmed";
+        return s === statusFilter;
+      });
     }
 
     if (dateFilter === "upcoming") {
@@ -217,6 +237,11 @@ export function ClientBookingsList() {
                     <h3 className="text-sm font-semibold">
                       {booking.activityTitle}
                     </h3>
+                    {booking.orderNumber && booking.orderNumber !== "-" && (
+                      <p className="text-xs text-muted-foreground">
+                        Заказ №{booking.orderNumber}
+                      </p>
+                    )}
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                       <span className="inline-flex items-center gap-1">
                         <CalendarDays className="h-3 w-3" />
@@ -231,13 +256,13 @@ export function ClientBookingsList() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    {booking.status === "pending_payment" && (
+                    {effectiveStatus(booking) === "pending_payment" && (
                       <CreditCard className="h-3 w-3 text-amber-500" />
                     )}
                     <span
-                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${getStatusColor(booking.status, booking.paymentStatus)}`}
+                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${getStatusColor(effectiveStatus(booking))}`}
                     >
-                      {getStatusLabel(booking.status, booking.paymentStatus)}
+                      {getStatusLabel(effectiveStatus(booking))}
                     </span>
                     <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
                   </div>
@@ -247,6 +272,12 @@ export function ClientBookingsList() {
                 onClick={() => handleDeleteBooking(booking)}
                 aria-label="Удалить заказ"
                 className="absolute right-2 top-2 rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-destructive"
+                title={
+                  effectiveStatus(booking) === "paid" ||
+                  effectiveStatus(booking) === "completed"
+                    ? "Оплаченный заказ нельзя удалить"
+                    : "Удалить заказ"
+                }
               >
                 <Trash2 className="h-4 w-4" />
               </button>

@@ -839,7 +839,8 @@ export const mockOrders: OrderRecord[] = [
     date: new Date(Date.now() + 86400000 * 7).toISOString().split("T")[0],
     time: "12:00",
     price: 3500,
-    status: "confirmed",
+    status: "paid",
+    wasPaid: true,
     createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
   },
   {
@@ -871,7 +872,8 @@ export const mockOrders: OrderRecord[] = [
     date: new Date(Date.now() + 86400000 * 5).toISOString().split("T")[0],
     time: "10:00",
     price: 5000,
-    status: "confirmed",
+    status: "paid",
+    wasPaid: true,
     createdAt: new Date(Date.now() - 86400000).toISOString(),
   },
   {
@@ -887,7 +889,8 @@ export const mockOrders: OrderRecord[] = [
     date: new Date(Date.now() + 86400000 * 12).toISOString().split("T")[0],
     time: null,
     price: 5000,
-    status: "confirmed",
+    status: "cancelled",
+    wasPaid: true,
     createdAt: new Date().toISOString(),
   },
   {

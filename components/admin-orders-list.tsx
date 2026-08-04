@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 interface OrderRecord {
   id: string;
@@ -49,8 +50,10 @@ const statusLabels: Record<
     variant: "default" | "secondary" | "destructive" | "outline";
   }
 > = {
-  pending_payment: { label: "Ожидает оплаты", variant: "secondary" },
-  confirmed: { label: "Подтверждён", variant: "default" },
+  pending_payment: { label: "Не оплачен", variant: "secondary" },
+  paid: { label: "Оплачен", variant: "default" },
+  confirmed: { label: "Оплачен", variant: "default" },
+  completed: { label: "Исполнен", variant: "default" },
   cancelled: { label: "Отменён", variant: "destructive" },
 };
 
@@ -87,11 +90,16 @@ export function AdminOrdersList() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [orderDetail, setOrderDetail] = useState<OrderDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [scope, setScope] = useState<"all" | "cancelled_paid">("all");
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams({ page: String(page), limit: "100" });
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: "100",
+        scope,
+      });
       if (search) params.set("search", search);
       const res = await fetch(`/api/admin/orders?${params}`);
       const data = await res.json();
@@ -105,7 +113,7 @@ export function AdminOrdersList() {
     } finally {
       setLoading(false);
     }
-  }, [page, search]);
+  }, [page, search, scope]);
 
   useEffect(() => {
     fetchOrders();
@@ -130,6 +138,7 @@ export function AdminOrdersList() {
     try {
       const params = new URLSearchParams();
       if (search) params.set("search", search);
+      params.set("scope", scope);
       params.set("export", "csv");
       const res = await fetch(`/api/admin/orders?${params}`);
       if (!res.ok) throw new Error("Ошибка экспорта");
@@ -166,11 +175,66 @@ export function AdminOrdersList() {
     }
   };
 
+  const handleCancelOrder = (order: OrderRecord) => {
+    toast("Отменить оплаченный заказ?", {
+      description: `«${order.activityTitle}» от ${order.clientName}. Отменить может только администратор.`,
+      action: {
+        label: "Отменить",
+        onClick: async () => {
+          const loadingId = toast.loading("Отменяем заказ...");
+          try {
+            const res = await fetch(`/api/admin/orders/${order.id}`, {
+              method: "PATCH",
+            });
+            if (!res.ok) {
+              const data = await res.json().catch(() => ({}));
+              throw new Error(data.error || "Ошибка отмены заказа");
+            }
+            toast.success("Заказ отменён", { id: loadingId });
+            fetchOrders();
+          } catch (err) {
+            toast.error((err as Error).message, { id: loadingId });
+          }
+        },
+      },
+      cancel: { label: "Назад", onClick: () => {} },
+    });
+  };
+
+  const changeScope = (next: "all" | "cancelled_paid") => {
+    if (next === scope) return;
+    setScope(next);
+    setPage(1);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <FileText className="h-5 w-5 text-muted-foreground" />
         <h1 className="text-xl font-semibold">Отчёты</h1>
+      </div>
+
+      <div className="flex items-center gap-1.5 rounded-lg border bg-muted/30 p-1 w-fit">
+        <button
+          onClick={() => changeScope("all")}
+          className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+            scope === "all"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Все заказы
+        </button>
+        <button
+          onClick={() => changeScope("cancelled_paid")}
+          className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+            scope === "cancelled_paid"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Отмена активностей
+        </button>
       </div>
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
@@ -358,6 +422,20 @@ export function AdminOrdersList() {
                         Не удалось загрузить детали заказа
                       </p>
                     )}
+                    {scope === "all" &&
+                      (order.status === "paid" ||
+                        order.status === "completed" ||
+                        order.status === "confirmed") && (
+                        <div className="mt-3 flex justify-end">
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleCancelOrder(order)}
+                          >
+                            Отменить заказ
+                          </Button>
+                        </div>
+                      )}
                   </div>
                 )}
               </div>

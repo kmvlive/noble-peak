@@ -97,6 +97,9 @@ export async function GET(request: NextRequest) {
     Math.max(1, parseInt(searchParams.get("limit") ?? "100", 10) || 100)
   );
   const search = searchParams.get("search") ?? "";
+  const scope = searchParams.get("scope");
+  const filter =
+    scope === "cancelled_paid" ? ("cancelled_paid" as const) : undefined;
 
   const dbAvailable = await isDatabaseAvailable();
 
@@ -106,6 +109,7 @@ export async function GET(request: NextRequest) {
       limit,
       offset,
       search: search || undefined,
+      filter,
     });
     return NextResponse.json({
       orders: result.orders,
@@ -120,6 +124,9 @@ export async function GET(request: NextRequest) {
   if (search) {
     const q = search.trim().toLowerCase();
     items = items.filter((o) => o.orderNumber.toLowerCase().includes(q));
+  }
+  if (filter === "cancelled_paid") {
+    items = items.filter((o) => o.status === "cancelled" && o.wasPaid === true);
   }
   items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const total = items.length;

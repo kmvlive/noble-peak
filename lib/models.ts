@@ -575,7 +575,7 @@ export interface BookingRecord {
   time: string | null;
   details: string;
   price: number;
-  status: "pending_payment" | "confirmed" | "cancelled";
+  status: "pending_payment" | "paid" | "confirmed" | "completed" | "cancelled";
   paymentId: string | null;
   paymentUrl: string | null;
   paymentStatus: string | null;
@@ -705,6 +705,8 @@ export async function confirmBookingPayment(
       },
     })
   );
+
+  await updateOrderStatusByBookingId(id, "paid", { wasPaid: true });
 }
 
 export async function failBookingPayment(
@@ -725,6 +727,8 @@ export async function failBookingPayment(
       },
     })
   );
+
+  await updateOrderStatusByBookingId(id, "cancelled");
 }
 
 export async function deleteBooking(id: string): Promise<void> {
@@ -759,6 +763,90 @@ async function getAllOrdersById(bookingId: string): Promise<OrderRecord[]> {
     })
   );
   return (result.Items as OrderRecord[]) ?? [];
+}
+
+export async function getOrdersByBookingIds(
+  bookingIds: string[]
+): Promise<OrderRecord[]> {
+  if (bookingIds.length === 0) return [];
+  const distinct = Array.from(new Set(bookingIds));
+  const orders: OrderRecord[] = [];
+  for (const bookingId of distinct) {
+    const found = await getAllOrdersById(bookingId);
+    orders.push(...found);
+  }
+  return orders;
+}
+
+async function findOrderByBookingId(
+  bookingId: string
+): Promise<OrderRecord | null> {
+  const orders = await getAllOrdersById(bookingId);
+  return orders[0] ?? null;
+}
+
+export async function updateOrderStatusByBookingId(
+  bookingId: string,
+  status: OrderStatus,
+  options?: { wasPaid?: boolean }
+): Promise<void> {
+  const order = await findOrderByBookingId(bookingId);
+  if (!order) return;
+
+  const updateExpr = ["set #status = :status"];
+  const exprValues: Record<string, unknown> = { ":status": status };
+  if (options?.wasPaid !== undefined) {
+    updateExpr.push("wasPaid = :wasPaid");
+    exprValues[":wasPaid"] = options.wasPaid;
+  }
+
+  await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.ORDERS,
+      Key: { id: order.id },
+      UpdateExpression: updateExpr.join(", "),
+      ExpressionAttributeNames: { "#status": "status" },
+      ExpressionAttributeValues: exprValues,
+    })
+  );
+}
+
+export async function updateOrderStatusById(
+  id: string,
+  status: OrderStatus,
+  options?: { wasPaid?: boolean }
+): Promise<void> {
+  const updateExpr = ["set #status = :status"];
+  const exprValues: Record<string, unknown> = { ":status": status };
+  if (options?.wasPaid !== undefined) {
+    updateExpr.push("wasPaid = :wasPaid");
+    exprValues[":wasPaid"] = options.wasPaid;
+  }
+
+  await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.ORDERS,
+      Key: { id },
+      UpdateExpression: updateExpr.join(", "),
+      ExpressionAttributeNames: { "#status": "status" },
+      ExpressionAttributeValues: exprValues,
+    })
+  );
+}
+
+export async function updateBookingStatus(
+  id: string,
+  status: "pending_payment" | "paid" | "confirmed" | "completed" | "cancelled"
+): Promise<void> {
+  await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.BOOKINGS,
+      Key: { id },
+      UpdateExpression: "set #status = :status",
+      ExpressionAttributeNames: { "#status": "status" },
+      ExpressionAttributeValues: { ":status": status },
+    })
+  );
 }
 
 export interface EmailSettingsRecord {
@@ -1444,6 +1532,20 @@ export async function deleteAnalyticsCounter(id: string): Promise<void> {
   );
 }
 
+export type OrderStatus =
+  | "pending_payment"
+  | "paid"
+  | "completed"
+  | "cancelled";
+
+export const ORDER_STATUS_LABELS: Record<string, string> = {
+  pending_payment: "Не оплачен",
+  paid: "Оплачен",
+  confirmed: "Оплачен",
+  completed: "Исполнен",
+  cancelled: "Отменён",
+};
+
 export interface OrderRecord {
   id: string;
   orderNumber: string;
@@ -1457,7 +1559,8 @@ export interface OrderRecord {
   date: string;
   time: string | null;
   price: number;
-  status: string;
+  status: OrderStatus;
+  wasPaid?: boolean;
   createdAt: string;
 }
 
@@ -1503,6 +1606,7 @@ export async function getAllOrders(options?: {
   limit?: number;
   offset?: number;
   search?: string;
+  filter?: "cancelled_paid";
 }): Promise<{ orders: OrderRecord[]; total: number }> {
   const result = await docClient.send(
     new ScanCommand({
@@ -1514,6 +1618,10 @@ export async function getAllOrders(options?: {
   if (options?.search) {
     const q = options.search.trim().toLowerCase();
     items = items.filter((o) => o.orderNumber.toLowerCase().includes(q));
+  }
+
+  if (options?.filter === "cancelled_paid") {
+    items = items.filter((o) => o.status === "cancelled" && o.wasPaid === true);
   }
 
   items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));

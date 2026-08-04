@@ -5,6 +5,7 @@ import {
   deleteBooking,
   getActivityById,
   createNotification,
+  getOrdersByBookingIds,
 } from "@/lib/models";
 import { getClientEmailFromRequest } from "@/lib/client-auth";
 
@@ -40,6 +41,18 @@ export async function DELETE(
       return NextResponse.json(
         { error: "Нет доступа к этому заказу" },
         { status: 403 }
+      );
+    }
+
+    const orders = await getOrdersByBookingIds([booking.id]);
+    const order = orders.find((o) => o.bookingId === booking.id);
+    if (order && (order.status === "paid" || order.status === "completed")) {
+      return NextResponse.json(
+        {
+          error:
+            "Оплаченный заказ нельзя удалить. Для отмены обратитесь к администратору.",
+        },
+        { status: 409 }
       );
     }
 

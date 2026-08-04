@@ -3,10 +3,21 @@ import { isDatabaseAvailable } from "@/lib/db";
 import {
   getActivitiesByPartnerEmail,
   getBookingsByActivityIds,
+  getOrdersByBookingIds,
 } from "@/lib/models";
 import { getPartnerEmailFromRequest } from "@/lib/partner-auth";
-import { mockPartnerActivities, mockPartnerBookings } from "@/lib/mock-data";
-import type { BookingRecord } from "@/lib/models";
+import {
+  mockPartnerActivities,
+  mockPartnerBookings,
+  mockOrders,
+} from "@/lib/mock-data";
+import type { BookingRecord, OrderRecord } from "@/lib/models";
+
+export interface PartnerOrderView extends BookingRecord {
+  orderNumber: string;
+  orderStatus: string;
+  wasPaid?: boolean;
+}
 
 function escapeCSV(value: string | number | null | undefined): string {
   if (value == null) return '""';
@@ -17,8 +28,9 @@ function escapeCSV(value: string | number | null | undefined): string {
   return `"${str}"`;
 }
 
-function bookingsToCSV(bookings: BookingRecord[]): string {
+function bookingsToCSV(bookings: PartnerOrderView[]): string {
   const headers = [
+    "Номер заказа",
     "ID бронирования",
     "Email клиента",
     "Имя клиента",
@@ -34,6 +46,7 @@ function bookingsToCSV(bookings: BookingRecord[]): string {
   ];
   const rows = bookings.map((b) =>
     [
+      escapeCSV(b.orderNumber),
       escapeCSV(b.id),
       escapeCSV(b.clientEmail),
       escapeCSV(b.clientName),
@@ -44,11 +57,28 @@ function bookingsToCSV(bookings: BookingRecord[]): string {
       escapeCSV(b.time),
       escapeCSV(b.details),
       escapeCSV(b.price),
-      escapeCSV(b.status),
+      escapeCSV(b.orderStatus),
       escapeCSV(b.createdAt),
     ].join(",")
   );
   return "\uFEFF" + headers.join(",") + "\n" + rows.join("\n");
+}
+
+function mergeOrders(
+  bookings: BookingRecord[],
+  orders: OrderRecord[]
+): PartnerOrderView[] {
+  const map = new Map<string, OrderRecord>();
+  for (const o of orders) map.set(o.bookingId, o);
+  return bookings.map((b) => {
+    const o = map.get(b.id);
+    return {
+      ...b,
+      orderNumber: o?.orderNumber ?? "-",
+      orderStatus: o?.status ?? b.status,
+      wasPaid: o?.wasPaid,
+    };
+  });
 }
 
 export async function GET(request: NextRequest) {
@@ -67,8 +97,10 @@ export async function GET(request: NextRequest) {
       const activities = await getActivitiesByPartnerEmail(partnerEmail);
       const activityIds = activities.map((a) => a.id);
       const bookings = await getBookingsByActivityIds(activityIds);
+      const orders = await getOrdersByBookingIds(bookings.map((b) => b.id));
+      const view = mergeOrders(bookings, orders);
       if (isExport) {
-        const csv = bookingsToCSV(bookings);
+        const csv = bookingsToCSV(view);
         return new NextResponse(csv, {
           headers: {
             "Content-Type": "text/csv; charset=utf-8",
@@ -76,7 +108,7 @@ export async function GET(request: NextRequest) {
           },
         });
       }
-      return NextResponse.json(bookings);
+      return NextResponse.json(view);
     } catch (error) {
       console.error("Ошибка получения заказов партнёра:", error);
       return NextResponse.json(
@@ -92,9 +124,10 @@ export async function GET(request: NextRequest) {
   const filtered = mockPartnerBookings.filter((b) =>
     partnerActivityIds.includes(b.activityId)
   );
+  const view = mergeOrders(filtered, mockOrders);
 
   if (isExport) {
-    const csv = bookingsToCSV(filtered);
+    const csv = bookingsToCSV(view);
     return new NextResponse(csv, {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
@@ -103,5 +136,5 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  return NextResponse.json(filtered);
+  return NextResponse.json(view);
 }
