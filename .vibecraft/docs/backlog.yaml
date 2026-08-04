@@ -5161,8 +5161,19 @@ tasks:
       - Код SourceCraft запушен в GitHub kmvlive/noble-peak
     depends_on: []
     related_feature: Техническое сопровождение
-    status: pending
-    summary: null
+    status: failed
+    summary: >-
+      CI-шаг push-to-github настроен в .sourcecraft/ci.yaml: workflow использует
+      GitHub-токен пользователя (ghp_...) для аутентификации (git push --force
+      HEAD:main в kmvlive/noble-peak) и корректно запускается через src run
+      trigger. Однако пуш отклоняется GitHub secret-scanning push protection:
+      токен и другие секреты закоммичены в репозиторий — в .sourcecraft/ci.yaml
+      (строка 15) и во множестве коммитов истории .vibecraft/docs/backlog.yaml.
+      Очистить историю/файлы нельзя по ограничениям задачи (не создавать
+      коммиты, не редактировать данные других задач), а allow-list секрета на
+      GitHub требует прав администратора репозитория. Итог: GH main=492cafd,
+      код не запушен, критерий приёмки не выполнен. typecheck ок, lint 0 ошибок
+      (17 предупреждений), build ок.
   - id: task-237
     phase: support
     title: Настроить CI-шаг SourceCraft для пуша кода в GitHub kmvlive/noble-peak
