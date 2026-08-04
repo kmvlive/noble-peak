@@ -109,9 +109,17 @@ export function AdminMenuManager({
     }
   };
 
-  const handleDelete = async (item: MenuItem) => {
-    if (!confirm(`Удалить пункт меню «${item.name}»?`)) return;
+  const handleDelete = (item: MenuItem) => {
+    toast(`Удалить пункт меню «${item.name}»?`, {
+      action: {
+        label: "Удалить",
+        onClick: () => confirmDelete(item),
+      },
+      cancel: { label: "Отмена", onClick: () => {} },
+    });
+  };
 
+  const confirmDelete = async (item: MenuItem) => {
     const token = getToken();
 
     try {
@@ -132,7 +140,12 @@ export function AdminMenuManager({
       }
 
       toast.success(`Пункт «${item.name}» удалён`);
-      setItems((prev) => prev.filter((i) => i.id !== item.id));
+      const data = await res.json();
+      if (Array.isArray(data.items)) {
+        setItems(data.items);
+      } else {
+        setItems((prev) => prev.filter((i) => i.id !== item.id));
+      }
     } catch {
       toast.error("Ошибка удаления");
     }

@@ -1344,10 +1344,7 @@ export async function moveMenuItem(
   const [moved] = reordered.splice(index, 1);
   reordered.splice(targetIndex, 0, moved);
 
-  return renumberMenuItems(
-    menuType,
-    reordered.map((item, i) => ({ ...item, order: i }))
-  );
+  return renumberMenuItems(menuType, reordered);
 }
 
 export async function deleteMenuItem(
@@ -1362,11 +1359,7 @@ export async function deleteMenuItem(
   );
 
   const remaining = await getMenuItems(menuType);
-  await renumberMenuItems(
-    menuType,
-    remaining.map((item, i) => ({ ...item, order: i }))
-  );
-  return remaining;
+  return renumberMenuItems(menuType, remaining);
 }
 
 export interface AnalyticsCounterRecord {

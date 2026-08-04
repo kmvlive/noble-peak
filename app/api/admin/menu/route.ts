@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isDatabaseAvailable } from "@/lib/db";
-import { getMenuItems, createMenuItem } from "@/lib/models";
+import { getMenuItems, createMenuItem, renumberMenuItems } from "@/lib/models";
 import { mockMenuItems } from "@/lib/mock-data";
 import { verifyToken } from "@/lib/auth";
 import { z } from "zod";
@@ -92,6 +92,12 @@ export async function POST(request: NextRequest) {
       id: randomUUID(),
       ...parsed.data,
     });
+
+    const typedMenuType = parsed.data.menuType;
+    const items = await renumberMenuItems(
+      typedMenuType,
+      await getMenuItems(typedMenuType)
+    );
 
     return NextResponse.json(menuItem, { status: 201 });
   } catch (error) {
