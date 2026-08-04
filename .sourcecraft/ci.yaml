@@ -4,6 +4,15 @@ tokens:
     scope: org
 
 workflows:
+  deliver:
+    tasks:
+      - name: deliver-code-via-receive-api
+        cubes:
+          - name: deliver-code
+            script:
+              - echo "=== Delivering source files to production via /api/receive-code ==="
+              - RECEIVE_CODE_URL=https://my.magazin-tour.ru/api/receive-code RECEIVE_CODE_TOKEN=src-ci-deploy-token-2026 npm run deliver:code
+              - echo "=== DELIVER COMPLETE ==="
   deploy:
     tasks:
       - name: deploy-via-ssh

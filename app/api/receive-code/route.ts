@@ -41,15 +41,29 @@ async function writeFiles(files: { path: string; content: string }[]) {
 
 function triggerBuild() {
   const cwd = process.cwd();
+  const composeFile =
+    process.env.RECEIVE_CODE_COMPOSE_FILE ?? "docker-compose.prod.yml";
   const commands = [
     `cd "${cwd}"`,
-    "echo '🏗️ npm run build...'",
-    "npm run build",
-    "echo '✓ Build completed'",
-    "echo '🔄 PM2 restart...'",
-    "pm2 restart all",
-    "echo '✓ PM2 restart completed'",
-  ].join(" && ");
+    // На сервере приложение реально запущено через docker compose.
+    // Если docker-compose.prod.yml существует — пересобираем и перезапускаем
+    // контейнер, иначе (локально / PM2) — собираем и перезапускаем через PM2.
+    `if [ -f "${composeFile}" ]; then`,
+    "  echo '🏗️ docker compose build...'",
+    `  docker compose -f ${composeFile} build`,
+    "  echo '✓ Build completed'",
+    "  echo '🔄 docker compose up --force-recreate...'",
+    `  docker compose -f ${composeFile} up -d --force-recreate`,
+    "  echo '✓ Container restarted'",
+    "else",
+    "  echo '🏗️ npm run build...'",
+    "  npm run build",
+    "  echo '✓ Build completed'",
+    "  echo '🔄 PM2 restart...'",
+    "  pm2 restart all || (npm run build && npm run start &)",
+    "  echo '✓ Restart complete'",
+    "fi",
+  ].join("\n");
 
   const child = spawn("sh", ["-c", commands], {
     cwd,
@@ -132,7 +146,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Written ${files.length} file(s), build and PM2 restart triggered`,
+      message: `Written ${files.length} file(s), build and restart triggered`,
       files: files.map((f) => f.path),
     });
   } catch (error) {
