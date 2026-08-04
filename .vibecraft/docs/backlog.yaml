@@ -5698,5 +5698,8 @@ tasks:
       - Блок «Информация для туристов» больше не отображается
     depends_on: []
     related_feature: Личный кабинет клиента
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      На дашборде клиента название блока «Информация для туристов» заменено на
+      «Информация туристам». Основная реализация: components/client-tourist-info.tsx.
+      typecheck, lint, build проходят.

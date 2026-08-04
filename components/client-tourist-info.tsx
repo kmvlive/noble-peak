@@ -46,7 +46,7 @@ export function ClientTouristInfo() {
           <Info className="h-4 w-4 text-primary" />
         </div>
         <h2 className="text-lg font-semibold tracking-tight">
-          Информация для туристов
+          Информация туристам
         </h2>
       </div>
 
