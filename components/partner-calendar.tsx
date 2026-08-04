@@ -2,7 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  CalendarDays,
+  Clock,
+  User,
+  ArrowRight,
+} from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getToken } from "@/components/partner-layout-client";
 import { Button } from "@/components/ui/button";
@@ -40,6 +47,7 @@ export function PartnerCalendar() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentDate, setCurrentDate] = useState(() => new Date());
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   useEffect(() => {
     const token = getToken();
@@ -103,8 +111,14 @@ export function PartnerCalendar() {
     cells.push({ day: d, dateStr, hasOrders: !!ordersByDate[dateStr] });
   }
 
-  const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
-  const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
+  const prevMonth = () => {
+    setSelectedDate(null);
+    setCurrentDate(new Date(year, month - 1, 1));
+  };
+  const nextMonth = () => {
+    setSelectedDate(null);
+    setCurrentDate(new Date(year, month + 1, 1));
+  };
 
   const orderCount = orders.filter((o) => o.status !== "cancelled").length;
 
@@ -151,15 +165,24 @@ export function PartnerCalendar() {
 
               const isToday = cell.dateStr === today;
               const dayOrders = ordersByDate[cell.dateStr] || [];
+              const isSelected = cell.dateStr === selectedDate;
+              const hasOrders = dayOrders.length > 0;
 
               return (
-                <div
+                <button
                   key={i}
+                  type="button"
+                  disabled={!hasOrders}
+                  onClick={() =>
+                    setSelectedDate(isSelected ? null : cell.dateStr)
+                  }
                   className={`relative flex min-h-[36px] md:min-h-[56px] flex-col items-center justify-start rounded-lg p-0.5 md:p-1 text-xs md:text-sm transition-colors ${
                     isToday
                       ? "bg-primary/10 ring-1 ring-primary/30"
-                      : "hover:bg-accent"
-                  }`}
+                      : hasOrders
+                        ? "cursor-pointer hover:bg-accent"
+                        : "hover:bg-accent"
+                  } ${isSelected ? "ring-2 ring-primary bg-primary/10" : ""}`}
                 >
                   <span
                     className={`text-[10px] md:text-xs ${
@@ -168,7 +191,7 @@ export function PartnerCalendar() {
                   >
                     {cell.day}
                   </span>
-                  {dayOrders.length > 0 && (
+                  {hasOrders && (
                     <div className="mt-0.5 flex flex-wrap justify-center gap-0.5">
                       {dayOrders.slice(0, 2).map((o) => (
                         <div
@@ -184,12 +207,63 @@ export function PartnerCalendar() {
                       )}
                     </div>
                   )}
-                </div>
+                </button>
               );
             })}
           </div>
         </div>
       </div>
+
+      {selectedDate && ordersByDate[selectedDate]?.length > 0 && (
+        <div className="rounded-xl border bg-card p-3 md:p-4">
+          <div className="mb-2 md:mb-3 flex items-center justify-between gap-2">
+            <h3 className="text-xs md:text-sm font-semibold">
+              Заказы на{" "}
+              {new Date(selectedDate + "T00:00:00Z").toLocaleDateString(
+                "ru-RU",
+                {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                  timeZone: "UTC",
+                }
+              )}
+            </h3>
+            <button
+              type="button"
+              onClick={() => setSelectedDate(null)}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              Закрыть
+            </button>
+          </div>
+          <div className="space-y-2">
+            {ordersByDate[selectedDate].map((order) => (
+              <button
+                key={order.id}
+                type="button"
+                onClick={() => router.push(`/partner/orders?order=${order.id}`)}
+                className="flex w-full items-center gap-3 rounded-lg bg-muted/50 px-3 py-2.5 text-left text-xs md:text-sm transition-colors hover:bg-accent"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium">{order.activityTitle}</p>
+                  <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[10px] md:text-xs text-muted-foreground">
+                    <span className="inline-flex items-center gap-1">
+                      <User className="h-3 w-3" />
+                      {order.clientName}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {order.time ? order.time : "весь день"}
+                    </span>
+                  </div>
+                </div>
+                <ArrowRight className="h-4 w-4 shrink-0 text-primary" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {orderCount > 0 && (
         <div className="rounded-xl border bg-card p-3 md:p-4">

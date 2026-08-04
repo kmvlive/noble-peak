@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,12 +36,17 @@ const statusBadge: Record<
   cancelled: { label: "Отменён", variant: "destructive" },
 };
 
-export function PartnerOrdersList() {
+export function PartnerOrdersList({
+  selectedOrderId,
+}: {
+  selectedOrderId?: string;
+}) {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const selectedRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const token = getToken();
@@ -66,6 +71,11 @@ export function PartnerOrdersList() {
         setLoading(false);
       });
   }, [router]);
+
+  useEffect(() => {
+    if (loading || !selectedOrderId || !selectedRef.current) return;
+    selectedRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [loading, selectedOrderId]);
 
   const handleExportCSV = async () => {
     try {
@@ -160,7 +170,12 @@ export function PartnerOrdersList() {
         return (
           <div
             key={order.id}
-            className="rounded-xl border bg-card p-4 transition-colors hover:bg-accent/30"
+            ref={order.id === selectedOrderId ? selectedRef : undefined}
+            className={`rounded-xl border bg-card p-4 transition-colors ${
+              order.id === selectedOrderId
+                ? "ring-2 ring-primary bg-primary/5"
+                : "hover:bg-accent/30"
+            }`}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">

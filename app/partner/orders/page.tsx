@@ -1,7 +1,12 @@
 import { ShoppingCart } from "lucide-react";
 import { PartnerOrdersList } from "@/components/partner-orders-list";
 
-export default function PartnerOrdersPage() {
+export default async function PartnerOrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ order?: string }>;
+}) {
+  const { order } = await searchParams;
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
@@ -15,7 +20,7 @@ export default function PartnerOrdersPage() {
           </p>
         </div>
       </div>
-      <PartnerOrdersList />
+      <PartnerOrdersList selectedOrderId={order} />
     </div>
   );
 }
