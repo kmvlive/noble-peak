@@ -1634,6 +1634,133 @@ export async function getAllOrders(options?: {
   return { orders, total };
 }
 
+export interface OrderBackfillResult {
+  assigned: number;
+  created: number;
+  totalOrders: number;
+  totalBookings: number;
+}
+
+function orderStatusFromBooking(status: BookingRecord["status"]): OrderStatus {
+  if (status === "confirmed") return "paid";
+  if (status === "paid") return "paid";
+  if (status === "completed") return "completed";
+  if (status === "cancelled") return "cancelled";
+  return "pending_payment";
+}
+
+function orderWasPaidFromBooking(status: BookingRecord["status"]): boolean {
+  return status === "paid" || status === "confirmed" || status === "completed";
+}
+
+function orderFromBooking(
+  booking: BookingRecord,
+  orderNumber: string,
+  partnerEmail: string | null
+): OrderRecord {
+  return {
+    id: randomUUID(),
+    orderNumber,
+    bookingId: booking.id,
+    clientEmail: booking.clientEmail,
+    clientName: booking.clientName,
+    clientPhone: booking.clientPhone,
+    activityId: booking.activityId,
+    activityTitle: booking.activityTitle,
+    partnerEmail,
+    date: booking.date,
+    time: booking.time,
+    price: booking.price,
+    status: orderStatusFromBooking(booking.status),
+    wasPaid: orderWasPaidFromBooking(booking.status),
+    createdAt: booking.createdAt,
+  };
+}
+
+export async function backfillOrders(): Promise<OrderBackfillResult> {
+  const orderScan = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.ORDERS,
+    })
+  );
+  const orders = (orderScan.Items as OrderRecord[]) ?? [];
+
+  let maxNum = 0;
+  const ordersByBookingId = new Map<string, OrderRecord>();
+  for (const order of orders) {
+    if (order.bookingId) ordersByBookingId.set(order.bookingId, order);
+    const num = parseInt(order.orderNumber, 10);
+    if (!isNaN(num) && num > maxNum) maxNum = num;
+  }
+
+  let next = maxNum + 1;
+  let assigned = 0;
+
+  for (const order of orders) {
+    const num = parseInt(order.orderNumber, 10);
+    if (isNaN(num)) {
+      const orderNumber = String(next).padStart(6, "0");
+      next += 1;
+      assigned += 1;
+      await docClient.send(
+        new UpdateCommand({
+          TableName: TableName.ORDERS,
+          Key: { id: order.id },
+          UpdateExpression: "set #orderNumber = :orderNumber",
+          ExpressionAttributeNames: { "#orderNumber": "orderNumber" },
+          ExpressionAttributeValues: { ":orderNumber": orderNumber },
+        })
+      );
+    }
+  }
+
+  const bookingScan = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.BOOKINGS,
+    })
+  );
+  const bookings = (bookingScan.Items as BookingRecord[]) ?? [];
+
+  let activities: ActivityRecord[] = [];
+  try {
+    activities = await getAllActivities();
+  } catch {
+    activities = [];
+  }
+  const partnerByActivityId = new Map<string, string>();
+  for (const activity of activities) {
+    if (activity.partnerEmail) {
+      partnerByActivityId.set(activity.id, activity.partnerEmail);
+    }
+  }
+
+  let created = 0;
+  for (const booking of bookings) {
+    if (ordersByBookingId.has(booking.id)) continue;
+    const orderNumber = String(next).padStart(6, "0");
+    next += 1;
+    created += 1;
+    const order = orderFromBooking(
+      booking,
+      orderNumber,
+      partnerByActivityId.get(booking.activityId) ?? null
+    );
+    await docClient.send(
+      new PutCommand({
+        TableName: TableName.ORDERS,
+        Item: order,
+      })
+    );
+  }
+
+  return {
+    assigned,
+    created,
+    totalOrders: orders.length + created,
+    totalBookings: bookings.length,
+  };
+}
+
 export async function getOrderById(id: string): Promise<OrderRecord | null> {
   const result = await docClient.send(
     new GetCommand({

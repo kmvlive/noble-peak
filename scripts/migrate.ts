@@ -84,6 +84,21 @@ async function migrate() {
     console.log(`  ✓ Создана: ${table.name}`);
   }
 
+  console.log("🔢 Заполнение порядковых номеров заказов...");
+
+  try {
+    const { backfillOrders } = await import("../lib/models");
+    const report = await backfillOrders();
+    console.log(
+      `  ✓ Заказы: присвоено номеров — ${report.assigned}, создано заказов — ${report.created}`
+    );
+  } catch (error) {
+    console.warn(
+      "  ⚠️ Не удалось выполнить backfill заказов:",
+      error instanceof Error ? error.message : error
+    );
+  }
+
   console.log("🎉 Миграции завершены!");
 }
 
