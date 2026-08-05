@@ -3,7 +3,7 @@ import { isDatabaseAvailable } from "@/lib/db";
 import {
   getActivitiesByPartnerEmail,
   getBookingById,
-  deleteBooking,
+  archiveBooking,
   createNotification,
   updateOrderStatusByBookingId,
   updateBookingStatus,
@@ -99,7 +99,7 @@ export async function DELETE(
       );
     }
 
-    await deleteBooking(booking.id);
+    await archiveBooking(booking.id);
 
     createNotification({
       recipientEmail: booking.clientEmail,

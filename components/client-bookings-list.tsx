@@ -11,6 +11,7 @@ import {
   ArrowUpDown,
   SlidersHorizontal,
   Trash2,
+  Archive,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -26,14 +27,11 @@ interface Booking {
   createdAt: string;
   orderNumber?: string;
   orderStatus?: string;
+  deletedAt?: string | null;
 }
 
 type StatusFilter =
-  | "all"
-  | "confirmed"
-  | "pending_payment"
-  | "cancelled"
-  | "completed";
+  "all" | "confirmed" | "pending_payment" | "cancelled" | "completed";
 type DateFilter = "all" | "upcoming" | "past";
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
@@ -70,6 +68,7 @@ export function ClientBookingsList() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");
   const [sortAsc, setSortAsc] = useState(false);
+  const [view, setView] = useState<"active" | "archive">("active");
 
   const handleDeleteBooking = (booking: Booking) => {
     const status = effectiveStatus(booking);
@@ -107,7 +106,7 @@ export function ClientBookingsList() {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const res = await fetch("/api/client/bookings");
+        const res = await fetch(`/api/client/bookings?scope=${view}`);
         if (res.status === 401) {
           router.push("/client/login");
           return;
@@ -122,7 +121,7 @@ export function ClientBookingsList() {
     };
 
     fetchBookings();
-  }, [router]);
+  }, [router, view]);
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -167,42 +166,68 @@ export function ClientBookingsList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <SlidersHorizontal className="h-4 w-4 text-muted-foreground shrink-0" />
-        <div className="flex flex-wrap gap-1.5">
-          {STATUS_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => setStatusFilter(opt.value)}
-              className={`min-h-9 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                statusFilter === opt.value
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-        <div className="ml-auto flex items-center gap-2 max-sm:w-full max-sm:ml-0">
-          <select
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value as DateFilter)}
-            className="min-h-9 flex-1 rounded-md border bg-background px-3 py-1.5 text-xs text-muted-foreground"
-          >
-            <option value="all">Все даты</option>
-            <option value="upcoming">Предстоящие</option>
-            <option value="past">Прошедшие</option>
-          </select>
-          <button
-            onClick={() => setSortAsc((v) => !v)}
-            className="min-h-9 flex items-center gap-1.5 rounded-md border bg-background px-3 py-1.5 text-xs text-muted-foreground hover:bg-accent transition-colors"
-          >
-            <ArrowUpDown className="h-3.5 w-3.5" />
-            {sortAsc ? "сначала новые" : "сначала старые"}
-          </button>
-        </div>
+      <div className="flex items-center gap-1.5 rounded-lg border bg-muted/30 p-1 w-fit">
+        <button
+          onClick={() => setView("active")}
+          className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+            view === "active"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Активные
+        </button>
+        <button
+          onClick={() => setView("archive")}
+          className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+            view === "archive"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Archive className="h-4 w-4" />
+          Архив
+        </button>
       </div>
+
+      {view === "active" && (
+        <div className="flex flex-wrap items-center gap-2">
+          <SlidersHorizontal className="h-4 w-4 text-muted-foreground shrink-0" />
+          <div className="flex flex-wrap gap-1.5">
+            {STATUS_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setStatusFilter(opt.value)}
+                className={`min-h-9 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                  statusFilter === opt.value
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <div className="ml-auto flex items-center gap-2 max-sm:w-full max-sm:ml-0">
+            <select
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value as DateFilter)}
+              className="min-h-9 flex-1 rounded-md border bg-background px-3 py-1.5 text-xs text-muted-foreground"
+            >
+              <option value="all">Все даты</option>
+              <option value="upcoming">Предстоящие</option>
+              <option value="past">Прошедшие</option>
+            </select>
+            <button
+              onClick={() => setSortAsc((v) => !v)}
+              className="min-h-9 flex items-center gap-1.5 rounded-md border bg-background px-3 py-1.5 text-xs text-muted-foreground hover:bg-accent transition-colors"
+            >
+              <ArrowUpDown className="h-3.5 w-3.5" />
+              {sortAsc ? "сначала новые" : "сначала старые"}
+            </button>
+          </div>
+        </div>
+      )}
 
       {filteredBookings.length === 0 ? (
         <div className="rounded-lg border p-8 text-center space-y-3">
@@ -210,9 +235,11 @@ export function ClientBookingsList() {
             <CalendarDays className="h-6 w-6 text-muted-foreground" />
           </div>
           <p className="text-sm text-muted-foreground">
-            {bookings.length === 0
-              ? "У вас пока нет бронирований"
-              : "Нет бронирований по выбранным фильтрам"}
+            {view === "archive"
+              ? "В архиве пока пусто"
+              : bookings.length === 0
+                ? "У вас пока нет бронирований"
+                : "Нет бронирований по выбранным фильтрам"}
           </p>
           <Link
             href="/"
@@ -256,8 +283,14 @@ export function ClientBookingsList() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    {effectiveStatus(booking) === "pending_payment" && (
-                      <CreditCard className="h-3 w-3 text-amber-500" />
+                    {effectiveStatus(booking) === "pending_payment" &&
+                      view === "active" && (
+                        <CreditCard className="h-3 w-3 text-amber-500" />
+                      )}
+                    {view === "archive" && (
+                      <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider">
+                        Удалён
+                      </span>
                     )}
                     <span
                       className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${getStatusColor(effectiveStatus(booking))}`}
@@ -268,19 +301,21 @@ export function ClientBookingsList() {
                   </div>
                 </div>
               </Link>
-              <button
-                onClick={() => handleDeleteBooking(booking)}
-                aria-label="Удалить заказ"
-                className="absolute right-2 top-2 rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-destructive"
-                title={
-                  effectiveStatus(booking) === "paid" ||
-                  effectiveStatus(booking) === "completed"
-                    ? "Оплаченный заказ нельзя удалить"
-                    : "Удалить заказ"
-                }
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+              {view === "active" && (
+                <button
+                  onClick={() => handleDeleteBooking(booking)}
+                  aria-label="Удалить заказ"
+                  className="absolute right-2 top-2 rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-destructive"
+                  title={
+                    effectiveStatus(booking) === "paid" ||
+                    effectiveStatus(booking) === "completed"
+                      ? "Оплаченный заказ нельзя удалить"
+                      : "Удалить заказ"
+                  }
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
             </div>
           ))}
         </div>

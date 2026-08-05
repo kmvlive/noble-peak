@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Download, Trash2, CheckCircle2 } from "lucide-react";
+import { Search, Download, Trash2, CheckCircle2, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
@@ -52,6 +52,7 @@ export function PartnerOrdersList({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [view, setView] = useState<"active" | "archive">("active");
   const selectedRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -61,7 +62,7 @@ export function PartnerOrdersList({
       return;
     }
 
-    fetch("/api/partner/orders", {
+    fetch(`/api/partner/orders?scope=${view}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
@@ -76,7 +77,7 @@ export function PartnerOrdersList({
         setError(err.message);
         setLoading(false);
       });
-  }, [router]);
+  }, [router, view]);
 
   useEffect(() => {
     if (loading || !selectedOrderId || !selectedRef.current) return;
@@ -185,20 +186,75 @@ export function PartnerOrdersList({
 
   if (orders.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-16 text-center">
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-          <Search className="h-6 w-6 text-muted-foreground" />
+      <div className="space-y-4">
+        <div className="flex items-center gap-1.5 rounded-lg border bg-muted/30 p-1 w-fit">
+          <button
+            onClick={() => setView("active")}
+            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+              view === "active"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Активные
+          </button>
+          <button
+            onClick={() => setView("archive")}
+            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+              view === "archive"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Архив
+          </button>
         </div>
-        <h3 className="mb-1 font-medium">Заказов пока нет</h3>
-        <p className="text-sm text-muted-foreground">
-          Заказы появятся, когда клиенты забронируют ваши активности
-        </p>
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-16 text-center">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+            {view === "archive" ? (
+              <Archive className="h-6 w-6 text-muted-foreground" />
+            ) : (
+              <Search className="h-6 w-6 text-muted-foreground" />
+            )}
+          </div>
+          <h3 className="mb-1 font-medium">
+            {view === "archive" ? "В архиве пока пусто" : "Заказов пока нет"}
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            {view === "archive"
+              ? "Сюда попадают удалённые заказы"
+              : "Заказы появятся, когда клиенты забронируют ваши активности"}
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-1.5 rounded-lg border bg-muted/30 p-1 w-fit">
+        <button
+          onClick={() => setView("active")}
+          className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+            view === "active"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Активные
+        </button>
+        <button
+          onClick={() => setView("archive")}
+          className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+            view === "archive"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Архив
+        </button>
+      </div>
+
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -209,10 +265,12 @@ export function PartnerOrdersList({
             className="pl-9"
           />
         </div>
-        <Button variant="outline" size="sm" onClick={handleExportCSV}>
-          <Download className="h-4 w-4 sm:mr-1" />
-          <span className="hidden sm:inline">CSV</span>
-        </Button>
+        {view === "active" && (
+          <Button variant="outline" size="sm" onClick={handleExportCSV}>
+            <Download className="h-4 w-4 sm:mr-1" />
+            <span className="hidden sm:inline">CSV</span>
+          </Button>
+        )}
       </div>
 
       {filtered.length === 0 && (
@@ -244,6 +302,9 @@ export function PartnerOrdersList({
               <div className="min-w-0 flex-1">
                 <div className="mb-1.5 flex items-center gap-2">
                   <Badge variant={badge.variant}>{badge.label}</Badge>
+                  {view === "archive" && (
+                    <Badge variant="secondary">Удалён</Badge>
+                  )}
                   <span className="text-xs text-muted-foreground font-mono">
                     Заказ №{order.orderNumber}
                   </span>
@@ -283,17 +344,19 @@ export function PartnerOrdersList({
                   </p>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="shrink-0 text-muted-foreground hover:text-destructive"
-                aria-label="Удалить заказ"
-                onClick={() => handleDeleteOrder(order)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              {view === "active" && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="shrink-0 text-muted-foreground hover:text-destructive"
+                  aria-label="Удалить заказ"
+                  onClick={() => handleDeleteOrder(order)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
             </div>
-            {canConfirm && (
+            {view === "active" && canConfirm && (
               <div className="mt-3 flex justify-end">
                 <Button
                   variant="outline"

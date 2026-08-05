@@ -580,10 +580,12 @@ export interface BookingRecord {
   paymentUrl: string | null;
   paymentStatus: string | null;
   createdAt: string;
+  deletedAt?: string | null;
 }
 
 export async function getBookingsByActivityIds(
-  activityIds: string[]
+  activityIds: string[],
+  opts?: { includeArchived?: boolean }
 ): Promise<BookingRecord[]> {
   if (activityIds.length === 0) return [];
   const result = await docClient.send(
@@ -593,7 +595,11 @@ export async function getBookingsByActivityIds(
   );
   const all = (result.Items as BookingRecord[]) ?? [];
   const idSet = new Set(activityIds);
-  return all.filter((b) => idSet.has(b.activityId));
+  let resultList = all.filter((b) => idSet.has(b.activityId));
+  if (!opts?.includeArchived) {
+    resultList = resultList.filter((b) => !b.deletedAt);
+  }
+  return resultList;
 }
 
 export async function getActivitiesByPartnerEmail(
@@ -652,7 +658,8 @@ export async function getBookingById(
 }
 
 export async function getClientBookings(
-  clientEmail: string
+  clientEmail: string,
+  opts?: { includeArchived?: boolean }
 ): Promise<BookingRecord[]> {
   const result = await docClient.send(
     new QueryCommand({
@@ -664,7 +671,11 @@ export async function getClientBookings(
       },
     })
   );
-  return (result.Items as BookingRecord[]) ?? [];
+  let items = (result.Items as BookingRecord[]) ?? [];
+  if (!opts?.includeArchived) {
+    items = items.filter((b) => !b.deletedAt);
+  }
+  return items;
 }
 
 export async function updateBookingPayment(
@@ -731,23 +742,28 @@ export async function failBookingPayment(
   await updateOrderStatusByBookingId(id, "cancelled");
 }
 
-export async function deleteBooking(id: string): Promise<void> {
+export async function archiveBooking(id: string): Promise<void> {
+  const deletedAt = new Date().toISOString();
   const orders = await getAllOrdersById(id);
   await Promise.all(
     orders.map((o) =>
       docClient.send(
-        new DeleteCommand({
+        new UpdateCommand({
           TableName: TableName.ORDERS,
           Key: { id: o.id },
+          UpdateExpression: "set deletedAt = :deletedAt",
+          ExpressionAttributeValues: { ":deletedAt": deletedAt },
         })
       )
     )
   );
 
   await docClient.send(
-    new DeleteCommand({
+    new UpdateCommand({
       TableName: TableName.BOOKINGS,
       Key: { id },
+      UpdateExpression: "set deletedAt = :deletedAt",
+      ExpressionAttributeValues: { ":deletedAt": deletedAt },
     })
   );
 }
@@ -1559,6 +1575,7 @@ export interface OrderRecord {
   status: OrderStatus;
   wasPaid?: boolean;
   createdAt: string;
+  deletedAt?: string | null;
 }
 
 export async function getNextOrderNumber(): Promise<string> {
@@ -1603,7 +1620,7 @@ export async function getAllOrders(options?: {
   limit?: number;
   offset?: number;
   search?: string;
-  filter?: "cancelled_paid";
+  filter?: "cancelled_paid" | "deleted";
 }): Promise<{ orders: OrderRecord[]; total: number }> {
   const result = await docClient.send(
     new ScanCommand({
@@ -1617,8 +1634,14 @@ export async function getAllOrders(options?: {
     items = items.filter((o) => o.orderNumber.toLowerCase().includes(q));
   }
 
-  if (options?.filter === "cancelled_paid") {
-    items = items.filter((o) => o.status === "cancelled" && o.wasPaid === true);
+  if (options?.filter === "deleted") {
+    items = items.filter((o) => Boolean(o.deletedAt));
+  } else if (options?.filter === "cancelled_paid") {
+    items = items.filter(
+      (o) => o.status === "cancelled" && o.wasPaid === true && !o.deletedAt
+    );
+  } else {
+    items = items.filter((o) => !o.deletedAt);
   }
 
   items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));

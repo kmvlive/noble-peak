@@ -37,6 +37,7 @@ interface OrderRecord {
   price: number;
   status: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 
 interface OrderDetail extends OrderRecord {
@@ -90,7 +91,9 @@ export function AdminOrdersList() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [orderDetail, setOrderDetail] = useState<OrderDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
-  const [scope, setScope] = useState<"all" | "cancelled_paid">("all");
+  const [scope, setScope] = useState<"all" | "cancelled_paid" | "deleted">(
+    "all"
+  );
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
@@ -201,7 +204,7 @@ export function AdminOrdersList() {
     });
   };
 
-  const changeScope = (next: "all" | "cancelled_paid") => {
+  const changeScope = (next: "all" | "cancelled_paid" | "deleted") => {
     if (next === scope) return;
     setScope(next);
     setPage(1);
@@ -234,6 +237,16 @@ export function AdminOrdersList() {
           }`}
         >
           Отмена активностей
+        </button>
+        <button
+          onClick={() => changeScope("deleted")}
+          className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+            scope === "deleted"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Архив
         </button>
       </div>
 
@@ -300,6 +313,14 @@ export function AdminOrdersList() {
                       <span className="font-medium text-sm truncate">
                         {order.activityTitle}
                       </span>
+                      {order.deletedAt && (
+                        <Badge
+                          variant="secondary"
+                          className="shrink-0 text-[10px] px-1.5 py-0"
+                        >
+                          Удалён
+                        </Badge>
+                      )}
                       <Badge
                         variant={
                           statusLabels[order.status]?.variant ?? "outline"

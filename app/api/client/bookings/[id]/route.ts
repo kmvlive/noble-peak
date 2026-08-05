@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isDatabaseAvailable } from "@/lib/db";
 import {
   getBookingById,
-  deleteBooking,
+  archiveBooking,
   getActivityById,
   createNotification,
   getOrdersByBookingIds,
@@ -56,7 +56,7 @@ export async function DELETE(
       );
     }
 
-    await deleteBooking(booking.id);
+    await archiveBooking(booking.id);
 
     const activity = await getActivityById(booking.activityId);
     if (activity?.partnerEmail) {

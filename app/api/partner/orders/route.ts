@@ -89,6 +89,7 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const isExport = searchParams.get("export") === "csv";
+  const isArchive = searchParams.get("scope") === "archive";
 
   const dbAvailable = await isDatabaseAvailable();
 
@@ -96,11 +97,16 @@ export async function GET(request: NextRequest) {
     try {
       const activities = await getActivitiesByPartnerEmail(partnerEmail);
       const activityIds = activities.map((a) => a.id);
-      const bookings = await getBookingsByActivityIds(activityIds);
+      const bookings = await getBookingsByActivityIds(activityIds, {
+        includeArchived: true,
+      });
       const orders = await getOrdersByBookingIds(bookings.map((b) => b.id));
       const view = mergeOrders(bookings, orders);
+      const result = isArchive
+        ? view.filter((b) => Boolean(b.deletedAt))
+        : view.filter((b) => !b.deletedAt);
       if (isExport) {
-        const csv = bookingsToCSV(view);
+        const csv = bookingsToCSV(result);
         return new NextResponse(csv, {
           headers: {
             "Content-Type": "text/csv; charset=utf-8",
@@ -108,7 +114,7 @@ export async function GET(request: NextRequest) {
           },
         });
       }
-      return NextResponse.json(view);
+      return NextResponse.json(result);
     } catch (error) {
       console.error("Ошибка получения заказов партнёра:", error);
       return NextResponse.json(
@@ -124,7 +130,12 @@ export async function GET(request: NextRequest) {
   const filtered = mockPartnerBookings.filter((b) =>
     partnerActivityIds.includes(b.activityId)
   );
-  const view = mergeOrders(filtered, mockOrders);
+  let view = mergeOrders(filtered, mockOrders);
+  if (isArchive) {
+    view = view.filter((b) => Boolean(b.deletedAt));
+  } else {
+    view = view.filter((b) => !b.deletedAt);
+  }
 
   if (isExport) {
     const csv = bookingsToCSV(view);

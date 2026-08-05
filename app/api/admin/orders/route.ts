@@ -99,7 +99,9 @@ export async function GET(request: NextRequest) {
   const search = searchParams.get("search") ?? "";
   const scope = searchParams.get("scope");
   const filter =
-    scope === "cancelled_paid" ? ("cancelled_paid" as const) : undefined;
+    scope === "cancelled_paid" || scope === "deleted"
+      ? (scope as "cancelled_paid" | "deleted")
+      : undefined;
 
   const dbAvailable = await isDatabaseAvailable();
 
@@ -125,7 +127,10 @@ export async function GET(request: NextRequest) {
     const q = search.trim().toLowerCase();
     items = items.filter((o) => o.orderNumber.toLowerCase().includes(q));
   }
-  if (filter === "cancelled_paid") {
+  if (filter === "deleted") {
+    // В mock-данных удалённых (архивных) заказов нет.
+    items = [];
+  } else if (filter === "cancelled_paid") {
     items = items.filter((o) => o.status === "cancelled" && o.wasPaid === true);
   }
   items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));

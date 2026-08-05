@@ -14,16 +14,28 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const { searchParams } = new URL(request.url);
+    const isArchive = searchParams.get("scope") === "archive";
+
     const dbAvailable = await isDatabaseAvailable();
     if (!dbAvailable) {
+      const all = enrich(mockBookings, mockOrders);
       return NextResponse.json({
-        bookings: enrich(mockBookings, mockOrders),
+        bookings: isArchive
+          ? all.filter((b) => Boolean(b.deletedAt))
+          : all.filter((b) => !b.deletedAt),
       });
     }
 
-    const bookings = await getClientBookings(clientEmail);
+    const bookings = await getClientBookings(clientEmail, {
+      includeArchived: true,
+    });
     const orders = await getOrdersByBookingIds(bookings.map((b) => b.id));
-    return NextResponse.json({ bookings: enrich(bookings, orders) });
+    const enriched = enrich(bookings, orders);
+    const result = isArchive
+      ? enriched.filter((b) => Boolean(b.deletedAt))
+      : enriched.filter((b) => !b.deletedAt);
+    return NextResponse.json({ bookings: result });
   } catch {
     return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
   }
