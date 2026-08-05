@@ -732,13 +732,6 @@ export async function failBookingPayment(
 }
 
 export async function deleteBooking(id: string): Promise<void> {
-  await docClient.send(
-    new DeleteCommand({
-      TableName: TableName.BOOKINGS,
-      Key: { id },
-    })
-  );
-
   const orders = await getAllOrdersById(id);
   await Promise.all(
     orders.map((o) =>
@@ -749,6 +742,13 @@ export async function deleteBooking(id: string): Promise<void> {
         })
       )
     )
+  );
+
+  await docClient.send(
+    new DeleteCommand({
+      TableName: TableName.BOOKINGS,
+      Key: { id },
+    })
   );
 }
 
@@ -1533,10 +1533,7 @@ export async function deleteAnalyticsCounter(id: string): Promise<void> {
 }
 
 export type OrderStatus =
-  | "pending_payment"
-  | "paid"
-  | "completed"
-  | "cancelled";
+  "pending_payment" | "paid" | "completed" | "cancelled";
 
 export const ORDER_STATUS_LABELS: Record<string, string> = {
   pending_payment: "Не оплачен",

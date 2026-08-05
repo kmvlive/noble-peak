@@ -356,7 +356,14 @@ export function AdminOrdersList() {
                             <span className="font-medium text-foreground">
                               Партнёр:
                             </span>
-                            <span>{orderDetail.partnerName ?? "—"}</span>
+                            {orderDetail.partnerEmail ? (
+                              <span>
+                                {orderDetail.partnerName ??
+                                  orderDetail.partnerEmail}
+                              </span>
+                            ) : (
+                              <span>Без партнёра</span>
+                            )}
                           </div>
                           {orderDetail.partnerEmail && (
                             <div className="flex items-center gap-2 text-muted-foreground">
