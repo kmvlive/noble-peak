@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
         name: p.name,
         phone: p.phone,
         photo: p.photo,
+        partnerNumber: p.partnerNumber ?? "",
         createdAt: p.createdAt,
       })),
     });

@@ -13,6 +13,7 @@ import type {
   InfoPageRecord,
   InfoPageTarget,
   AgentStatsRecord,
+  PartnerLinkRecord,
 } from "./schema";
 import { randomUUID } from "node:crypto";
 import { sendVkNotification } from "./vk-notify";
@@ -1078,6 +1079,7 @@ export interface PartnerRecord {
   telegramChatId?: string;
   telegramNotificationsEnabled?: boolean;
   agentEmail?: string;
+  partnerNumber?: string;
   createdAt: string;
 }
 
@@ -1282,8 +1284,16 @@ export async function createPartner(
   data: Omit<PartnerRecord, "createdAt">
 ): Promise<PartnerRecord> {
   const now = new Date().toISOString();
+  let number = data.partnerNumber;
+  if (!number) {
+    number = generatePartnerNumber();
+    while (await getPartnerByNumber(number)) {
+      number = generatePartnerNumber();
+    }
+  }
   const partner: PartnerRecord = {
     ...data,
+    partnerNumber: number,
     createdAt: now,
   };
 
@@ -1307,6 +1317,110 @@ export async function getAllPartners(): Promise<PartnerRecord[]> {
   return (result.Items as PartnerRecord[]) ?? [];
 }
 
+function generatePartnerNumber(): string {
+  const digits = () =>
+    String(Math.floor(100000 + Math.random() * 900000)).slice(0, 6);
+  return `PRT-${digits()}`;
+}
+
+export async function getPartnerByNumber(
+  number: string
+): Promise<PartnerRecord | null> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.PARTNERS,
+      IndexName: IndexName.PARTNERS_NUMBER,
+      KeyConditionExpression: "#partnerNumber = :partnerNumber",
+      ExpressionAttributeNames: { "#partnerNumber": "partnerNumber" },
+      ExpressionAttributeValues: { ":partnerNumber": number },
+    })
+  );
+  const items = result.Items as PartnerRecord[];
+  return items.length > 0 ? items[0] : null;
+}
+
+export async function getLinksByAgent(
+  agentEmail: string
+): Promise<PartnerLinkRecord[]> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.PARTNER_LINKS,
+      IndexName: IndexName.PARTNER_LINKS_AGENT_EMAIL,
+      KeyConditionExpression: "agentEmail = :agentEmail",
+      ExpressionAttributeValues: { ":agentEmail": agentEmail },
+    })
+  );
+  return (result.Items as PartnerLinkRecord[]) ?? [];
+}
+
+export async function getPendingLinksByPartner(
+  partnerEmail: string
+): Promise<PartnerLinkRecord[]> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.PARTNER_LINKS,
+      IndexName: IndexName.PARTNER_LINKS_PARTNER_EMAIL,
+      KeyConditionExpression: "partnerEmail = :partnerEmail",
+      ExpressionAttributeValues: { ":partnerEmail": partnerEmail },
+    })
+  );
+  const items = (result.Items as PartnerLinkRecord[]) ?? [];
+  return items.filter((l) => l.status === "pending");
+}
+
+export async function getLinksByPartner(
+  partnerEmail: string
+): Promise<PartnerLinkRecord[]> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.PARTNER_LINKS,
+      IndexName: IndexName.PARTNER_LINKS_PARTNER_EMAIL,
+      KeyConditionExpression: "partnerEmail = :partnerEmail",
+      ExpressionAttributeValues: { ":partnerEmail": partnerEmail },
+    })
+  );
+  return (result.Items as PartnerLinkRecord[]) ?? [];
+}
+
+export async function createPartnerLink(
+  data: Omit<PartnerLinkRecord, "id" | "createdAt" | "status" | "respondedAt">
+): Promise<PartnerLinkRecord> {
+  const link: PartnerLinkRecord = {
+    ...data,
+    id: randomUUID(),
+    status: "pending",
+    createdAt: new Date().toISOString(),
+  };
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.PARTNER_LINKS,
+      Item: link,
+      ConditionExpression: "attribute_not_exists(id)",
+    })
+  );
+  return link;
+}
+
+export async function respondToPartnerLink(
+  id: string,
+  status: "accepted" | "declined"
+): Promise<PartnerLinkRecord | null> {
+  const result = await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.PARTNER_LINKS,
+      Key: { id },
+      UpdateExpression: "set #status = :status, respondedAt = :respondedAt",
+      ExpressionAttributeNames: { "#status": "status" },
+      ExpressionAttributeValues: {
+        ":status": status,
+        ":respondedAt": new Date().toISOString(),
+      },
+      ReturnValues: "ALL_NEW",
+    })
+  );
+  return (result.Attributes as PartnerLinkRecord) ?? null;
+}
+
 export async function updatePartner(
   email: string,
   data: Partial<
@@ -1326,6 +1440,7 @@ export async function updatePartner(
       | "vkNotificationsEnabled"
       | "telegramChatId"
       | "telegramNotificationsEnabled"
+      | "agentEmail"
     >
   >
 ): Promise<PartnerRecord> {
@@ -1418,6 +1533,12 @@ export async function updatePartner(
     exprValues[":telegramNotificationsEnabled"] =
       data.telegramNotificationsEnabled;
     exprNames["#telegramNotificationsEnabled"] = "telegramNotificationsEnabled";
+  }
+
+  if (data.agentEmail !== undefined) {
+    updateExpr.push("#agentEmail = :agentEmail");
+    exprValues[":agentEmail"] = data.agentEmail;
+    exprNames["#agentEmail"] = "agentEmail";
   }
 
   if (updateExpr.length === 0) {

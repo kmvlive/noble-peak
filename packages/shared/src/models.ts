@@ -141,7 +141,21 @@ export interface PartnerRecord {
   telegramChatId?: string;
   telegramNotificationsEnabled?: boolean;
   agentEmail?: string;
+  partnerNumber?: string;
   createdAt: string;
+}
+
+export type PartnerLinkStatus = "pending" | "accepted" | "declined";
+
+export interface PartnerLinkRecord {
+  id: string;
+  agentEmail: string;
+  agentName: string;
+  partnerEmail: string;
+  partnerName: string;
+  status: PartnerLinkStatus;
+  createdAt: string;
+  respondedAt?: string;
 }
 
 export interface AgentRecord {

@@ -28,6 +28,7 @@ export const TableName = {
   INFO_PAGES: "info_pages",
   AGENTS: "agents",
   AGENT_STATS: "agent_stats",
+  PARTNER_LINKS: "partner_links",
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];
@@ -137,11 +138,17 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
     attributeDefinitions: [
       { AttributeName: "email", AttributeType: "S" },
       { AttributeName: "slug", AttributeType: "S" },
+      { AttributeName: "partnerNumber", AttributeType: "S" },
     ],
     globalSecondaryIndexes: [
       {
         IndexName: "slug-index",
         KeySchema: [{ AttributeName: "slug", KeyType: "HASH" }],
+        Projection: { ProjectionType: "ALL" },
+      },
+      {
+        IndexName: "number-index",
+        KeySchema: [{ AttributeName: "partnerNumber", KeyType: "HASH" }],
         Projection: { ProjectionType: "ALL" },
       },
     ],
@@ -322,6 +329,28 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
     keySchema: [{ AttributeName: "agentEmail", KeyType: "HASH" }],
     attributeDefinitions: [{ AttributeName: "agentEmail", AttributeType: "S" }],
   },
+
+  [TableName.PARTNER_LINKS]: {
+    name: TableName.PARTNER_LINKS,
+    keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+    attributeDefinitions: [
+      { AttributeName: "id", AttributeType: "S" },
+      { AttributeName: "partnerEmail", AttributeType: "S" },
+      { AttributeName: "agentEmail", AttributeType: "S" },
+    ],
+    globalSecondaryIndexes: [
+      {
+        IndexName: "partnerEmail-index",
+        KeySchema: [{ AttributeName: "partnerEmail", KeyType: "HASH" }],
+        Projection: { ProjectionType: "ALL" },
+      },
+      {
+        IndexName: "agentEmail-index",
+        KeySchema: [{ AttributeName: "agentEmail", KeyType: "HASH" }],
+        Projection: { ProjectionType: "ALL" },
+      },
+    ],
+  },
 };
 
 export const TABLE_NAMES: TableName[] = Object.values(TableName);
@@ -344,6 +373,9 @@ export const IndexName = {
   ORDER_SETTINGS_ID: "id",
   INFO_PAGES_TARGET: "target-index",
   AGENTS_CODE: "code-index",
+  PARTNERS_NUMBER: "number-index",
+  PARTNER_LINKS_PARTNER_EMAIL: "partnerEmail-index",
+  PARTNER_LINKS_AGENT_EMAIL: "agentEmail-index",
 } as const;
 
 export type IndexName = (typeof IndexName)[keyof typeof IndexName];

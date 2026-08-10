@@ -6254,8 +6254,20 @@ tasks:
       - task-264
       - task-265
     related_feature: Кабинет агента (партнёрская программа)
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Реализован уникальный номер партнёра (PRT-XXXXXX), присваиваемый
+      автоматически при регистрации (createPartner в lib/models.ts, GSI
+      number-index на таблице partners). Номер отображается в дашборде партнёра
+      через компонент PartnerBindingPanel (components/partner-binding-panel.tsx,
+      GET /api/partner/links). Агент в разделе «Партнёры»
+      (components/agent-partners.tsx) может добавить партнёра по номеру через
+      POST /api/agent/partner-links — создаётся запрос на привязку (таблица
+      partner_links, модель PartnerLinkRecord). Партнёр видит запрос в своём
+      кабинете и может принять/отклонить через POST /api/partner/links/[id]/respond;
+      при принятии на партнёре проставляется agentEmail. Статус привязки
+      («Привязан к агенту»/«Не привязан») отображается в дашборде партнёра.
+      typecheck, lint, build проходят.
   - id: task-268
     phase: agent
     title: Раздел «Партнёры» в кабинете агента

@@ -20,6 +20,7 @@ import type {
   ChatMessageRecord,
   InfoPageRecord,
   AgentStatsRecord,
+  PartnerLinkRecord,
 } from "./models";
 import type { SliderImage, OrderSettingsRecord } from "./models";
 
@@ -186,7 +187,21 @@ export const mockPartners: PartnerRecord[] = [
       tin: "770012345678",
     },
     agentEmail: "agent@example.com",
+    partnerNumber: "PRT-123456",
     createdAt: new Date("2024-06-01").toISOString(),
+  },
+];
+
+export const mockPartnerLinks: PartnerLinkRecord[] = [
+  {
+    id: "link-demo-001",
+    agentEmail: "agent@example.com",
+    agentName: "Агент Смирнова",
+    partnerEmail: "partner@example.com",
+    partnerName: "Партнёр Иванов",
+    status: "accepted",
+    createdAt: new Date("2024-09-01").toISOString(),
+    respondedAt: new Date("2024-09-02").toISOString(),
   },
 ];
 

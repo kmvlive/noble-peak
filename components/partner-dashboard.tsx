@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { getToken } from "@/components/partner-layout-client";
 import { toast } from "sonner";
+import { PartnerBindingPanel } from "@/components/partner-binding-panel";
 
 interface OrderNotification {
   id: string;
@@ -141,6 +142,8 @@ export function PartnerDashboard() {
           </p>
         </div>
       </div>
+
+      <PartnerBindingPanel />
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
