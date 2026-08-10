@@ -6224,8 +6224,17 @@ tasks:
       - task-264
       - task-265
     related_feature: Кабинет агента (партнёрская программа)
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Реализована автоматическая привязка партнёра к агенту по агентской ссылке.
+      На странице регистрации партнёра (components/partner-login-form.tsx)
+      учитывается параметр ref и передаётся в POST /api/partner/register, где по
+      коду агента (getAgentByCode) при создании партнёра сохраняется поле
+      agentEmail в PartnerRecord (lib/models.ts createPartner). Добавлены
+      getPartnersByAgent, GET /api/agent/partners и раздел «Партнёры» агента
+      (/agent/partners, components/agent-partners.tsx), где привязанные партнёры
+      видны агенту. Мок-данные дополнены agentEmail. typecheck, lint, build
+      проходят.
   - id: task-267
     phase: agent
     title: Уникальный номер партнёра и привязка по номеру с подтверждением

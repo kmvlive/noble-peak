@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { isDatabaseAvailable } from "@/lib/db";
-import { getPartnerByEmail, createPartner } from "@/lib/models";
+import { getPartnerByEmail, createPartner, getAgentByCode } from "@/lib/models";
 import { hashPassword, createPartnerToken } from "@/lib/partner-auth";
 import { sendEmail } from "@/lib/email";
 import { appName } from "@/lib/app-name";
@@ -14,6 +14,7 @@ const registerSchema = z.object({
     .string()
     .min(6, "Пароль должен быть не менее 6 символов")
     .max(100),
+  ref: z.string().min(1).max(50).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, phone, email, password } = parsed.data;
+    const { name, phone, email, password, ref } = parsed.data;
 
     const dbAvailable = await isDatabaseAvailable();
 
@@ -48,12 +49,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    let agentEmail: string | undefined;
+    if (ref) {
+      const agent = await getAgentByCode(ref);
+      if (agent) {
+        agentEmail = agent.email;
+      }
+    }
+
     const passwordHash = hashPassword(password);
     const partner = await createPartner({
       email,
       name,
       phone,
       passwordHash,
+      agentEmail,
     });
 
     const token = createPartnerToken(email);

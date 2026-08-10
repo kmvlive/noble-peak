@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, Lock, User, Phone } from "lucide-react";
+import { Mail, Lock, User, Phone, Link2 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { VkLoginButton } from "@/components/vk-login-button";
@@ -12,6 +12,7 @@ import { VkLoginButton } from "@/components/vk-login-button";
 export function PartnerLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const ref = searchParams.get("ref");
   const [mode, setMode] = useState<"login" | "register">("login");
   const [loading, setLoading] = useState(false);
 
@@ -115,6 +116,7 @@ export function PartnerLoginForm() {
           phone: regPhone,
           email: regEmail,
           password: regPassword,
+          ref: ref ?? undefined,
         }),
       });
 
@@ -138,6 +140,15 @@ export function PartnerLoginForm() {
 
   return (
     <div>
+      {ref ? (
+        <div className="mb-4 flex items-start gap-2 rounded-lg border bg-primary/5 p-3 text-sm">
+          <Link2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          <p className="text-muted-foreground">
+            Вы перешли по партнёрской ссылке агента. После регистрации вы будете
+            автоматически привязаны к агенту (код {ref}).
+          </p>
+        </div>
+      ) : null}
       <div className="flex mb-6 rounded-lg border p-1">
         <button
           type="button"

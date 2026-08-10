@@ -185,6 +185,7 @@ export const mockPartners: PartnerRecord[] = [
       issueDate: "2015-06-15",
       tin: "770012345678",
     },
+    agentEmail: "agent@example.com",
     createdAt: new Date("2024-06-01").toISOString(),
   },
 ];

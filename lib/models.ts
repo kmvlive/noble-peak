@@ -1,5 +1,5 @@
 import { docClient, isDatabaseAvailable } from "./db";
-import { mockInfoPages, mockAgentStats } from "./mock-data";
+import { mockInfoPages, mockAgentStats, mockPartners } from "./mock-data";
 import {
   GetCommand,
   PutCommand,
@@ -1249,6 +1249,23 @@ export async function getPartnerBySlug(
   );
   const items = result.Items as PartnerRecord[];
   return items.length > 0 ? items[0] : null;
+}
+
+export async function getPartnersByAgent(
+  agentEmail: string
+): Promise<PartnerRecord[]> {
+  const dbAvailable = await isDatabaseAvailable();
+  if (!dbAvailable) {
+    return mockPartners.filter((p) => p.agentEmail === agentEmail);
+  }
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.PARTNERS,
+      FilterExpression: "agentEmail = :agentEmail",
+      ExpressionAttributeValues: { ":agentEmail": agentEmail },
+    })
+  );
+  return (result.Items as PartnerRecord[]) ?? [];
 }
 
 export async function isSlugTaken(

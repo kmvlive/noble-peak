@@ -140,6 +140,7 @@ export interface PartnerRecord {
   vkNotificationsEnabled?: boolean;
   telegramChatId?: string;
   telegramNotificationsEnabled?: boolean;
+  agentEmail?: string;
   createdAt: string;
 }
 
