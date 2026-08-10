@@ -143,6 +143,16 @@ export interface PartnerRecord {
   createdAt: string;
 }
 
+export interface AgentRecord {
+  email: string;
+  name: string;
+  phone: string;
+  passwordHash: string;
+  code: string;
+  blocked?: boolean;
+  createdAt: string;
+}
+
 export interface PasswordResetRecord {
   token: string;
   email: string;

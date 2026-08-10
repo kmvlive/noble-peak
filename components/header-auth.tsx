@@ -52,6 +52,10 @@ export function HeaderAuth() {
         <span className="sm:hidden">Партнёрам</span>
         <span className="hidden sm:inline">Вход для партнёров</span>
       </Link>
+      <Link href="/agent/login" className={linkClass}>
+        <span className="sm:hidden">Агентам</span>
+        <span className="hidden sm:inline">Вход для агентов</span>
+      </Link>
       <Link href="/client/login" className={linkClass}>
         <span className="sm:hidden">Клиентам</span>
         <span className="hidden sm:inline">Вход для клиентов</span>

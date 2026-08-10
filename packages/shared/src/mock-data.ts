@@ -10,6 +10,7 @@ import type {
   AdminRecord,
   ClientRecord,
   PartnerRecord,
+  AgentRecord,
   PasswordResetRecord,
   MenuItemRecord,
   AnalyticsCounterRecord,
@@ -184,6 +185,18 @@ export const mockPartners: PartnerRecord[] = [
       tin: "770012345678",
     },
     createdAt: new Date("2024-06-01").toISOString(),
+  },
+];
+
+export const mockAgents: AgentRecord[] = [
+  {
+    email: "agent@example.com",
+    name: "Агент Смирнова",
+    phone: "+7 (999) 333-22-11",
+    passwordHash: "hash:agent",
+    code: "AGT-DEMO-001",
+    blocked: false,
+    createdAt: new Date("2024-08-01").toISOString(),
   },
 ];
 

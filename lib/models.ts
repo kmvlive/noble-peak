@@ -1076,6 +1076,73 @@ export interface PartnerRecord {
   createdAt: string;
 }
 
+export interface AgentRecord {
+  email: string;
+  name: string;
+  phone: string;
+  passwordHash: string;
+  code: string;
+  blocked?: boolean;
+  createdAt: string;
+}
+
+export async function getAgentByEmail(
+  email: string
+): Promise<AgentRecord | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TableName.AGENTS,
+      Key: { email },
+    })
+  );
+  return (result.Item as AgentRecord) ?? null;
+}
+
+export async function getAgentByCode(
+  code: string
+): Promise<AgentRecord | null> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.AGENTS,
+      IndexName: IndexName.AGENTS_CODE,
+      KeyConditionExpression: "#code = :code",
+      ExpressionAttributeNames: { "#code": "code" },
+      ExpressionAttributeValues: { ":code": code },
+    })
+  );
+  const items = result.Items as AgentRecord[];
+  return items.length > 0 ? items[0] : null;
+}
+
+export async function createAgent(
+  data: Omit<AgentRecord, "createdAt">
+): Promise<AgentRecord> {
+  const now = new Date().toISOString();
+  const agent: AgentRecord = {
+    ...data,
+    createdAt: now,
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.AGENTS,
+      Item: agent,
+      ConditionExpression: "attribute_not_exists(email)",
+    })
+  );
+
+  return agent;
+}
+
+export async function getAllAgents(): Promise<AgentRecord[]> {
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.AGENTS,
+    })
+  );
+  return (result.Items as AgentRecord[]) ?? [];
+}
+
 export async function getPartnerByEmail(
   email: string
 ): Promise<PartnerRecord | null> {
