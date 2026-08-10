@@ -5,6 +5,7 @@ import {
   mockPartners,
   mockOrders,
   mockAgentSettings,
+  mockPayouts,
 } from "./mock-data";
 import {
   GetCommand,
@@ -22,6 +23,8 @@ import type {
   AgentSettingsRecord,
   PartnerLinkRecord,
   AgentBankDetails,
+  PayoutRecord,
+  PayoutStatus,
 } from "./schema";
 import { randomUUID } from "node:crypto";
 import { sendVkNotification } from "./vk-notify";
@@ -1456,6 +1459,128 @@ function countMockAgentSales(agentEmail: string): AgentSales {
   const partners = mockPartners.filter((p) => p.agentEmail === agentEmail);
   const partnerSet = new Set(partners.map((p) => p.email));
   return countAgentSales(mockOrders, partnerSet);
+}
+
+export interface AgentMonthlyEarnings {
+  month: string;
+  amount: number;
+}
+
+export async function getAgentEarningsByMonth(
+  agentEmail: string
+): Promise<AgentMonthlyEarnings[]> {
+  const dbAvailable = await isDatabaseAvailable();
+  if (!dbAvailable) return [];
+
+  const totals = await getAgentPaidOrderTotalsByMonth(agentEmail);
+  if (totals.size === 0) return [];
+
+  const settings = await getAgentSettings();
+  const result: AgentMonthlyEarnings[] = [];
+  for (const [month, total] of totals.entries()) {
+    result.push({
+      month,
+      amount: Math.round(total * getRateForMonthlySales(total, settings)),
+    });
+  }
+  result.sort((a, b) => b.month.localeCompare(a.month));
+  return result;
+}
+
+export async function getNextPayoutNumber(): Promise<string> {
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.PAYOUTS,
+      ProjectionExpression: "number",
+    })
+  );
+  const items = (result.Items as { number: string }[]) ?? [];
+  let max = 0;
+  for (const item of items) {
+    const num = parseInt(item.number, 10);
+    if (!isNaN(num) && num > max) max = num;
+  }
+  return String(max + 1).padStart(6, "0");
+}
+
+export async function getPayoutsByAgent(
+  agentEmail: string
+): Promise<PayoutRecord[]> {
+  const dbAvailable = await isDatabaseAvailable();
+  if (!dbAvailable) {
+    return mockPayouts
+      .filter((p) => p.agentEmail === agentEmail)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.PAYOUTS,
+      IndexName: IndexName.PAYOUTS_AGENT_EMAIL,
+      KeyConditionExpression: "#agentEmail = :agentEmail",
+      ExpressionAttributeNames: { "#agentEmail": "agentEmail" },
+      ExpressionAttributeValues: { ":agentEmail": agentEmail },
+    })
+  );
+  const items = (result.Items as PayoutRecord[]) ?? [];
+  return items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+export async function getPayoutForMonth(
+  agentEmail: string,
+  month: string
+): Promise<PayoutRecord | null> {
+  const payouts = await getPayoutsByAgent(agentEmail);
+  return payouts.find((p) => p.month === month) ?? null;
+}
+
+export async function getAllPayouts(): Promise<PayoutRecord[]> {
+  const result = await docClient.send(
+    new ScanCommand({ TableName: TableName.PAYOUTS })
+  );
+  const items = (result.Items as PayoutRecord[]) ?? [];
+  return items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+export async function createPayout(
+  data: Pick<PayoutRecord, "agentEmail" | "agentName" | "amount" | "month">
+): Promise<PayoutRecord> {
+  const now = new Date().toISOString();
+  const number = await getNextPayoutNumber();
+  const payout: PayoutRecord = {
+    id: randomUUID(),
+    number,
+    status: "pending",
+    createdAt: now,
+    updatedAt: now,
+    ...data,
+  };
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.PAYOUTS,
+      Item: payout,
+    })
+  );
+  return payout;
+}
+
+export async function updatePayoutStatus(
+  id: string,
+  status: PayoutStatus
+): Promise<PayoutRecord> {
+  const result = await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.PAYOUTS,
+      Key: { id },
+      UpdateExpression: "set #status = :status, updatedAt = :updatedAt",
+      ExpressionAttributeNames: { "#status": "status" },
+      ExpressionAttributeValues: {
+        ":status": status,
+        ":updatedAt": new Date().toISOString(),
+      },
+      ReturnValues: "ALL_NEW",
+    })
+  );
+  return result.Attributes as PayoutRecord;
 }
 
 export async function getPartnerByEmail(

@@ -6385,8 +6385,18 @@ tasks:
       - task-269
       - task-270
     related_feature: Кабинет агента (партнёрская программа)
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Реализован раздел «Заработок и выплаты» агента (/agent/earnings,
+      components/agent-earnings.tsx). Отображаются актуальная сумма заработка за
+      всё время и помесячные цифры (getAgentEarningsByMonth). Агент может подать
+      заявку на выплату раз в месяц (POST /api/agent/payouts, проверка заявки за
+      текущий месяц). У каждой заявки есть порядковый номер, видимый агенту
+      (getNextPayoutNumber, таблица payouts). При статусе approved агент видит
+      пометку «ожидайте выплату». Основная реализация: app/agent/earnings/,
+      app/api/agent/earnings/, app/api/agent/payouts/, lib/models.ts (модель
+      PayoutRecord), packages/shared/src/schema.ts (таблица payouts).
+      typecheck, lint, build проходят.
   - id: task-272
     phase: agent
     title: "Админ-панель: раздел «Агенты»"

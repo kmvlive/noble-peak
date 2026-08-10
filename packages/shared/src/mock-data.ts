@@ -22,6 +22,7 @@ import type {
   AgentStatsRecord,
   PartnerLinkRecord,
   AgentSettingsRecord,
+  PayoutRecord,
 } from "./models";
 import type { SliderImage, OrderSettingsRecord } from "./models";
 
@@ -1015,6 +1016,20 @@ export const mockAgentSettings: AgentSettingsRecord[] = [
     id: "ladder",
     tier2Threshold: 100000,
     tier3Threshold: 300000,
+    updatedAt: new Date().toISOString(),
+  },
+];
+
+export const mockPayouts: PayoutRecord[] = [
+  {
+    id: "mock-payout-1",
+    number: "000001",
+    agentEmail: "agent@example.com",
+    agentName: "Агент",
+    amount: 12500,
+    month: new Date().toISOString().slice(0, 7),
+    status: "pending",
+    createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
 ];

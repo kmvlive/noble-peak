@@ -288,6 +288,20 @@ export interface InfoPageRecord {
   updatedAt: string;
 }
 
+export type PayoutStatus = "pending" | "approved" | "paid" | "declined";
+
+export interface PayoutRecord {
+  id: string;
+  number: string;
+  agentEmail: string;
+  agentName: string;
+  amount: number;
+  month: string;
+  status: PayoutStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AgentStatsRecord {
   agentEmail: string;
   clicks30: number;
