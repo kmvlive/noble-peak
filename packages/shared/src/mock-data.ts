@@ -21,6 +21,7 @@ import type {
   InfoPageRecord,
   AgentStatsRecord,
   PartnerLinkRecord,
+  AgentSettingsRecord,
 } from "./models";
 import type { SliderImage, OrderSettingsRecord } from "./models";
 
@@ -973,6 +974,15 @@ export const mockAgentStats: AgentStatsRecord[] = [
     agentEmail: "agent@example.com",
     clicks30: 48,
     registrations30: 5,
+    updatedAt: new Date().toISOString(),
+  },
+];
+
+export const mockAgentSettings: AgentSettingsRecord[] = [
+  {
+    id: "ladder",
+    tier2Threshold: 100000,
+    tier3Threshold: 300000,
     updatedAt: new Date().toISOString(),
   },
 ];

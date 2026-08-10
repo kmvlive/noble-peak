@@ -26,8 +26,12 @@ import { toast } from "sonner";
 import { getToken } from "@/components/admin-layout-client";
 import type { ActivityRecord } from "@/lib/models";
 
+interface PendingActivity extends ActivityRecord {
+  agentCommissionPercent?: number;
+}
+
 export default function AdminPendingActivitiesPage() {
-  const [activities, setActivities] = useState<ActivityRecord[]>([]);
+  const [activities, setActivities] = useState<PendingActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [approveDialogId, setApproveDialogId] = useState<string | null>(null);
@@ -146,8 +150,12 @@ export default function AdminPendingActivitiesPage() {
         <div className="space-y-3">
           {activities.map((activity) => {
             const isProcessing = processingId === activity.id;
-            const partnerPriceCalc =
-              activity.price * (Number(partnerPercent) / 100);
+            const agentPercent = activity.agentCommissionPercent ?? 0;
+            const effectivePercent = Math.max(
+              0,
+              Number(partnerPercent) - agentPercent
+            );
+            const partnerPriceCalc = activity.price * (effectivePercent / 100);
 
             return (
               <div
@@ -248,7 +256,13 @@ export default function AdminPendingActivitiesPage() {
                       <DialogTitle>Одобрить активность</DialogTitle>
                       <DialogDescription>
                         Укажите цену для партнёра в % от цены клиента ({" "}
-                        {activity.price} ₽ )
+                        {activity.price} ₽ ).
+                        {agentPercent > 0 && (
+                          <span className="mt-1 block text-xs text-amber-700 dark:text-amber-400">
+                            У партнёра есть агент: {agentPercent}% агентской
+                            комиссии будет вычтено из доли партнёра.
+                          </span>
+                        )}
                       </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
@@ -267,6 +281,12 @@ export default function AdminPendingActivitiesPage() {
                         />
                       </div>
                       <p className="text-sm text-muted-foreground">
+                        {agentPercent > 0 && (
+                          <span>
+                            Доля партнёра: <strong>{effectivePercent}%</strong>{" "}
+                            (после вычета агентской комиссии).{" "}
+                          </span>
+                        )}
                         Цена партнёра:{" "}
                         <strong>{Math.round(partnerPriceCalc)} ₽</strong> (от{" "}
                         {activity.price} ₽)

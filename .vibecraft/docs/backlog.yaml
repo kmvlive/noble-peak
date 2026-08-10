@@ -6321,8 +6321,18 @@ tasks:
       - task-266
       - task-267
     related_feature: Кабинет агента (партнёрская программа)
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Реализовано начисление агентского процента с оплат партнёров по лесенке
+      3% → 4% → 5% от помесячного объёма продаж (getAgentEarnings и
+      getAgentCommissionRateForMonth в lib/models.ts группируют оплаченные заказы
+      партнёров по месяцу и применяют ставку по порогам; отменённые оплаченные
+      заказы исключаются — комиссия уменьшается при отмене). Пороги лесенки в
+      рублях хранятся в новой таблице agent_settings и настраиваются
+      администратором в разделе «Агенты» (app/admin/agents, admin-agents-manager,
+      GET/PUT /api/admin/agents). При модерации (app/api/admin/activities/[id],
+      pending/page.tsx) агентский процент вычитается из доли партнёра. typecheck,
+      lint, build проходят; миграция agent_settings выполнена.
   - id: task-270
     phase: agent
     title: Разделы «Отчёты», «Инструменты», «Реквизиты агента», «Уведомления»

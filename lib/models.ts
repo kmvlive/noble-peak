@@ -4,6 +4,7 @@ import {
   mockAgentStats,
   mockPartners,
   mockOrders,
+  mockAgentSettings,
 } from "./mock-data";
 import {
   GetCommand,
@@ -18,6 +19,7 @@ import type {
   InfoPageRecord,
   InfoPageTarget,
   AgentStatsRecord,
+  AgentSettingsRecord,
   PartnerLinkRecord,
 } from "./schema";
 import { randomUUID } from "node:crypto";
@@ -1157,6 +1159,13 @@ export async function getAllAgents(): Promise<AgentRecord[]> {
 
 export const DEFAULT_AGENT_COMMISSION_RATE = 0.03;
 
+export const DEFAULT_AGENT_SETTINGS: AgentSettingsRecord = {
+  id: "ladder",
+  tier2Threshold: 100000,
+  tier3Threshold: 300000,
+  updatedAt: "",
+};
+
 export async function getAgentStats(
   agentEmail: string
 ): Promise<AgentStatsRecord | null> {
@@ -1194,9 +1203,58 @@ export async function getAgentRegistrations30(
   return ((result.Items as PartnerRecord[]) ?? []).length;
 }
 
-export async function getAgentEarnings(agentEmail: string): Promise<number> {
+export async function getAgentSettings(): Promise<AgentSettingsRecord> {
   const dbAvailable = await isDatabaseAvailable();
-  if (!dbAvailable) return 0;
+  if (!dbAvailable) {
+    return (
+      mockAgentSettings.find((s) => s.id === "ladder") ?? DEFAULT_AGENT_SETTINGS
+    );
+  }
+  try {
+    const result = await docClient.send(
+      new GetCommand({
+        TableName: TableName.AGENT_SETTINGS,
+        Key: { id: "ladder" },
+      })
+    );
+    return (result.Item as AgentSettingsRecord) ?? DEFAULT_AGENT_SETTINGS;
+  } catch {
+    return DEFAULT_AGENT_SETTINGS;
+  }
+}
+
+export async function saveAgentSettings(
+  data: Pick<AgentSettingsRecord, "tier2Threshold" | "tier3Threshold">
+): Promise<AgentSettingsRecord> {
+  const record: AgentSettingsRecord = {
+    id: "ladder",
+    tier2Threshold: data.tier2Threshold,
+    tier3Threshold: data.tier3Threshold,
+    updatedAt: new Date().toISOString(),
+  };
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.AGENT_SETTINGS,
+      Item: record,
+    })
+  );
+  return record;
+}
+
+export function getRateForMonthlySales(
+  totalSales: number,
+  settings: AgentSettingsRecord = DEFAULT_AGENT_SETTINGS
+): number {
+  if (totalSales >= settings.tier3Threshold) return 0.05;
+  if (totalSales >= settings.tier2Threshold) return 0.04;
+  return DEFAULT_AGENT_COMMISSION_RATE;
+}
+
+async function getAgentPaidOrderTotalsByMonth(
+  agentEmail: string
+): Promise<Map<string, number>> {
+  const dbAvailable = await isDatabaseAvailable();
+  if (!dbAvailable) return new Map();
 
   const partnerScan = await docClient.send(
     new ScanCommand({
@@ -1206,28 +1264,50 @@ export async function getAgentEarnings(agentEmail: string): Promise<number> {
     })
   );
   const partners = (partnerScan.Items as PartnerRecord[]) ?? [];
-  if (partners.length === 0) return 0;
   const partnerSet = new Set(partners.map((p) => p.email));
+  if (partnerSet.size === 0) return new Map();
 
   const orderScan = await docClient.send(
     new ScanCommand({ TableName: TableName.ORDERS })
   );
   const orders = (orderScan.Items as OrderRecord[]) ?? [];
 
-  const paidStatuses = new Set<OrderStatus>(["paid", "completed"]);
-  const gross = orders.reduce((sum, o) => {
-    if (!o.partnerEmail || !partnerSet.has(o.partnerEmail)) return sum;
-    if (o.deletedAt) return sum;
-    if (
-      !paidStatuses.has(o.status) &&
-      !(o.wasPaid && o.status === "cancelled")
-    ) {
-      return sum;
-    }
-    return sum + o.price;
-  }, 0);
+  const totals = new Map<string, number>();
+  for (const o of orders) {
+    if (!o.partnerEmail || !partnerSet.has(o.partnerEmail)) continue;
+    if (o.deletedAt) continue;
+    if (o.status !== "paid" && o.status !== "completed") continue;
+    const month = (o.createdAt ?? "").slice(0, 7);
+    if (!month) continue;
+    totals.set(month, (totals.get(month) ?? 0) + o.price);
+  }
+  return totals;
+}
 
-  return Math.round(gross * DEFAULT_AGENT_COMMISSION_RATE);
+export async function getAgentCommissionRateForMonth(
+  agentEmail: string,
+  yearMonth?: string
+): Promise<number> {
+  const month = yearMonth ?? new Date().toISOString().slice(0, 7);
+  const totals = await getAgentPaidOrderTotalsByMonth(agentEmail);
+  const settings = await getAgentSettings();
+  return getRateForMonthlySales(totals.get(month) ?? 0, settings);
+}
+
+export async function getAgentEarnings(agentEmail: string): Promise<number> {
+  const dbAvailable = await isDatabaseAvailable();
+  if (!dbAvailable) return 0;
+
+  const totals = await getAgentPaidOrderTotalsByMonth(agentEmail);
+  if (totals.size === 0) return 0;
+
+  const settings = await getAgentSettings();
+  let earnings = 0;
+  for (const total of totals.values()) {
+    earnings += total * getRateForMonthlySales(total, settings);
+  }
+
+  return Math.round(earnings);
 }
 
 export async function getPartnerByEmail(

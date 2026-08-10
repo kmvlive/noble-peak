@@ -28,6 +28,7 @@ export const TableName = {
   INFO_PAGES: "info_pages",
   AGENTS: "agents",
   AGENT_STATS: "agent_stats",
+  AGENT_SETTINGS: "agent_settings",
   PARTNER_LINKS: "partner_links",
 } as const;
 
@@ -328,6 +329,12 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
     name: TableName.AGENT_STATS,
     keySchema: [{ AttributeName: "agentEmail", KeyType: "HASH" }],
     attributeDefinitions: [{ AttributeName: "agentEmail", AttributeType: "S" }],
+  },
+
+  [TableName.AGENT_SETTINGS]: {
+    name: TableName.AGENT_SETTINGS,
+    keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+    attributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
   },
 
   [TableName.PARTNER_LINKS]: {

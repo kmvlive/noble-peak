@@ -281,3 +281,10 @@ export interface AgentStatsRecord {
   registrations30: number;
   updatedAt: string;
 }
+
+export interface AgentSettingsRecord {
+  id: string;
+  tier2Threshold: number;
+  tier3Threshold: number;
+  updatedAt: string;
+}

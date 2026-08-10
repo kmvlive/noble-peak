@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { isDatabaseAvailable } from "@/lib/db";
-import { getActivityById, updateActivity, deleteActivity } from "@/lib/models";
+import {
+  getActivityById,
+  updateActivity,
+  deleteActivity,
+  getPartnerByEmail,
+  getAgentCommissionRateForMonth,
+} from "@/lib/models";
 import { verifyToken } from "@/lib/auth";
 import { z } from "zod";
 
@@ -110,8 +116,24 @@ export async function PUT(
     ) {
       const current = await getActivityById(id);
       if (current) {
+        let effectivePercent = updateData.partnerPricePercent;
+
+        if (current.partnerEmail) {
+          const partner = await getPartnerByEmail(current.partnerEmail);
+          if (partner?.agentEmail) {
+            const rate = await getAgentCommissionRateForMonth(
+              partner.agentEmail
+            );
+            effectivePercent = Math.max(
+              0,
+              effectivePercent - Math.round(rate * 100)
+            );
+            updateData.partnerPricePercent = effectivePercent;
+          }
+        }
+
         updateData.partnerPrice = Math.round(
-          current.price * (updateData.partnerPricePercent / 100)
+          current.price * (effectivePercent / 100)
         );
       }
     }
