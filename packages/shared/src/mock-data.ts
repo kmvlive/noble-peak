@@ -214,6 +214,17 @@ export const mockAgents: AgentRecord[] = [
     passwordHash: "hash:agent",
     code: "AGT-DEMO-001",
     blocked: false,
+    bankDetails: {
+      fullName: "Смирнова Анна Павловна",
+      bankName: "ПАО Сбербанк",
+      bik: "044525225",
+      accountNumber: "40817810000000001234",
+      correspondentAccount: "30101810400000000225",
+      inn: "770012345678",
+    },
+    vkNotificationsEnabled: false,
+    telegramNotificationsEnabled: false,
+    telegramChatId: "",
     createdAt: new Date("2024-08-01").toISOString(),
   },
 ];
@@ -603,6 +614,27 @@ export const mockNotifications: NotificationRecord[] = [
     link: "/partner/activities",
     isRead: false,
     createdAt: new Date(Date.now() - 86400000 * 7).toISOString(),
+  },
+  {
+    id: "mock-notif-agent-1",
+    recipientEmail: "agent@example.com",
+    type: "system",
+    title: "Новый партнёр привязался к вам",
+    message: "Партнёр Иванов зарегистрировался по вашей агентской ссылке.",
+    link: "/agent/partners",
+    isRead: false,
+    createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+  },
+  {
+    id: "mock-notif-agent-2",
+    recipientEmail: "agent@example.com",
+    type: "system",
+    title: "Начислено вознаграждение",
+    message:
+      "Вам начислено вознаграждение за продажи партнёров за прошлый месяц.",
+    link: "/agent/earnings",
+    isRead: true,
+    createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
   },
 ];
 

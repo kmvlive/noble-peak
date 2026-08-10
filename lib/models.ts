@@ -21,6 +21,7 @@ import type {
   AgentStatsRecord,
   AgentSettingsRecord,
   PartnerLinkRecord,
+  AgentBankDetails,
 } from "./schema";
 import { randomUUID } from "node:crypto";
 import { sendVkNotification } from "./vk-notify";
@@ -1097,6 +1098,10 @@ export interface AgentRecord {
   passwordHash: string;
   code: string;
   blocked?: boolean;
+  bankDetails?: AgentBankDetails;
+  vkNotificationsEnabled?: boolean;
+  telegramChatId?: string;
+  telegramNotificationsEnabled?: boolean;
   createdAt: string;
 }
 
@@ -1155,6 +1160,83 @@ export async function getAllAgents(): Promise<AgentRecord[]> {
     })
   );
   return (result.Items as AgentRecord[]) ?? [];
+}
+
+export async function updateAgent(
+  email: string,
+  data: Partial<
+    Pick<
+      AgentRecord,
+      | "name"
+      | "phone"
+      | "bankDetails"
+      | "vkNotificationsEnabled"
+      | "telegramChatId"
+      | "telegramNotificationsEnabled"
+    >
+  >
+): Promise<AgentRecord> {
+  const updateExpr: string[] = [];
+  const exprValues: Record<string, unknown> = {};
+  const exprNames: Record<string, string> = {};
+
+  if (data.name !== undefined) {
+    updateExpr.push("#name = :name");
+    exprValues[":name"] = data.name;
+    exprNames["#name"] = "name";
+  }
+
+  if (data.phone !== undefined) {
+    updateExpr.push("#phone = :phone");
+    exprValues[":phone"] = data.phone;
+    exprNames["#phone"] = "phone";
+  }
+
+  if (data.bankDetails !== undefined) {
+    updateExpr.push("#bankDetails = :bankDetails");
+    exprValues[":bankDetails"] = data.bankDetails;
+    exprNames["#bankDetails"] = "bankDetails";
+  }
+
+  if (data.vkNotificationsEnabled !== undefined) {
+    updateExpr.push("#vkNotificationsEnabled = :vkNotificationsEnabled");
+    exprValues[":vkNotificationsEnabled"] = data.vkNotificationsEnabled;
+    exprNames["#vkNotificationsEnabled"] = "vkNotificationsEnabled";
+  }
+
+  if (data.telegramChatId !== undefined) {
+    updateExpr.push("#telegramChatId = :telegramChatId");
+    exprValues[":telegramChatId"] = data.telegramChatId;
+    exprNames["#telegramChatId"] = "telegramChatId";
+  }
+
+  if (data.telegramNotificationsEnabled !== undefined) {
+    updateExpr.push(
+      "#telegramNotificationsEnabled = :telegramNotificationsEnabled"
+    );
+    exprValues[":telegramNotificationsEnabled"] =
+      data.telegramNotificationsEnabled;
+    exprNames["#telegramNotificationsEnabled"] = "telegramNotificationsEnabled";
+  }
+
+  if (updateExpr.length === 0) {
+    const existing = await getAgentByEmail(email);
+    if (!existing) throw new Error("Agent not found");
+    return existing;
+  }
+
+  const result = await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.AGENTS,
+      Key: { email },
+      UpdateExpression: `set ${updateExpr.join(", ")}`,
+      ExpressionAttributeValues: exprValues,
+      ExpressionAttributeNames: exprNames,
+      ReturnValues: "ALL_NEW",
+    })
+  );
+
+  return result.Attributes as AgentRecord;
 }
 
 export const DEFAULT_AGENT_COMMISSION_RATE = 0.03;
@@ -1308,6 +1390,72 @@ export async function getAgentEarnings(agentEmail: string): Promise<number> {
   }
 
   return Math.round(earnings);
+}
+
+export interface AgentSales {
+  today: number;
+  month: number;
+  year: number;
+}
+
+export async function getAgentSales(agentEmail: string): Promise<AgentSales> {
+  const dbAvailable = await isDatabaseAvailable();
+  if (!dbAvailable) {
+    return countMockAgentSales(agentEmail);
+  }
+
+  const partnerScan = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.PARTNERS,
+      FilterExpression: "agentEmail = :agentEmail",
+      ExpressionAttributeValues: { ":agentEmail": agentEmail },
+    })
+  );
+  const partners = (partnerScan.Items as PartnerRecord[]) ?? [];
+  const partnerSet = new Set(partners.map((p) => p.email));
+  if (partnerSet.size === 0) {
+    return { today: 0, month: 0, year: 0 };
+  }
+
+  const orderScan = await docClient.send(
+    new ScanCommand({ TableName: TableName.ORDERS })
+  );
+  const orders = (orderScan.Items as OrderRecord[]) ?? [];
+  return countAgentSales(orders, partnerSet);
+}
+
+function countAgentSales(
+  orders: OrderRecord[],
+  partnerSet: Set<string>
+): AgentSales {
+  const now = new Date();
+  const today = now.toISOString().split("T")[0];
+  const month = today.slice(0, 7);
+  const year = today.slice(0, 4);
+  const paidStatuses = new Set<OrderStatus>(["paid", "completed"]);
+
+  let todayCount = 0;
+  let monthCount = 0;
+  let yearCount = 0;
+
+  for (const o of orders) {
+    if (!o.partnerEmail || !partnerSet.has(o.partnerEmail)) continue;
+    if (o.deletedAt) continue;
+    if (!paidStatuses.has(o.status)) continue;
+    const created = (o.createdAt ?? "").split("T")[0];
+    if (!created) continue;
+    if (created === today) todayCount++;
+    if (created.slice(0, 7) === month) monthCount++;
+    if (created.slice(0, 4) === year) yearCount++;
+  }
+
+  return { today: todayCount, month: monthCount, year: yearCount };
+}
+
+function countMockAgentSales(agentEmail: string): AgentSales {
+  const partners = mockPartners.filter((p) => p.agentEmail === agentEmail);
+  const partnerSet = new Set(partners.map((p) => p.email));
+  return countAgentSales(mockOrders, partnerSet);
 }
 
 export async function getPartnerByEmail(

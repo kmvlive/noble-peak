@@ -35,6 +35,10 @@ function hasToken(): boolean {
   return !!getToken();
 }
 
+export function getAgentToken(): string | null {
+  return getToken();
+}
+
 export function clearAgentToken() {
   localStorage.removeItem(TOKEN_KEY);
 }

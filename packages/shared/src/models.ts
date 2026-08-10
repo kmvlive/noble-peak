@@ -158,6 +158,15 @@ export interface PartnerLinkRecord {
   respondedAt?: string;
 }
 
+export interface AgentBankDetails {
+  fullName: string;
+  bankName: string;
+  bik: string;
+  accountNumber: string;
+  correspondentAccount: string;
+  inn?: string;
+}
+
 export interface AgentRecord {
   email: string;
   name: string;
@@ -165,6 +174,10 @@ export interface AgentRecord {
   passwordHash: string;
   code: string;
   blocked?: boolean;
+  bankDetails?: AgentBankDetails;
+  vkNotificationsEnabled?: boolean;
+  telegramChatId?: string;
+  telegramNotificationsEnabled?: boolean;
   createdAt: string;
 }
 

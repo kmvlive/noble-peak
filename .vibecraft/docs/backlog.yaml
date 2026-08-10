@@ -6353,8 +6353,19 @@ tasks:
     depends_on:
       - task-265
     related_feature: Кабинет агента (партнёрская программа)
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Реализованы разделы кабинета агента: «Отчёты» (/agent/reports,
+      components/agent-reports.tsx, GET /api/agent/reports, getAgentSales в
+      lib/models.ts) — продажи партнёров за сегодня/месяц/год по оплаченным
+      заказам; «Инструменты» (/agent/tools) со ссылкой на
+      https://info.magazin-tour.ru/agentam/; «Реквизиты агента»
+      (/agent/details, components/agent-details.tsx, GET/PUT
+      /api/agent/details, updateAgent, поле bankDetails в AgentRecord);
+      «Уведомления» (/agent/notifications, components/agent-notifications.tsx)
+      со списком уведомлений и настройками Telegram и ВКонтакте
+      (/api/agent/notifications, vk-notifications, telegram-notifications).
+      Добавлены mock-данные. typecheck, lint, build проходят.
   - id: task-271
     phase: agent
     title: Заработок и выплаты агента
