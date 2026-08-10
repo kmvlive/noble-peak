@@ -1,5 +1,10 @@
 import { docClient, isDatabaseAvailable } from "./db";
-import { mockInfoPages, mockAgentStats, mockPartners } from "./mock-data";
+import {
+  mockInfoPages,
+  mockAgentStats,
+  mockPartners,
+  mockOrders,
+} from "./mock-data";
 import {
   GetCommand,
   PutCommand,
@@ -1268,6 +1273,35 @@ export async function getPartnersByAgent(
     })
   );
   return (result.Items as PartnerRecord[]) ?? [];
+}
+
+export async function getPartnerSalesLastMonth(
+  partnerEmail: string
+): Promise<number> {
+  const dbAvailable = await isDatabaseAvailable();
+  if (!dbAvailable) {
+    return countPaidSales(mockOrders, partnerEmail);
+  }
+
+  const orderScan = await docClient.send(
+    new ScanCommand({ TableName: TableName.ORDERS })
+  );
+  return countPaidSales(orderScan.Items as OrderRecord[], partnerEmail);
+}
+
+function countPaidSales(orders: OrderRecord[], partnerEmail: string): number {
+  const today = new Date().toISOString().split("T")[0];
+  const cutoff = new Date(today + "T00:00:00Z");
+  cutoff.setUTCMonth(cutoff.getUTCMonth() - 1);
+  const cutoffIso = cutoff.toISOString();
+  const paidStatuses = new Set<OrderStatus>(["paid", "completed"]);
+
+  return orders.filter((o) => {
+    if (o.partnerEmail !== partnerEmail) return false;
+    if (o.deletedAt) return false;
+    if (!paidStatuses.has(o.status)) return false;
+    return (o.createdAt ?? "") >= cutoffIso;
+  }).length;
 }
 
 export async function isSlugTaken(

@@ -6287,8 +6287,16 @@ tasks:
       - task-266
       - task-267
     related_feature: Кабинет агента (партнёрская программа)
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Реализован раздел «Партнёры» кабинета агента (/agent/partners,
+      components/agent-partners.tsx). Партнёры агента (по ссылке или привязке)
+      выводятся карточками с основной информацией (имя, номер, email, телефон).
+      При нажатии на партнёра открывается диалог с количеством его продаж за
+      последний месяц. Продажи считаются по оплаченным заказам партнёра за 30
+      дней (getPartnerSalesLastMonth в lib/models.ts, GET /api/agent/partners).
+      Добавление партнёра по номеру уже реализовано в task-267. typecheck, lint,
+      build проходят.
   - id: task-269
     phase: agent
     title: Начисление агентского процента с оплат и лесенка 3-4-5%

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isDatabaseAvailable } from "@/lib/db";
-import { getAgentByEmail, getPartnersByAgent } from "@/lib/models";
+import {
+  getAgentByEmail,
+  getPartnersByAgent,
+  getPartnerSalesLastMonth,
+} from "@/lib/models";
 import { getAgentEmailFromRequest } from "@/lib/agent-auth";
 
 export async function GET(request: NextRequest) {
@@ -19,6 +23,11 @@ export async function GET(request: NextRequest) {
 
     const partners = await getPartnersByAgent(agent.email);
 
+    const salesByEmail: Record<string, number> = {};
+    for (const p of partners) {
+      salesByEmail[p.email] = await getPartnerSalesLastMonth(p.email);
+    }
+
     return NextResponse.json({
       partners: partners.map((p) => ({
         email: p.email,
@@ -27,6 +36,7 @@ export async function GET(request: NextRequest) {
         photo: p.photo,
         partnerNumber: p.partnerNumber ?? "",
         createdAt: p.createdAt,
+        salesLastMonth: salesByEmail[p.email] ?? 0,
       })),
     });
   } catch {

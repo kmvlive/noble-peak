@@ -2,10 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Users, UserCircle, Mail, Phone, UserPlus } from "lucide-react";
+import {
+  Users,
+  UserCircle,
+  Mail,
+  Phone,
+  UserPlus,
+  ShoppingBag,
+} from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 interface Partner {
@@ -15,6 +28,7 @@ interface Partner {
   photo?: string;
   partnerNumber?: string;
   createdAt: string;
+  salesLastMonth: number;
 }
 
 export function AgentPartners() {
@@ -23,6 +37,7 @@ export function AgentPartners() {
   const [loading, setLoading] = useState(true);
   const [number, setNumber] = useState("");
   const [adding, setAdding] = useState(false);
+  const [selected, setSelected] = useState<Partner | null>(null);
 
   useEffect(() => {
     fetch("/api/agent/partners")
@@ -133,9 +148,10 @@ export function AgentPartners() {
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
           {partners.map((partner) => (
-            <div
+            <button
               key={partner.email}
-              className="flex items-center gap-3 rounded-xl border bg-card p-4 card-hover"
+              onClick={() => setSelected(partner)}
+              className="flex items-center gap-3 rounded-xl border bg-card p-4 card-hover text-left"
             >
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                 {partner.photo ? (
@@ -167,10 +183,69 @@ export function AgentPartners() {
                   </div>
                 ) : null}
               </div>
-            </div>
+            </button>
           ))}
         </div>
       )}
+
+      <Dialog
+        open={selected !== null}
+        onOpenChange={(o) => !o && setSelected(null)}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{selected?.name}</DialogTitle>
+          </DialogHeader>
+          {selected && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  {selected.photo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={selected.photo}
+                      alt={selected.name}
+                      className="h-full w-full rounded-full object-cover"
+                    />
+                  ) : (
+                    <UserCircle className="h-6 w-6" />
+                  )}
+                </div>
+                <div className="min-w-0 space-y-0.5">
+                  {selected.partnerNumber ? (
+                    <div className="font-mono text-sm text-primary">
+                      {selected.partnerNumber}
+                    </div>
+                  ) : null}
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <Mail className="h-3.5 w-3.5" />
+                    <span className="truncate">{selected.email}</span>
+                  </div>
+                  {selected.phone ? (
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <Phone className="h-3.5 w-3.5" />
+                      <span className="truncate">{selected.phone}</span>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+
+              <div className="rounded-xl border bg-muted/40 p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <ShoppingBag className="h-4 w-4 text-primary" />
+                  Продажи за последний месяц
+                </div>
+                <p className="mt-2 text-3xl font-bold tabular-nums">
+                  {selected.salesLastMonth}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  оплаченных активностей
+                </p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
