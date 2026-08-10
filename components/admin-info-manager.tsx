@@ -10,7 +10,7 @@ import { WysiwygEditor } from "./wysiwyg-editor";
 
 interface InfoPage {
   id: string;
-  target: "partner" | "tourist";
+  target: "partner" | "tourist" | "agent";
   title: string;
   content: string;
   createdAt: string;
@@ -18,7 +18,7 @@ interface InfoPage {
 }
 
 interface AdminInfoManagerProps {
-  target: "partner" | "tourist";
+  target: "partner" | "tourist" | "agent";
 }
 
 export function AdminInfoManager({ target }: AdminInfoManagerProps) {
@@ -34,7 +34,12 @@ export function AdminInfoManager({ target }: AdminInfoManagerProps) {
   const [editContent, setEditContent] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const targetLabel = target === "partner" ? "Партнёры" : "Туристы";
+  const targetLabel =
+    target === "partner"
+      ? "Партнёры"
+      : target === "tourist"
+        ? "Туристы"
+        : "Агенты";
 
   useEffect(() => {
     fetchPages();

@@ -15,7 +15,7 @@ function getTokenFromRequest(request: NextRequest): string | null {
 }
 
 const createInfoPageSchema = z.object({
-  target: z.enum(["partner", "tourist"]),
+  target: z.enum(["partner", "tourist", "agent"]),
   title: z.string().min(1).max(300),
   content: z.string().min(1).max(50000),
 });

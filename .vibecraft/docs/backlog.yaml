@@ -6445,8 +6445,16 @@ tasks:
       - task-265
       - task-272
     related_feature: "Админ-панель: Агенты, Информация агентам, Выплаты агентам"
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Добавлен раздел «Информация агентам» в админ-панели
+      (/admin/info/agents) с редактором и списком материалов на базе общего
+      компонента AdminInfoManager (target="agent"), добавлен пункт меню
+      «Информация агентам» (только для главного администратора). Расширены
+      zod-схемы API /api/admin/info и [id] на target "agent". Материалы уже
+      выводятся на дашборде агента (components/agent-dashboard.tsx) через GET
+      /api/agent/dashboard, который тянет getInfoPagesByTarget("agent"). Мок-данные
+      с agent-материалами есть в lib/mock-data.ts. typecheck, lint, build проходят.
   - id: task-274
     phase: agent
     title: "Админ-панель: раздел «Выплаты агентам»"

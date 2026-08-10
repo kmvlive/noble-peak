@@ -16,7 +16,7 @@ function getTokenFromRequest(request: NextRequest): string | null {
 const updateInfoPageSchema = z.object({
   title: z.string().min(1).max(300).optional(),
   content: z.string().min(1).max(50000).optional(),
-  target: z.enum(["partner", "tourist"]).optional(),
+  target: z.enum(["partner", "tourist", "agent"]).optional(),
 });
 
 export async function GET(

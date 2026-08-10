@@ -183,6 +183,11 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
       label: "Информация туристам",
       icon: FileText,
     },
+    {
+      href: "/admin/info/agents",
+      label: "Информация агентам",
+      icon: FileText,
+    },
     { href: "/admin/clients", label: "Клиенты", icon: Users },
     { href: "/admin/partners", label: "Партнёры", icon: Users },
     { href: "/admin/agents", label: "Агенты", icon: Users },
@@ -214,6 +219,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
     "/admin/settings",
     "/admin/analytics",
     "/admin/agents",
+    "/admin/info/agents",
   ];
 
   const navItems = isMain
