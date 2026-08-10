@@ -23,6 +23,7 @@ import {
   MessageSquare,
   Image,
   ShoppingCart,
+  CircleDollarSign,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -191,6 +192,11 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
     { href: "/admin/clients", label: "Клиенты", icon: Users },
     { href: "/admin/partners", label: "Партнёры", icon: Users },
     { href: "/admin/agents", label: "Агенты", icon: Users },
+    {
+      href: "/admin/payouts",
+      label: "Выплаты агентам",
+      icon: CircleDollarSign,
+    },
     { href: "/admin/orders", label: "Отчёты", icon: FileText },
     { href: "/admin/admins", label: "Администраторы", icon: Shield },
     {
@@ -219,6 +225,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
     "/admin/settings",
     "/admin/analytics",
     "/admin/agents",
+    "/admin/payouts",
     "/admin/info/agents",
   ];
 

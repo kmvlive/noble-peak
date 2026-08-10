@@ -1020,6 +1020,14 @@ export const mockAgentSettings: AgentSettingsRecord[] = [
   },
 ];
 
+const mockNow = new Date().toISOString();
+const mockMonth = mockNow.slice(0, 7);
+const mockPrevMonth = new Date(
+  Date.UTC(Number(mockMonth.slice(0, 4)), Number(mockMonth.slice(5, 7)) - 1, 1)
+)
+  .toISOString()
+  .slice(0, 7);
+
 export const mockPayouts: PayoutRecord[] = [
   {
     id: "mock-payout-1",
@@ -1027,9 +1035,42 @@ export const mockPayouts: PayoutRecord[] = [
     agentEmail: "agent@example.com",
     agentName: "Агент",
     amount: 12500,
-    month: new Date().toISOString().slice(0, 7),
+    month: mockMonth,
     status: "pending",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: mockNow,
+    updatedAt: mockNow,
+  },
+  {
+    id: "mock-payout-2",
+    number: "000002",
+    agentEmail: "agent@example.com",
+    agentName: "Агент",
+    amount: 8700,
+    month: mockPrevMonth,
+    status: "approved",
+    createdAt: mockNow,
+    updatedAt: mockNow,
+  },
+  {
+    id: "mock-payout-3",
+    number: "000003",
+    agentEmail: "agent@example.com",
+    agentName: "Агент",
+    amount: 6400,
+    month: mockPrevMonth,
+    status: "paid",
+    createdAt: mockNow,
+    updatedAt: mockNow,
+  },
+  {
+    id: "mock-payout-4",
+    number: "000004",
+    agentEmail: "agent@example.com",
+    agentName: "Агент",
+    amount: 3100,
+    month: mockPrevMonth,
+    status: "declined",
+    createdAt: mockNow,
+    updatedAt: mockNow,
   },
 ];
