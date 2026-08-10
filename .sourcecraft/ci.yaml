@@ -12,7 +12,7 @@ workflows:
             script:
               - set -e
               - echo "=== Pushing SourceCraft code to GitHub kmvlive/noble-peak ==="
-              - GITHUB_TOKEN=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
+              - GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
               - GITHUB_URL="https://kmvlive:${GITHUB_TOKEN}@github.com/kmvlive/noble-peak.git"
               - echo "=== Unshallowing sourcecraft clone if needed ==="
               - git fetch --unshallow origin 2>/dev/null || true
