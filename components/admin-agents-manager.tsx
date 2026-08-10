@@ -8,6 +8,12 @@ import {
   Save,
   ShieldAlert,
   ShieldCheck,
+  ArrowLeft,
+  Phone,
+  Mail,
+  User,
+  Hash,
+  Banknote,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +39,29 @@ interface Settings {
   updatedAt: string;
 }
 
+interface PartnerItem {
+  email: string;
+  name: string;
+  phone: string;
+  partnerNumber: string;
+}
+
+interface AgentDetail {
+  email: string;
+  name: string;
+  phone: string;
+  code: string;
+  blocked: boolean;
+  createdAt: string;
+  bankDetails: {
+    fullName?: string;
+    bankName?: string;
+    accountNumber?: string;
+  } | null;
+  currentRatePercent: number;
+  partnersCount: number;
+}
+
 export function AdminAgentsManager() {
   const [agents, setAgents] = useState<AgentItem[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
@@ -40,6 +69,13 @@ export function AdminAgentsManager() {
   const [saving, setSaving] = useState(false);
   const [tier2, setTier2] = useState("");
   const [tier3, setTier3] = useState("");
+
+  const [detail, setDetail] = useState<{
+    agent: AgentDetail;
+    partners: PartnerItem[];
+  } | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [blocking, setBlocking] = useState(false);
 
   useEffect(() => {
     fetchAgents();
@@ -67,6 +103,71 @@ export function AdminAgentsManager() {
       toast.error("Ошибка загрузки");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openDetail = async (agent: AgentItem) => {
+    setDetailLoading(true);
+    setDetail(null);
+    const token = getToken();
+    try {
+      const res = await fetch(
+        `/api/admin/agents/${encodeURIComponent(agent.email)}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      );
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error || "Ошибка загрузки");
+        return;
+      }
+      const data = await res.json();
+      setDetail({
+        agent: data.agent,
+        partners: Array.isArray(data.partners) ? data.partners : [],
+      });
+    } catch {
+      toast.error("Ошибка загрузки");
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const toggleBlock = async () => {
+    if (!detail) return;
+    const nextBlocked = !detail.agent.blocked;
+    setBlocking(true);
+    const token = getToken();
+    try {
+      const res = await fetch(
+        `/api/admin/agents/${encodeURIComponent(detail.agent.email)}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ blocked: nextBlocked }),
+        }
+      );
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error || "Ошибка обновления");
+        return;
+      }
+      const saved = await res.json();
+      setDetail((d) =>
+        d ? { ...d, agent: { ...d.agent, blocked: saved.blocked } } : d
+      );
+      toast.success(
+        saved.blocked ? "Агент заблокирован" : "Агент разблокирован"
+      );
+      fetchAgents();
+    } catch {
+      toast.error("Ошибка обновления");
+    } finally {
+      setBlocking(false);
     }
   };
 
@@ -118,6 +219,155 @@ export function AdminAgentsManager() {
         <Skeleton className="h-32 w-full max-w-2xl" />
         <Skeleton className="h-20 w-full" />
         <Skeleton className="h-20 w-full" />
+      </div>
+    );
+  }
+
+  if (detail || detailLoading) {
+    return (
+      <div className="space-y-6">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setDetail(null)}
+          className="gap-1.5"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Назад к списку агентов
+        </Button>
+
+        {detailLoading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-28 w-full max-w-2xl" />
+            <Skeleton className="h-40 w-full" />
+          </div>
+        ) : detail ? (
+          <>
+            <div className="rounded-xl border bg-card p-5 space-y-4 max-w-2xl">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-semibold tracking-tight truncate">
+                      {detail.agent.name}
+                    </h2>
+                    {detail.agent.blocked ? (
+                      <ShieldAlert className="h-4 w-4 text-destructive" />
+                    ) : (
+                      <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </div>
+                  <span
+                    className={`mt-1 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                      detail.agent.blocked
+                        ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                        : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                    }`}
+                  >
+                    {detail.agent.blocked ? "Заблокирован" : "Активен"}
+                  </span>
+                </div>
+                <Button
+                  variant={detail.agent.blocked ? "outline" : "destructive"}
+                  size="sm"
+                  onClick={toggleBlock}
+                  disabled={blocking}
+                >
+                  {blocking ? (
+                    <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                  ) : detail.agent.blocked ? (
+                    <ShieldCheck className="mr-1.5 h-4 w-4" />
+                  ) : (
+                    <ShieldAlert className="mr-1.5 h-4 w-4" />
+                  )}
+                  {detail.agent.blocked ? "Разблокировать" : "Заблокировать"}
+                </Button>
+              </div>
+
+              <div className="grid gap-3 text-sm sm:grid-cols-2">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Mail className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{detail.agent.email}</span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Phone className="h-4 w-4 shrink-0" />
+                  <span>{detail.agent.phone}</span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Hash className="h-4 w-4 shrink-0" />
+                  <span>Код: {detail.agent.code}</span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <User className="h-4 w-4 shrink-0" />
+                  <span>
+                    Зарегистрирован:{" "}
+                    {new Date(detail.agent.createdAt).toLocaleDateString(
+                      "ru-RU"
+                    )}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Banknote className="h-4 w-4 shrink-0" />
+                  <span>
+                    Ставка в этом месяце: {detail.agent.currentRatePercent}%
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Users className="h-4 w-4 shrink-0" />
+                  <span>Партнёров: {detail.agent.partnersCount}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-semibold tracking-tight">
+                  Партнёры агента
+                </h3>
+              </div>
+
+              {detail.partners.length === 0 ? (
+                <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-10 text-center">
+                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                    <Users className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    У агента пока нет партнёров
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-hidden rounded-lg border">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b bg-muted/50 text-left text-muted-foreground">
+                        <th className="px-4 py-2.5 font-medium">Имя</th>
+                        <th className="px-4 py-2.5 font-medium">Телефон</th>
+                        <th className="px-4 py-2.5 font-medium">Email</th>
+                        <th className="px-4 py-2.5 font-medium">Номер</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {detail.partners.map((p) => (
+                        <tr key={p.email} className="border-b last:border-0">
+                          <td className="px-4 py-2.5 font-medium">{p.name}</td>
+                          <td className="px-4 py-2.5 text-muted-foreground">
+                            {p.phone}
+                          </td>
+                          <td className="px-4 py-2.5 text-muted-foreground">
+                            {p.email}
+                          </td>
+                          <td className="px-4 py-2.5 text-muted-foreground">
+                            {p.partnerNumber || "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        ) : null}
       </div>
     );
   }
@@ -197,9 +447,11 @@ export function AdminAgentsManager() {
         ) : (
           <div className="space-y-3">
             {agents.map((agent) => (
-              <div
+              <button
                 key={agent.email}
-                className="flex flex-col gap-2 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
+                type="button"
+                onClick={() => openDetail(agent)}
+                className="flex w-full flex-col gap-2 rounded-lg border p-4 text-left transition-colors hover:bg-accent sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
@@ -228,7 +480,7 @@ export function AdminAgentsManager() {
                 >
                   {agent.blocked ? "Заблокирован" : "Активен"}
                 </span>
-              </div>
+              </button>
             ))}
           </div>
         )}

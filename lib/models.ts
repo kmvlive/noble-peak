@@ -1173,6 +1173,7 @@ export async function updateAgent(
       | "name"
       | "phone"
       | "bankDetails"
+      | "blocked"
       | "vkNotificationsEnabled"
       | "telegramChatId"
       | "telegramNotificationsEnabled"
@@ -1199,6 +1200,12 @@ export async function updateAgent(
     updateExpr.push("#bankDetails = :bankDetails");
     exprValues[":bankDetails"] = data.bankDetails;
     exprNames["#bankDetails"] = "bankDetails";
+  }
+
+  if (data.blocked !== undefined) {
+    updateExpr.push("#blocked = :blocked");
+    exprValues[":blocked"] = data.blocked;
+    exprNames["#blocked"] = "blocked";
   }
 
   if (data.vkNotificationsEnabled !== undefined) {

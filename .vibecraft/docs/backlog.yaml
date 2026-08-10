@@ -6417,8 +6417,18 @@ tasks:
     depends_on:
       - task-264
     related_feature: "Админ-панель: Агенты, Информация агентам, Выплаты агентам"
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Реализован раздел «Агенты» в админ-панели (/admin/agents,
+      components/admin-agents-manager.tsx). Список агентов (имя, email, код,
+      число партнёров, ставка за месяц, статус). При нажатии на агента
+      открывается карточка с информацией (email, телефон, код, дата
+      регистрации, ставка) и списком его партнёров (GET
+      /api/admin/agents/[email]). Кнопка «Заблокировать/Разблокировать» (PATCH
+      /api/admin/agents/[email], поле blocked в updateAgent) — заблокированный
+      агент не может войти в кабинет (проверка в /api/agent/login). Задаются
+      пороги лесенки 3-4-5% в рублях (PUT /api/admin/agents). typecheck, lint,
+      build проходят.
   - id: task-273
     phase: agent
     title: "Админ-панель: раздел «Информация агентам»"
