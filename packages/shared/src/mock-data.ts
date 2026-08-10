@@ -19,6 +19,7 @@ import type {
   CityRecord,
   ChatMessageRecord,
   InfoPageRecord,
+  AgentStatsRecord,
 } from "./models";
 import type { SliderImage, OrderSettingsRecord } from "./models";
 
@@ -836,6 +837,33 @@ export const mockInfoPages: InfoPageRecord[] = [
     createdAt: new Date("2025-02-12").toISOString(),
     updatedAt: new Date("2025-02-12").toISOString(),
   },
+  {
+    id: "info-agent-1",
+    target: "agent",
+    title: "Как привлекать партнёров",
+    content:
+      "<p>Делитесь вашей партнёрской ссылкой в соцсетях и мессенджерах. Каждый партнёр, зарегистрировавшийся по вашей ссылке, автоматически привязывается к вам. Чем больше партнёров вы привлечёте — тем выше ваш заработок.</p>",
+    createdAt: new Date("2025-03-01").toISOString(),
+    updatedAt: new Date("2025-03-01").toISOString(),
+  },
+  {
+    id: "info-agent-2",
+    target: "agent",
+    title: "Как рассчитывается ваш процент",
+    content:
+      "<p>Вы получаете процент с каждой успешной оплаты активности ваших партнёров. Ставка зависит от объёма продаж за месяц и растёт по лесенке <strong>3% → 4% → 5%</strong>. Пороги задаёт администратор.</p>",
+    createdAt: new Date("2025-03-02").toISOString(),
+    updatedAt: new Date("2025-03-02").toISOString(),
+  },
+  {
+    id: "info-agent-3",
+    target: "agent",
+    title: "Вывод заработка",
+    content:
+      "<p>Вы можете вывести заработок раз в месяц. Для этого подайте заявку в разделе «Заработок и выплаты». После подтверждения администратором вы увидите пометку «ожидайте выплату».</p>",
+    createdAt: new Date("2025-03-03").toISOString(),
+    updatedAt: new Date("2025-03-03").toISOString(),
+  },
 ];
 
 export const mockOrders: OrderRecord[] = [
@@ -921,5 +949,14 @@ export const mockOrders: OrderRecord[] = [
     price: 3500,
     status: "pending_payment",
     createdAt: new Date().toISOString(),
+  },
+];
+
+export const mockAgentStats: AgentStatsRecord[] = [
+  {
+    agentEmail: "agent@example.com",
+    clicks30: 48,
+    registrations30: 5,
+    updatedAt: new Date().toISOString(),
   },
 ];

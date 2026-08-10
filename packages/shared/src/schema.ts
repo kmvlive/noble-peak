@@ -27,6 +27,7 @@ export const TableName = {
   CITIES: "cities",
   INFO_PAGES: "info_pages",
   AGENTS: "agents",
+  AGENT_STATS: "agent_stats",
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];
@@ -314,6 +315,12 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
         Projection: { ProjectionType: "ALL" },
       },
     ],
+  },
+
+  [TableName.AGENT_STATS]: {
+    name: TableName.AGENT_STATS,
+    keySchema: [{ AttributeName: "agentEmail", KeyType: "HASH" }],
+    attributeDefinitions: [{ AttributeName: "agentEmail", AttributeType: "S" }],
   },
 };
 

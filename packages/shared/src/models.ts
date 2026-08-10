@@ -249,7 +249,7 @@ export interface ChatMessageRecord {
   createdAt: string;
 }
 
-export type InfoPageTarget = "partner" | "tourist";
+export type InfoPageTarget = "partner" | "tourist" | "agent";
 
 export interface InfoPageRecord {
   id: string;
@@ -257,5 +257,12 @@ export interface InfoPageRecord {
   title: string;
   content: string;
   createdAt: string;
+  updatedAt: string;
+}
+
+export interface AgentStatsRecord {
+  agentEmail: string;
+  clicks30: number;
+  registrations30: number;
   updatedAt: string;
 }

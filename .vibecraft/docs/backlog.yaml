@@ -6196,8 +6196,16 @@ tasks:
     depends_on:
       - task-264
     related_feature: Кабинет агента (партнёрская программа)
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Реализован дашборд агента (components/agent-dashboard.tsx, /agent):
+      карточки «Переходы за 30 дней», «Регистрации партнёров за 30 дней»,
+      «Заработок», партнёрская ссылка вида /partner/login?ref=КОД-АГЕНТА и
+      статьи «Информация агентам» (target "agent"). Добавлены API GET
+      /api/agent/dashboard, getAgentStats/getAgentRegistrations30/getAgentEarnings
+      (lib/models.ts), таблица agent_stats, поле agentEmail в PartnerRecord,
+      mock-данные. Меню разделов создано в task-264. typecheck, lint, build
+      проходят.
   - id: task-266
     phase: agent
     title: Партнёрская ссылка и автоматическая привязка партнёра

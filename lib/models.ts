@@ -1,5 +1,5 @@
 import { docClient, isDatabaseAvailable } from "./db";
-import { mockInfoPages } from "./mock-data";
+import { mockInfoPages, mockAgentStats } from "./mock-data";
 import {
   GetCommand,
   PutCommand,
@@ -9,7 +9,11 @@ import {
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { TableName, IndexName } from "./schema";
-import type { InfoPageRecord, InfoPageTarget } from "./schema";
+import type {
+  InfoPageRecord,
+  InfoPageTarget,
+  AgentStatsRecord,
+} from "./schema";
 import { randomUUID } from "node:crypto";
 import { sendVkNotification } from "./vk-notify";
 import { sendTelegramNotification } from "./telegram-notify";
@@ -1073,6 +1077,7 @@ export interface PartnerRecord {
   vkNotificationsEnabled?: boolean;
   telegramChatId?: string;
   telegramNotificationsEnabled?: boolean;
+  agentEmail?: string;
   createdAt: string;
 }
 
@@ -1141,6 +1146,81 @@ export async function getAllAgents(): Promise<AgentRecord[]> {
     })
   );
   return (result.Items as AgentRecord[]) ?? [];
+}
+
+export const DEFAULT_AGENT_COMMISSION_RATE = 0.03;
+
+export async function getAgentStats(
+  agentEmail: string
+): Promise<AgentStatsRecord | null> {
+  const dbAvailable = await isDatabaseAvailable();
+  if (!dbAvailable) {
+    return mockAgentStats.find((s) => s.agentEmail === agentEmail) ?? null;
+  }
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TableName.AGENT_STATS,
+      Key: { agentEmail },
+    })
+  );
+  return (result.Item as AgentStatsRecord) ?? null;
+}
+
+export async function getAgentRegistrations30(
+  agentEmail: string
+): Promise<number> {
+  const dbAvailable = await isDatabaseAvailable();
+  if (!dbAvailable) return 0;
+
+  const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.PARTNERS,
+      FilterExpression: "agentEmail = :agentEmail AND createdAt >= :cutoff",
+      ExpressionAttributeValues: {
+        ":agentEmail": agentEmail,
+        ":cutoff": cutoff,
+      },
+    })
+  );
+  return ((result.Items as PartnerRecord[]) ?? []).length;
+}
+
+export async function getAgentEarnings(agentEmail: string): Promise<number> {
+  const dbAvailable = await isDatabaseAvailable();
+  if (!dbAvailable) return 0;
+
+  const partnerScan = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.PARTNERS,
+      FilterExpression: "agentEmail = :agentEmail",
+      ExpressionAttributeValues: { ":agentEmail": agentEmail },
+    })
+  );
+  const partners = (partnerScan.Items as PartnerRecord[]) ?? [];
+  if (partners.length === 0) return 0;
+  const partnerSet = new Set(partners.map((p) => p.email));
+
+  const orderScan = await docClient.send(
+    new ScanCommand({ TableName: TableName.ORDERS })
+  );
+  const orders = (orderScan.Items as OrderRecord[]) ?? [];
+
+  const paidStatuses = new Set<OrderStatus>(["paid", "completed"]);
+  const gross = orders.reduce((sum, o) => {
+    if (!o.partnerEmail || !partnerSet.has(o.partnerEmail)) return sum;
+    if (o.deletedAt) return sum;
+    if (
+      !paidStatuses.has(o.status) &&
+      !(o.wasPaid && o.status === "cancelled")
+    ) {
+      return sum;
+    }
+    return sum + o.price;
+  }, 0);
+
+  return Math.round(gross * DEFAULT_AGENT_COMMISSION_RATE);
 }
 
 export async function getPartnerByEmail(
