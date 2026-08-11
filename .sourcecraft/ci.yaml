@@ -6,7 +6,23 @@ tokens:
 workflows:
   deploy:
     tasks:
+      - name: sync-from-github
+        cubes:
+          - name: sync
+            script:
+              - set -e
+              - echo "=== Syncing latest code from GitHub kmvlive/noble-peak ==="
+              - GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+              - GITHUB_URL="https://kmvlive:${GITHUB_TOKEN}@github.com/kmvlive/noble-peak.git"
+              - echo "=== Configuring github remote ==="
+              - git remote remove github 2>/dev/null || true
+              - git remote add github "${GITHUB_URL}"
+              - echo "=== Fetching and resetting to github/main ==="
+              - git fetch github main
+              - git reset --hard github/main
+              - echo "=== SYNC FROM GITHUB COMPLETE ==="
       - name: push-code-to-github
+        needs: [sync-from-github]
         cubes:
           - name: push
             script:
