@@ -30,6 +30,11 @@ const createActivitySchema = z.object({
   imageGradient: z.string().optional().default("from-blue-400 to-indigo-500"),
   isMultiDay: z.boolean().optional().default(false),
   location: z.string().max(200).optional().default(""),
+  languages: z
+    .array(z.string().min(1).max(40))
+    .max(20)
+    .optional()
+    .default(["ru"]),
   status: z
     .enum(["active", "pending", "rejected"])
     .optional()

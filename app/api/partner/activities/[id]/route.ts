@@ -17,6 +17,7 @@ const updatePartnerActivitySchema = z.object({
   imageGradient: z.string().optional(),
   isMultiDay: z.boolean().optional(),
   location: z.string().max(200).optional(),
+  languages: z.array(z.string().min(1).max(40)).max(20).optional(),
 });
 
 export async function GET(

@@ -11,6 +11,11 @@ import { WysiwygEditor } from "./wysiwyg-editor";
 import { CityAutocomplete } from "./city-autocomplete";
 import { RUSSIAN_CITIES } from "@/lib/russian-cities";
 import type { SectionRecord, ActivityType } from "@/lib/models";
+import {
+  ACTIVITY_LANGUAGES,
+  DEFAULT_ACTIVITY_LANGUAGES,
+} from "@/lib/languages";
+import { Languages } from "lucide-react";
 
 const gradientOptions = [
   "from-emerald-400 to-cyan-500",
@@ -44,6 +49,9 @@ export function PartnerActivityForm() {
   const [activityType, setActivityType] = useState<ActivityType>("individual");
   const [location, setLocation] = useState("");
   const [isMultiDay, setIsMultiDay] = useState(false);
+  const [languages, setLanguages] = useState<string[]>(
+    DEFAULT_ACTIVITY_LANGUAGES
+  );
 
   useEffect(() => {
     fetch("/api/admin/sections")
@@ -83,6 +91,7 @@ export function PartnerActivityForm() {
       imageGradient,
       location: location.trim(),
       isMultiDay,
+      languages,
     };
 
     try {
@@ -126,6 +135,12 @@ export function PartnerActivityForm() {
     if (imageUrls.includes(newImageUrl.trim())) return;
     setImageUrls((prev) => [...prev, newImageUrl.trim()]);
     setNewImageUrl("");
+  };
+
+  const toggleLanguage = (value: string) => {
+    setLanguages((prev) =>
+      prev.includes(value) ? prev.filter((l) => l !== value) : [...prev, value]
+    );
   };
 
   const removeImageUrl = (url: string) => {
@@ -334,6 +349,37 @@ export function PartnerActivityForm() {
             onChange={setLocation}
             placeholder="г. Ялта, ул. Кирова, 15"
           />
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Languages className="h-4 w-4 text-muted-foreground" />
+            <label className="text-sm font-medium">
+              На каких языках проводится активность?
+            </label>
+          </div>
+          <div className="flex flex-wrap gap-2 pt-1">
+            {ACTIVITY_LANGUAGES.map((lang) => {
+              const checked = languages.includes(lang.value);
+              return (
+                <button
+                  key={lang.value}
+                  type="button"
+                  onClick={() => toggleLanguage(lang.value)}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                    checked
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "bg-background text-muted-foreground hover:bg-accent"
+                  }`}
+                >
+                  {lang.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Можно выбрать несколько языков
+          </p>
         </div>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">

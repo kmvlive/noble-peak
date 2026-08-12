@@ -30,6 +30,7 @@ export interface ActivityRecord {
   imageGradient: string;
   location?: string;
   isMultiDay?: boolean;
+  languages?: string[];
   status: ActivityStatus;
   partnerEmail?: string;
   createdAt: string;

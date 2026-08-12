@@ -61,6 +61,7 @@ export interface ActivityRecord {
   orderType: OrderType;
   imageGradient: string;
   location?: string;
+  languages?: string[];
   status: ActivityStatus;
   partnerEmail?: string;
   createdAt: string;

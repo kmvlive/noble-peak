@@ -22,6 +22,11 @@ import { RUSSIAN_CITIES } from "@/lib/russian-cities";
 import type { OrderType, ActivityType, SectionRecord } from "@/lib/models";
 import { AdminActivityCalendar } from "./admin-activity-calendar";
 import { slugify } from "@/lib/utils";
+import {
+  ACTIVITY_LANGUAGES,
+  DEFAULT_ACTIVITY_LANGUAGES,
+} from "@/lib/languages";
+import { Languages } from "lucide-react";
 
 interface AdminActivityFormProps {
   activity?: {
@@ -41,6 +46,7 @@ interface AdminActivityFormProps {
     imageGradient: string;
     location?: string;
     isMultiDay?: boolean;
+    languages?: string[];
   };
 }
 
@@ -91,6 +97,9 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
   const [over18, setOver18] = useState(activity?.over18 ?? false);
   const [location, setLocation] = useState(activity?.location ?? "");
   const [isMultiDay, setIsMultiDay] = useState(activity?.isMultiDay ?? false);
+  const [languages, setLanguages] = useState<string[]>(
+    activity?.languages ?? DEFAULT_ACTIVITY_LANGUAGES
+  );
 
   const [id, setId] = useState(activity?.id ?? "");
 
@@ -146,6 +155,7 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
       imageGradient,
       location: location.trim(),
       isMultiDay,
+      languages,
     };
 
     try {
@@ -193,6 +203,12 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
     if (imageUrls.includes(newImageUrl.trim())) return;
     setImageUrls((prev) => [...prev, newImageUrl.trim()]);
     setNewImageUrl("");
+  };
+
+  const toggleLanguage = (value: string) => {
+    setLanguages((prev) =>
+      prev.includes(value) ? prev.filter((l) => l !== value) : [...prev, value]
+    );
   };
 
   const removeImageUrl = (url: string) => {
@@ -421,6 +437,37 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
             onChange={setLocation}
             placeholder="г. Ялта, ул. Кирова, 15"
           />
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Languages className="h-4 w-4 text-muted-foreground" />
+            <label className="text-sm font-medium">
+              На каких языках проводится активность?
+            </label>
+          </div>
+          <div className="flex flex-wrap gap-2 pt-1">
+            {ACTIVITY_LANGUAGES.map((lang) => {
+              const checked = languages.includes(lang.value);
+              return (
+                <button
+                  key={lang.value}
+                  type="button"
+                  onClick={() => toggleLanguage(lang.value)}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                    checked
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "bg-background text-muted-foreground hover:bg-accent"
+                  }`}
+                >
+                  {lang.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Можно выбрать несколько языков
+          </p>
         </div>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
