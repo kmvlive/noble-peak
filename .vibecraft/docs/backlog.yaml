@@ -5577,5 +5577,5 @@ tasks:
     meta:
       quick_implement_marker: quick_implement:call_e3f0708aaca54ae88ee01c77
     id: task-1043
-    status: pending
-    summary: null
+    status: failed
+    summary: "Настроена цепочка .sourcecraft/ci.yaml (deploy: sync-from-github -> push-code-to-github -> deploy-via-ssh -> verify) и webhooks.yaml. Убраны захардкоженные токены: секрет вебхука заменён на ${{ secrets.DEPLOY_SECRET }} (добавлен в SourceCraft), маршрут trigger-deploy разрешает шаблон из окружения, deliver workflow удалён. Добавлены авто-коммит public/uploads и db:check в деплой; backups/uploads gitignored. typecheck/lint/build проходят. БЛОКЕР: GITHUB_TOKEN отозван (401), push-code-to-github падает, deploy-via-ssh не достигается. Нужен новый GitHub PAT и обновление секрета GITHUB_TOKEN."

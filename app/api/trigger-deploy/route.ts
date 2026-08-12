@@ -19,24 +19,30 @@ async function handleTriggerDeploy(request: NextRequest) {
       "webhooks.yaml"
     );
 
-    let secret: string;
+    let secret: string | undefined;
 
     try {
       const raw = fs.readFileSync(webhooksPath, "utf-8");
       const data = yaml.load(raw) as {
-        webhooks?: { hooks?: Array<{ secret: string }> };
+        webhooks?: { hooks?: Array<{ secret?: string }> };
       };
       const webhook = data?.webhooks?.hooks?.[0];
-      if (!webhook?.secret) {
-        return NextResponse.json(
-          { error: "Секрет не найден в webhooks.yaml" },
-          { status: 500 }
-        );
-      }
-      secret = webhook.secret;
+      secret = webhook?.secret;
     } catch {
       return NextResponse.json(
         { error: "Не удалось прочитать webhooks.yaml" },
+        { status: 500 }
+      );
+    }
+
+    if (secret && /^\$\{\{\s*secrets\.([A-Z0-9_]+)\s*\}\}$/.test(secret)) {
+      const name = secret.match(/^\$\{\{\s*secrets\.([A-Z0-9_]+)\s*\}\}$/)?.[1];
+      secret = name ? process.env[name] : undefined;
+    }
+
+    if (!secret) {
+      return NextResponse.json(
+        { error: "Секрет деплоя не найден в webhooks.yaml или окружении" },
         { status: 500 }
       );
     }

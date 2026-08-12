@@ -2,7 +2,7 @@ webhooks:
   hooks:
     - slug: deploy
       url: https://my.magazin-tour.ru/api/deploy
-      secret: 3724841febb66a37c1f25c9c8157a6521ccd9166c848e2371462a37f85f94852
+      secret: ${{ secrets.DEPLOY_SECRET }}
       events:
         - push
         - implement_project

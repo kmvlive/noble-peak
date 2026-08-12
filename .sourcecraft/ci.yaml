@@ -32,6 +32,9 @@ workflows:
               - GITHUB_URL="https://kmvlive:${GITHUB_TOKEN}@github.com/kmvlive/noble-peak.git"
               - echo "=== Unshallowing sourcecraft clone if needed ==="
               - git fetch --unshallow origin 2>/dev/null || true
+              - echo "=== Auto-committing public/uploads so uploads are never lost ==="
+              - git add public/uploads
+              - git -c user.name="SourceCraft CI" -c user.email="ci@sourcecraft.local" commit -m "chore: auto-commit public/uploads [ci skip]" 2>/dev/null || echo "No new uploads to commit"
               - echo "=== Configuring github remote ==="
               - git remote remove github 2>/dev/null || true
               - git remote add github "${GITHUB_URL}"
@@ -48,16 +51,18 @@ workflows:
                 echo '=== Connected to server ==='
                 cd /opt/noble-peak
 
-                echo '=== git pull ==='
+                echo '=== git pull from GitHub ==='
                 git pull origin main
 
-                echo '=== Setting env vars ==='
-                grep -q '^DEPLOY_SECRET=' .env.production 2>/dev/null || echo 'DEPLOY_SECRET=3724841febb66a37c1f25c9c8157a6521ccd9166c848e2371462a37f85f94852' >> .env.production
-                grep -q '^RECEIVE_CODE_TOKEN=' .env.production 2>/dev/null || echo 'RECEIVE_CODE_TOKEN=src-ci-deploy-token-2026' >> .env.production
+                echo '=== Preserving backups/uploads (gitignored, untouched by deploy) ==='
+                if [ -d backups/uploads ]; then echo 'backups/uploads preserved'; else echo 'no backups/uploads dir (nothing to preserve)'; fi
 
                 echo '=== Rebuilding and restarting app ==='
                 docker compose -f docker-compose.prod.yml build
                 docker compose -f docker-compose.prod.yml up -d --force-recreate
+
+                echo '=== Checking database (health + schema verify + migrations) ==='
+                docker compose -f docker-compose.prod.yml exec -T app npm run db:check
 
                 echo '=== DEPLOY COMPLETE ==='
                 "
@@ -69,12 +74,3 @@ workflows:
               - curl -sf https://my.magazin-tour.ru/api/health > /dev/null && echo "HEALTH_OK" || echo "HEALTH_CHECK_FAILED"
               - curl -sf https://my.magazin-tour.ru/api/client/tourist-info > /dev/null && echo "TOURIST_INFO_OK" || echo "TOURIST_INFO_FAILED"
               - curl -sf https://my.magazin-tour.ru/api/admin/info > /dev/null && echo "ADMIN_INFO_OK" || echo "ADMIN_INFO_FAILED"
-  deliver:
-    tasks:
-      - name: deliver-code-via-receive-api
-        cubes:
-          - name: deliver-code
-            script:
-              - echo "=== Delivering source files to production via /api/receive-code ==="
-              - RECEIVE_CODE_URL=https://my.magazin-tour.ru/api/receive-code RECEIVE_CODE_TOKEN=src-ci-deploy-token-2026 npm run deliver:code
-              - echo "=== DELIVER COMPLETE ==="
