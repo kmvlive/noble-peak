@@ -35,6 +35,10 @@ if [ -n "${SSH_PASSWORD}" ]; then
 fi
 ssh_run() { "${SSH_CMD[@]}" -p "${REMOTE_PORT}" -l "${REMOTE_USER}" "${REMOTE_HOST}" "$@"; }
 
+# ── Бэкап и авто-коммит загружаемых файлов ──────────────────
+info "Бэкап и авто-коммит загружаемых файлов..."
+npm run upload:backup
+
 # ── Сборка production-образа ─────────────────────────────────
 info "Сборка Docker-образа..."
 docker build -t magazin-tour:latest -f Dockerfile .
@@ -75,9 +79,9 @@ else
   exit 1
 fi
 
-# ── Проверка и исправление схемы DynamoDB ───────────────────
-info "Проверка и исправление схемы DynamoDB..."
+# ── Проверка и исправление схемы DynamoDB (health + verify + migrate) ──
+info "Автоматическая проверка и починка БД (health, схема, миграции)..."
 ssh_run \
-  "cd ${REMOTE_DIR} && docker compose -f ${COMPOSE_FILE} exec -T app npm run db:verify"
+  "cd ${REMOTE_DIR} && docker compose -f ${COMPOSE_FILE} exec -T app npm run db:check"
 
 ok "Деплой завершён успешно!"

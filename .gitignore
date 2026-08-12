@@ -37,3 +37,6 @@ next-env.d.ts
 # playwright cli
 .playwright-cli
 .playwright-mcp
+
+# локальные бэкапы загружаемых файлов (public/uploads при этом НЕ игнорируется)
+/backups/uploads/

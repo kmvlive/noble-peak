@@ -17,6 +17,8 @@
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:verify": "tsx scripts/verify-schema.ts",
+    "db:check": "tsx scripts/check-db.ts",
+    "upload:backup": "tsx scripts/backup-uploads.ts",
     "deliver:code": "tsx scripts/deliver-code.ts",
     "docker:dev": "docker-compose up --build",
     "docker:dev:down": "docker-compose down",
