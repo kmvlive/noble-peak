@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import { ChatWidget } from "@/components/chat-widget";
 import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
 
 interface Notification {
   id: string;
@@ -186,25 +187,36 @@ export function ClientNotificationsList() {
       });
       if (!res.ok) {
         setTelegramEnabled(!enabled);
+        const data = await res.json().catch(() => null);
+        toast.error(data?.error || "Не удалось изменить настройку Telegram");
       }
     } catch {
       setTelegramEnabled(!enabled);
+      toast.error("Не удалось изменить настройку Telegram");
     }
   };
 
   const handleTelegramChatIdSave = async () => {
+    const chatId = telegramChatId.trim();
+    if (!chatId) {
+      toast.error("Введите Telegram ID");
+      return;
+    }
     try {
       const res = await fetch("/api/client/telegram-notifications", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chatId: telegramChatId }),
+        body: JSON.stringify({ chatId }),
       });
       if (!res.ok) {
-        const data = await res.json();
-        console.error("Failed to save Telegram chat ID:", data);
+        const data = await res.json().catch(() => null);
+        toast.error(data?.error || "Не удалось сохранить Telegram ID");
+        return;
       }
+      setTelegramChatId(chatId);
+      toast.success("Telegram ID сохранён");
     } catch {
-      // ignore
+      toast.error("Не удалось сохранить Telegram ID");
     }
   };
 
