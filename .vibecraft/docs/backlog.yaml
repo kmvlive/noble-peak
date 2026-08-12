@@ -5331,5 +5331,12 @@ tasks:
     meta:
       quick_implement_marker: quick_implement:call_6bb6b9d6284146cb9d531521
     id: task-9788
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Реализован учёт переходов по партнёрской ссылке агента. Добавлена таблица
+      agent_clicks и функции recordAgentClick/getAgentClicks30 (lib/models.ts),
+      эндпоинт POST /api/agent/clicks с zod-валидацией кода агента и вызов записи
+      клика при открытии /partner/login?ref=КОД-АГЕНТА
+      (components/partner-login-form.tsx). Дашборд агента читает «Переходов за
+      30 дней» через getAgentClicks30 (app/api/agent/dashboard/route.ts).
+      Основная реализация: lib/models.ts, app/api/agent/clicks/route.ts.

@@ -28,6 +28,7 @@ export const TableName = {
   INFO_PAGES: "info_pages",
   AGENTS: "agents",
   AGENT_STATS: "agent_stats",
+  AGENT_CLICKS: "agent_clicks",
   AGENT_SETTINGS: "agent_settings",
   PARTNER_LINKS: "partner_links",
   PAYOUTS: "payouts",
@@ -332,6 +333,26 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
     attributeDefinitions: [{ AttributeName: "agentEmail", AttributeType: "S" }],
   },
 
+  [TableName.AGENT_CLICKS]: {
+    name: TableName.AGENT_CLICKS,
+    keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+    attributeDefinitions: [
+      { AttributeName: "id", AttributeType: "S" },
+      { AttributeName: "agentEmail", AttributeType: "S" },
+      { AttributeName: "createdAt", AttributeType: "S" },
+    ],
+    globalSecondaryIndexes: [
+      {
+        IndexName: "agentEmail-index",
+        KeySchema: [
+          { AttributeName: "agentEmail", KeyType: "HASH" },
+          { AttributeName: "createdAt", KeyType: "RANGE" },
+        ],
+        Projection: { ProjectionType: "ALL" },
+      },
+    ],
+  },
+
   [TableName.AGENT_SETTINGS]: {
     name: TableName.AGENT_SETTINGS,
     keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
@@ -398,6 +419,7 @@ export const IndexName = {
   INFO_PAGES_TARGET: "target-index",
   AGENTS_CODE: "code-index",
   PARTNERS_NUMBER: "number-index",
+  AGENT_CLICKS_AGENT_EMAIL: "agentEmail-index",
   PARTNER_LINKS_PARTNER_EMAIL: "partnerEmail-index",
   PARTNER_LINKS_AGENT_EMAIL: "agentEmail-index",
   PAYOUTS_AGENT_EMAIL: "agentEmail-index",

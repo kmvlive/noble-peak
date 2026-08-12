@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isDatabaseAvailable } from "@/lib/db";
 import {
   getAgentByEmail,
-  getAgentStats,
+  getAgentClicks30,
   getAgentRegistrations30,
   getAgentEarnings,
   getInfoPagesByTarget,
@@ -25,12 +25,12 @@ export async function GET(request: NextRequest) {
 
     const stats = dbAvailable
       ? {
-          clicks30: (await getAgentStats(agent.email))?.clicks30 ?? 0,
+          clicks30: await getAgentClicks30(agent.email),
           registrations30: await getAgentRegistrations30(agent.email),
           earnings: await getAgentEarnings(agent.email),
         }
       : {
-          clicks30: (await getAgentStats(agent.email))?.clicks30 ?? 0,
+          clicks30: await getAgentClicks30(agent.email),
           registrations30: 0,
           earnings: 0,
         };

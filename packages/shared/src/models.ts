@@ -310,6 +310,12 @@ export interface AgentStatsRecord {
   updatedAt: string;
 }
 
+export interface AgentClickRecord {
+  id: string;
+  agentEmail: string;
+  createdAt: string;
+}
+
 export interface AgentSettingsRecord {
   id: string;
   tier2Threshold: number;

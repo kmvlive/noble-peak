@@ -20,6 +20,7 @@ import type {
   InfoPageRecord,
   InfoPageTarget,
   AgentStatsRecord,
+  AgentClickRecord,
   AgentSettingsRecord,
   PartnerLinkRecord,
   AgentBankDetails,
@@ -1273,6 +1274,46 @@ export async function getAgentStats(
     })
   );
   return (result.Item as AgentStatsRecord) ?? null;
+}
+
+export async function recordAgentClick(agentEmail: string): Promise<void> {
+  const click: AgentClickRecord = {
+    id: randomUUID(),
+    agentEmail,
+    createdAt: new Date().toISOString(),
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.AGENT_CLICKS,
+      Item: click,
+    })
+  );
+}
+
+export async function getAgentClicks30(agentEmail: string): Promise<number> {
+  const dbAvailable = await isDatabaseAvailable();
+  if (!dbAvailable) return 0;
+
+  const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.AGENT_CLICKS,
+      IndexName: IndexName.AGENT_CLICKS_AGENT_EMAIL,
+      KeyConditionExpression:
+        "#agentEmail = :agentEmail AND #createdAt >= :cutoff",
+      ExpressionAttributeNames: {
+        "#agentEmail": "agentEmail",
+        "#createdAt": "createdAt",
+      },
+      ExpressionAttributeValues: {
+        ":agentEmail": agentEmail,
+        ":cutoff": cutoff,
+      },
+    })
+  );
+  return ((result.Items as AgentClickRecord[]) ?? []).length;
 }
 
 export async function getAgentRegistrations30(
