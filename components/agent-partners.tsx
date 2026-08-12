@@ -31,6 +31,24 @@ interface Partner {
   salesLastMonth: number;
 }
 
+function PartnerAvatar({ partner }: { partner: Partner }) {
+  const [broken, setBroken] = useState(false);
+
+  if (!partner.photo || broken) {
+    return <UserCircle className="h-6 w-6" />;
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={partner.photo}
+      alt={partner.name}
+      onError={() => setBroken(true)}
+      className="h-full w-full rounded-full object-cover"
+    />
+  );
+}
+
 export function AgentPartners() {
   const router = useRouter();
   const [partners, setPartners] = useState<Partner[]>([]);
@@ -154,16 +172,7 @@ export function AgentPartners() {
               className="flex items-center gap-3 rounded-xl border bg-card p-4 card-hover text-left"
             >
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                {partner.photo ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={partner.photo}
-                    alt={partner.name}
-                    className="h-full w-full rounded-full object-cover"
-                  />
-                ) : (
-                  <UserCircle className="h-6 w-6" />
-                )}
+                <PartnerAvatar partner={partner} />
               </div>
               <div className="min-w-0 flex-1 space-y-0.5">
                 <div className="font-semibold truncate">{partner.name}</div>
@@ -200,16 +209,7 @@ export function AgentPartners() {
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  {selected.photo ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={selected.photo}
-                      alt={selected.name}
-                      className="h-full w-full rounded-full object-cover"
-                    />
-                  ) : (
-                    <UserCircle className="h-6 w-6" />
-                  )}
+                  <PartnerAvatar partner={selected} />
                 </div>
                 <div className="min-w-0 space-y-0.5">
                   {selected.partnerNumber ? (

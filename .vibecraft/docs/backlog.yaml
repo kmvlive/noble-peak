@@ -5740,5 +5740,5 @@ tasks:
     meta:
       quick_implement_marker: quick_implement:call_d7edc5839370447193ff03f2
     id: task-0300
-    status: pending
-    summary: null
+    status: completed
+    summary: "В agent-partners.tsx добавлена защита от битых фотографий партнёров. Реализован компонент PartnerAvatar с onError-обработчиком, который при не загрузившемся фото (недоступный файл) подставляет иконку-заглушку UserCircle. Используется и в карточке партнёра, и в диалоге с деталями. Основная реализация: components/agent-partners.tsx."
