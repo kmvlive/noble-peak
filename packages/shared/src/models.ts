@@ -53,6 +53,7 @@ export interface ClientRecord {
 export interface CalendarDateEntry {
   available: boolean;
   hours?: string[];
+  closed?: boolean;
 }
 
 export interface ActivityCalendarRecord {

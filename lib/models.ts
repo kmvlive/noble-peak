@@ -516,6 +516,7 @@ export async function deleteSection(id: string): Promise<void> {
 export interface CalendarDateEntry {
   available: boolean;
   hours?: string[];
+  closed?: boolean;
 }
 
 export interface ActivityCalendarRecord {
@@ -618,6 +619,23 @@ export async function getBookingsByActivityIds(
     resultList = resultList.filter((b) => !b.deletedAt);
   }
   return resultList;
+}
+
+export async function getOrderedDatesByActivityId(
+  activityId: string
+): Promise<string[]> {
+  const bookings = await getBookingsByActivityIds([activityId]);
+  return Array.from(new Set(bookings.map((b) => b.date))).sort();
+}
+
+export async function isActivityDateClosed(
+  activityId: string,
+  date: string
+): Promise<boolean> {
+  const calendar = await getActivityCalendar(activityId);
+  if (!calendar) return false;
+  const entry = calendar.dates[date];
+  return Boolean(entry?.closed);
 }
 
 export async function getActivitiesByPartnerEmail(

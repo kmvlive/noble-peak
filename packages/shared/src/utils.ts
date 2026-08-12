@@ -63,3 +63,20 @@ export function slugify(text: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 }
+
+export function computePartnerToPay(
+  activity: {
+    orderType?: string;
+    partnerPrice?: number;
+    partnerPricePercent?: number;
+  } | null,
+  price: number
+): number {
+  if (!activity) return price;
+  if (activity.orderType === "order_form") return price;
+  if (typeof activity.partnerPrice === "number") return activity.partnerPrice;
+  if (typeof activity.partnerPricePercent === "number") {
+    return Math.round(price * (activity.partnerPricePercent / 100));
+  }
+  return price;
+}

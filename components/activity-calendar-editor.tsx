@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Save, X, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Save, X, Clock, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -9,6 +9,7 @@ import { toast } from "sonner";
 interface CalendarDateEntry {
   available: boolean;
   hours?: string[];
+  closed?: boolean;
 }
 
 interface ActivityCalendarEditorProps {
@@ -16,6 +17,7 @@ interface ActivityCalendarEditorProps {
   fetchUrl: string;
   saveUrl: string;
   tokenProvider: () => string | null;
+  ordersUrl?: string;
 }
 
 const MONTHS = [
@@ -84,10 +86,13 @@ export function ActivityCalendarEditor({
   fetchUrl,
   saveUrl,
   tokenProvider,
+  ordersUrl,
 }: ActivityCalendarEditorProps) {
   const [dates, setDates] = useState<Record<string, CalendarDateEntry>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [orderDates, setOrderDates] = useState<Set<string>>(new Set());
+  const [closeMode, setCloseMode] = useState(false);
 
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
@@ -114,6 +119,26 @@ export function ActivityCalendarEditor({
     fetchCalendar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activityId, fetchUrl]);
+
+  useEffect(() => {
+    if (!ordersUrl) return;
+    const token = tokenProvider();
+    const fetchOrderDates = async () => {
+      try {
+        const res = await fetch(ordersUrl, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        const data = await res.json();
+        if (Array.isArray(data?.dates)) {
+          setOrderDates(new Set(data.dates as string[]));
+        }
+      } catch {
+        setOrderDates(new Set());
+      }
+    };
+    fetchOrderDates();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activityId, ordersUrl]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -193,12 +218,85 @@ export function ActivityCalendarEditor({
     });
   };
 
+  const buildRange = (start: string, end: string): string[] => {
+    const [rangeStart, rangeEnd] = [start, end].sort();
+    const range: string[] = [];
+    const current = new Date(rangeStart + "T00:00:00Z");
+    const endDate = new Date(rangeEnd + "T00:00:00Z");
+
+    while (current <= endDate) {
+      const dateStr = current.toISOString().split("T")[0];
+      if (isTodayOrFuture(dateStr)) {
+        range.push(dateStr);
+      }
+      current.setUTCDate(current.getUTCDate() + 1);
+    }
+    return range;
+  };
+
+  const warnIfOrders = (range: string[]): void => {
+    const withOrders = range.filter((d) => orderDates.has(d));
+    if (withOrders.length > 0) {
+      toast.warning(
+        `Внимание: в закрываемых днях есть заказы (${withOrders.join(", ")}). Существующие заказы не будут удалены, но новые оформить нельзя.`,
+        { duration: 8000 }
+      );
+    }
+  };
+
+  const closeDates = (range: string[]) => {
+    warnIfOrders(range);
+    setDates((prev) => {
+      const next = { ...prev };
+      range.forEach((dateStr) => {
+        const current = next[dateStr];
+        if (current?.available) {
+          next[dateStr] = { ...current, closed: true };
+        }
+      });
+      return next;
+    });
+  };
+
+  const openDates = (range: string[]) => {
+    setDates((prev) => {
+      const next = { ...prev };
+      range.forEach((dateStr) => {
+        const current = next[dateStr];
+        if (current?.available) {
+          next[dateStr] = { ...current, closed: false };
+        }
+      });
+      return next;
+    });
+  };
+
+  const closeDateRange = (start: string, end: string) => {
+    closeDates(buildRange(start, end));
+  };
+
   const handleDateClick = (
     dateStr: string,
     _day: number,
     e: React.MouseEvent
   ) => {
     if (!isTodayOrFuture(dateStr)) return;
+
+    if (closeMode) {
+      if (e.shiftKey && lastClickedDate && lastClickedDate !== dateStr) {
+        closeDateRange(lastClickedDate, dateStr);
+        return;
+      }
+      setLastClickedDate(dateStr);
+      const entry = dates[dateStr];
+      if (!entry?.available) return;
+      if (entry.closed) {
+        openDates([dateStr]);
+      } else {
+        closeDates([dateStr]);
+      }
+      return;
+    }
 
     if (e.shiftKey && lastClickedDate && lastClickedDate !== dateStr) {
       selectDateRange(lastClickedDate, dateStr);
@@ -323,6 +421,30 @@ export function ActivityCalendarEditor({
         </div>
       </div>
 
+      <div className="flex items-center gap-2">
+        <Button
+          variant={closeMode ? "outline" : "default"}
+          size="sm"
+          onClick={() => setCloseMode(false)}
+        >
+          Открыть дни
+        </Button>
+        <Button
+          variant={closeMode ? "default" : "outline"}
+          size="sm"
+          onClick={() => setCloseMode(true)}
+        >
+          <Lock className="mr-1.5 h-4 w-4" />
+          Закрыть дни
+        </Button>
+        {closeMode && (
+          <span className="text-xs text-muted-foreground">
+            Клик по открытому дню — закрыть, по закрытому — открыть. Shift+клик
+            — закрыть диапазон.
+          </span>
+        )}
+      </div>
+
       <div className="grid grid-cols-7 gap-px rounded-lg border bg-muted overflow-hidden">
         {DAY_NAMES.map((name) => (
           <div
@@ -340,6 +462,7 @@ export function ActivityCalendarEditor({
           const dateStr = formatDate(year, month, day);
           const entry = dates[dateStr];
           const isAvailable = entry?.available;
+          const isClosed = isAvailable && Boolean(entry?.closed);
           const isSelected = selectedDate === dateStr;
           const hasHours =
             isAvailable && entry?.hours && entry.hours.length > 0;
@@ -362,14 +485,21 @@ export function ActivityCalendarEditor({
                 className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-xs ${
                   isBlocked
                     ? "text-muted-foreground"
-                    : isAvailable
-                      ? "bg-primary text-primary-foreground font-medium"
-                      : "text-foreground"
+                    : isClosed
+                      ? "bg-destructive/10 text-destructive font-medium"
+                      : isAvailable
+                        ? "bg-primary text-primary-foreground font-medium"
+                        : "text-foreground"
                 }`}
               >
                 {day}
               </span>
-              {hasHours && !isBlocked && (
+              {isClosed && !isBlocked && (
+                <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2">
+                  <Lock className="h-2.5 w-2.5 text-destructive" />
+                </span>
+              )}
+              {hasHours && !isClosed && !isBlocked && (
                 <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2">
                   <Clock className="h-2.5 w-2.5 text-muted-foreground" />
                 </span>
@@ -389,6 +519,10 @@ export function ActivityCalendarEditor({
           Есть часы
         </span>
         <span className="inline-flex items-center gap-1.5">
+          <Lock className="h-3 w-3 text-destructive" />
+          Закрыто
+        </span>
+        <span className="inline-flex items-center gap-1.5">
           <span className="inline-block h-3 w-3 rounded-full border bg-background" />
           Недоступно
         </span>
@@ -400,28 +534,47 @@ export function ActivityCalendarEditor({
 
       <p className="text-xs text-muted-foreground">
         Shift+клик — выбрать диапазон дат. Клик на дату — выбрать/отметить часы.
+        Режим «Закрыть дни» — закрыть открытые дни от новых заказов
+        (существующие заказы не удаляются).
       </p>
 
       {selectedDate && (
         <div className="rounded-lg border p-4 space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <h3 className="text-sm font-semibold">Часы для {selectedDate}</h3>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setDates((prev) => {
-                  const next = { ...prev };
-                  delete next[selectedDate];
-                  return next;
-                });
-                setSelectedDate(null);
-                setEditingHours([]);
-              }}
-            >
-              <X className="mr-1 h-3 w-3" />
-              Убрать дату
-            </Button>
+            <div className="flex items-center gap-1">
+              {selectedEntry?.available && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (selectedEntry.closed) {
+                      openDates([selectedDate]);
+                    } else {
+                      closeDates([selectedDate]);
+                    }
+                  }}
+                >
+                  {selectedEntry.closed ? "Открыть день" : "Закрыть день"}
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setDates((prev) => {
+                    const next = { ...prev };
+                    delete next[selectedDate];
+                    return next;
+                  });
+                  setSelectedDate(null);
+                  setEditingHours([]);
+                }}
+              >
+                <X className="mr-1 h-3 w-3" />
+                Убрать дату
+              </Button>
+            </div>
           </div>
 
           <p className="text-xs text-muted-foreground">

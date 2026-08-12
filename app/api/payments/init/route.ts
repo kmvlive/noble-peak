@@ -10,6 +10,7 @@ import {
   getClientByPhone,
   createClient,
   getClientByEmail,
+  isActivityDateClosed,
 } from "@/lib/models";
 import {
   getClientEmailFromRequest,
@@ -123,6 +124,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Активность не найдена" },
         { status: 404 }
+      );
+    }
+
+    if (await isActivityDateClosed(activityId, date)) {
+      return NextResponse.json(
+        { error: "Эта дата закрыта для новых заказов" },
+        { status: 409 }
       );
     }
 

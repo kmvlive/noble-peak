@@ -28,6 +28,7 @@ interface Booking {
   orderNumber?: string;
   orderStatus?: string;
   deletedAt?: string | null;
+  partnerToPay?: number;
 }
 
 type StatusFilter =
@@ -281,6 +282,17 @@ export function ClientBookingsList() {
                         </span>
                       )}
                     </div>
+                    {view === "active" &&
+                      typeof booking.partnerToPay === "number" &&
+                      booking.partnerToPay > 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          Партнеру на руки после выполнения активности вы должны
+                          отдать{" "}
+                          <span className="font-medium text-foreground">
+                            {booking.partnerToPay} ₽
+                          </span>
+                        </p>
+                      )}
                   </div>
                   <div className="flex items-center gap-1.5">
                     {effectiveStatus(booking) === "pending_payment" &&

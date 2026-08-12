@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 interface CalendarDateEntry {
   available: boolean;
   hours?: string[];
+  closed?: boolean;
 }
 
 interface ActivityBookingCalendarProps {
@@ -158,7 +159,7 @@ export function ActivityBookingCalendar({
 
   const handleDateClick = (dateStr: string) => {
     const entry = dates[dateStr];
-    if (!entry?.available) return;
+    if (!entry?.available || entry.closed) return;
 
     if (internalSelectedDate === dateStr) {
       setInternalSelectedDate(null);
@@ -256,11 +257,12 @@ export function ActivityBookingCalendar({
           const dateStr = formatDate(year, month, day);
           const entry = dates[dateStr];
           const isAvailable = entry?.available ?? false;
+          const isClosed = isAvailable && Boolean(entry?.closed);
           const isPast = isDateInPast(year, month, day);
           const isSelected = internalSelectedDate === dateStr;
           const hasHoursForDate =
             isAvailable && entry?.hours && entry.hours.length > 0;
-          const canSelect = isAvailable && !isPast;
+          const canSelect = isAvailable && !isClosed && !isPast;
 
           return (
             <button
@@ -276,9 +278,11 @@ export function ActivityBookingCalendar({
                 className={`inline-flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full text-xs ${
                   isSelected
                     ? "bg-primary text-primary-foreground font-medium"
-                    : isAvailable && !isPast
-                      ? "bg-primary/10 text-primary font-medium"
-                      : "text-muted-foreground"
+                    : isClosed
+                      ? "bg-destructive/10 text-destructive font-medium line-through"
+                      : isAvailable && !isPast
+                        ? "bg-primary/10 text-primary font-medium"
+                        : "text-muted-foreground"
                 }`}
               >
                 {day}

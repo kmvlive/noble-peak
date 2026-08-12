@@ -15,6 +15,7 @@ export function PartnerActivityCalendar({
       activityId={activityId}
       fetchUrl={`/api/partner/activities/${activityId}/calendar`}
       saveUrl={`/api/partner/activities/${activityId}/calendar`}
+      ordersUrl={`/api/partner/activities/${activityId}/order-dates`}
       tokenProvider={() => getToken()}
     />
   );

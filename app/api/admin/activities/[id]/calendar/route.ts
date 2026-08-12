@@ -8,6 +8,7 @@ import { z } from "zod";
 const calendarDateEntrySchema = z.object({
   available: z.boolean(),
   hours: z.array(z.string()).optional(),
+  closed: z.boolean().optional(),
 });
 
 const setCalendarSchema = z.object({

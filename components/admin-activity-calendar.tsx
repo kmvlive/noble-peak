@@ -15,6 +15,7 @@ export function AdminActivityCalendar({
       activityId={activityId}
       fetchUrl={`/api/admin/activities/${activityId}/calendar`}
       saveUrl={`/api/admin/activities/${activityId}/calendar`}
+      ordersUrl={`/api/admin/activities/${activityId}/order-dates`}
       tokenProvider={() => getToken()}
     />
   );
