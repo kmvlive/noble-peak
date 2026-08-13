@@ -167,6 +167,9 @@ export function PaymentPageContent() {
   }
 
   if (isGuest && !loading && !paymentUrl && !redirecting) {
+    const registerRedirect = encodeURIComponent(
+      `/payment?activityId=${activityId}&date=${date}&time=${time || ""}`
+    );
     return (
       <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
         <div className="w-full max-w-md space-y-6">
@@ -176,9 +179,31 @@ export function PaymentPageContent() {
             </div>
             <h1 className="text-2xl font-bold tracking-tight">Оплата</h1>
             <p className="text-sm text-muted-foreground">
-              Укажите имя и телефон для оформления оплаты
+              Для оплаты зарегистрируйтесь или укажите имя и телефон
             </p>
           </div>
+
+          <Link
+            href={`/client/login?redirect=${registerRedirect}`}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary min-h-[48px] px-4 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            Зарегистрироваться
+          </Link>
+
+          <div className="relative my-2">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">
+                или как гость
+              </span>
+            </div>
+          </div>
+
+          <p className="text-sm text-muted-foreground text-center">
+            Укажите имя и телефон для оформления оплаты
+          </p>
 
           {guestConflict && (
             <Card className="border-destructive/50 bg-destructive/10 p-4">

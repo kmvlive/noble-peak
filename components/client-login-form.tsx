@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,8 +17,17 @@ function setClientToken(token: string) {
 export function ClientLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect");
   const [mode, setMode] = useState<"login" | "register">("login");
   const [loading, setLoading] = useState(false);
+
+  const goAfterAuth = useCallback(() => {
+    if (redirect && redirect.startsWith("/")) {
+      router.replace(redirect);
+    } else {
+      router.replace("/client");
+    }
+  }, [redirect, router]);
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -58,7 +67,7 @@ export function ClientLoginForm() {
           }
           toast.success("Добро пожаловать!");
           setClientToken(data.token);
-          router.replace("/client");
+          goAfterAuth();
         })
         .catch(() => {
           toast.error("Ошибка соединения с сервером");
@@ -67,7 +76,7 @@ export function ClientLoginForm() {
           setLoading(false);
         });
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, goAfterAuth]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,7 +103,7 @@ export function ClientLoginForm() {
 
       toast.success("Добро пожаловать!");
       setClientToken(data.token);
-      router.replace("/client");
+      goAfterAuth();
     } catch {
       toast.error("Ошибка соединения с сервером");
     } finally {
@@ -133,7 +142,7 @@ export function ClientLoginForm() {
       sessionStorage.setItem("reg_email", regEmail);
       sessionStorage.setItem("reg_password", regPassword);
       setClientToken(data.token);
-      router.replace("/client");
+      goAfterAuth();
     } catch {
       toast.error("Ошибка соединения с сервером");
     } finally {

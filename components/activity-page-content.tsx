@@ -14,6 +14,8 @@ import {
   Info,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -25,8 +27,10 @@ import { PhotoLightbox } from "@/components/photo-lightbox";
 import { ActivityReviews } from "@/components/activity-reviews";
 
 export function ActivityPageContent({ activity }: { activity: Activity }) {
+  const router = useRouter();
   const [likes, setLikes] = useState(activity.likes);
   const [liked, setLiked] = useState(false);
+  const [clientChecked, setClientChecked] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -55,6 +59,8 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
         }
       } catch {
         /* not logged in */
+      } finally {
+        setClientChecked(true);
       }
     };
     const checkPartner = () => {
@@ -67,6 +73,16 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
   }, []);
 
   const handleLike = () => {
+    if (clientChecked && !clientData) {
+      toast("Чтобы поставить лайк, зарегистрируйтесь или войдите", {
+        action: {
+          label: "Зарегистрироваться",
+          onClick: () => router.push("/client/login"),
+        },
+        cancel: { label: "Отмена", onClick: () => {} },
+      });
+      return;
+    }
     if (liked) {
       setLikes((l) => l - 1);
     } else {

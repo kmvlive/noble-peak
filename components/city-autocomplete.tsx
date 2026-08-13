@@ -138,7 +138,7 @@ export function CityAutocomplete({
         <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
       )}
       {isOpen && suggestions.length > 0 && (
-        <ul className="absolute z-50 mt-1 max-h-48 w-full overflow-auto rounded-md border bg-popover p-1 text-sm shadow-md">
+        <ul className="absolute left-0 right-0 z-50 mt-1 max-h-48 w-full min-w-0 max-w-full overflow-auto rounded-md border bg-popover p-1 text-sm shadow-md">
           {suggestions.map((city, index) => (
             <li
               key={city}
