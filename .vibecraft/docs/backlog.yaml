@@ -5509,7 +5509,8 @@ tasks:
       загрузившемся фото (недоступный файл) подставляет иконку-заглушку
       UserCircle. Используется и в карточке партнёра, и в диалоге с деталями.
       Основная реализация: components/agent-partners.tsx."
-  - title: "Настроить полностью автоматический конвейер доставки кода SourceCraft →
+  - id: task-1043
+    title: "Настроить полностью автоматический конвейер доставки кода SourceCraft →
       GitHub → сервер, чтобы после каждой правки (implement_project) код
       автоматически попадал на production-сервер без ручных действий.  Текущее
       состояние: - SourceCraft-репозиторий
@@ -5572,10 +5573,40 @@ tasks:
       Проверить, что workflow корректно синхронизируется с GitHub
       (sync-from-github), пушит изменения (push-code-to-github) и деплоит на
       сервер (deploy-via-ssh).
+    status: failed
     acceptance_criteria:
       - Запрос пользователя выполнен полностью
     meta:
       quick_implement_marker: quick_implement:call_e3f0708aaca54ae88ee01c77
-    id: task-1043
-    status: failed
-    summary: "Настроена цепочка .sourcecraft/ci.yaml (deploy: sync-from-github -> push-code-to-github -> deploy-via-ssh -> verify) и webhooks.yaml. Убраны захардкоженные токены: секрет вебхука заменён на ${{ secrets.DEPLOY_SECRET }} (добавлен в SourceCraft), маршрут trigger-deploy разрешает шаблон из окружения, deliver workflow удалён. Добавлены авто-коммит public/uploads и db:check в деплой; backups/uploads gitignored. typecheck/lint/build проходят. БЛОКЕР: GITHUB_TOKEN отозван (401), push-code-to-github падает, deploy-via-ssh не достигается. Нужен новый GitHub PAT и обновление секрета GITHUB_TOKEN."
+    summary: "Настроена цепочка .sourcecraft/ci.yaml (deploy: sync-from-github ->
+      push-code-to-github -> deploy-via-ssh -> verify) и webhooks.yaml. Убраны
+      захардкоженные токены: секрет вебхука заменён на ${{ secrets.DEPLOY_SECRET
+      }} (добавлен в SourceCraft), маршрут trigger-deploy разрешает шаблон из
+      окружения, deliver workflow удалён. Добавлены авто-коммит public/uploads и
+      db:check в деплой; backups/uploads gitignored. typecheck/lint/build
+      проходят. БЛОКЕР: GITHUB_TOKEN отозван (401), push-code-to-github падает,
+      deploy-via-ssh не достигается. Нужен новый GitHub PAT и обновление секрета
+      GITHUB_TOKEN."
+  - title: Удалить дублирующий GitHub Actions workflow
+      `.github/workflows/deploy.yml` (название «Auto Deploy»). Он вызывает
+      эндпоинт сервера /api/deploy с секретами DEPLOY_URL и DEPLOY_SECRET,
+      которые не заданы в GitHub-репозитории kmvlive/noble-peak, из-за чего
+      каждый пуш в main даёт падающий запуск и шлёт письма об ошибке. Деплой и
+      так работает через основной конвейер SourceCraft → GitHub → сервер (вебхук
+      implement_project → /api/deploy), поэтому этот workflow лишний и его нужно
+      удалить, чтобы не создавал шум.
+    description: Удалить дублирующий GitHub Actions workflow
+      `.github/workflows/deploy.yml` (название «Auto Deploy»). Он вызывает
+      эндпоинт сервера /api/deploy с секретами DEPLOY_URL и DEPLOY_SECRET,
+      которые не заданы в GitHub-репозитории kmvlive/noble-peak, из-за чего
+      каждый пуш в main даёт падающий запуск и шлёт письма об ошибке. Деплой и
+      так работает через основной конвейер SourceCraft → GitHub → сервер (вебхук
+      implement_project → /api/deploy), поэтому этот workflow лишний и его нужно
+      удалить, чтобы не создавал шум.
+    acceptance_criteria:
+      - Запрос пользователя выполнен полностью
+    meta:
+      quick_implement_marker: quick_implement:call_be2ba1c69b9945f4b8d9bd5c
+    id: task-1342
+    status: pending
+    summary: null
