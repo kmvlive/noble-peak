@@ -34,7 +34,7 @@ workflows:
               - git fetch --unshallow origin 2>/dev/null || true
               - echo "=== Auto-committing public/uploads so uploads are never lost ==="
               - git add public/uploads
-              - git -c user.name="SourceCraft CI" -c user.email="ci@sourcecraft.local" commit -m "chore: auto-commit public/uploads [ci skip]" 2>/dev/null || echo "No new uploads to commit"
+              - git -c user.name="SourceCraft CI" -c user.email="ci@sourcecraft.local" commit -m "chore(auto-commit) public/uploads [ci skip]" 2>/dev/null || echo "No new uploads to commit"
               - echo "=== Configuring github remote ==="
               - git remote remove github 2>/dev/null || true
               - git remote add github "${GITHUB_URL}"
