@@ -504,6 +504,58 @@ export async function createSection(
   return section;
 }
 
+export async function updateSection(
+  id: string,
+  data: Partial<Omit<SectionRecord, "id" | "createdAt" | "updatedAt">>
+): Promise<SectionRecord | undefined> {
+  const updateExpr: string[] = [];
+  const exprValues: Record<string, unknown> = {};
+  const exprNames: Record<string, string> = {};
+
+  if (data.name !== undefined) {
+    updateExpr.push("#name = :name");
+    exprValues[":name"] = data.name;
+    exprNames["#name"] = "name";
+  }
+  if (data.description !== undefined) {
+    updateExpr.push("#description = :description");
+    exprValues[":description"] = data.description;
+    exprNames["#description"] = "description";
+  }
+  if (data.icon !== undefined) {
+    updateExpr.push("#icon = :icon");
+    exprValues[":icon"] = data.icon;
+    exprNames["#icon"] = "icon";
+  }
+  if (data.imageGradient !== undefined) {
+    updateExpr.push("#imageGradient = :imageGradient");
+    exprValues[":imageGradient"] = data.imageGradient;
+    exprNames["#imageGradient"] = "imageGradient";
+  }
+  if (data.category !== undefined) {
+    updateExpr.push("#category = :category");
+    exprValues[":category"] = data.category;
+    exprNames["#category"] = "category";
+  }
+
+  updateExpr.push("updatedAt = :updatedAt");
+  exprValues[":updatedAt"] = new Date().toISOString();
+
+  const result = await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.SECTIONS,
+      Key: { id },
+      UpdateExpression: `set ${updateExpr.join(", ")}`,
+      ExpressionAttributeValues: exprValues,
+      ExpressionAttributeNames:
+        Object.keys(exprNames).length > 0 ? exprNames : undefined,
+      ReturnValues: "ALL_NEW",
+    })
+  );
+
+  return result.Attributes as SectionRecord | undefined;
+}
+
 export async function deleteSection(id: string): Promise<void> {
   await docClient.send(
     new DeleteCommand({
@@ -2288,10 +2340,7 @@ export async function deleteAnalyticsCounter(id: string): Promise<void> {
 }
 
 export type OrderStatus =
-  | "pending_payment"
-  | "paid"
-  | "completed"
-  | "cancelled";
+  "pending_payment" | "paid" | "completed" | "cancelled";
 
 export const ORDER_STATUS_LABELS: Record<string, string> = {
   pending_payment: "Не оплачен",

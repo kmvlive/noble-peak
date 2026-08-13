@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isDatabaseAvailable } from "@/lib/db";
 import { revalidateTag } from "next/cache";
-import { getAllSections, createSection, deleteSection } from "@/lib/models";
+import {
+  getAllSections,
+  createSection,
+  updateSection,
+  deleteSection,
+} from "@/lib/models";
 import { mockSections } from "@/lib/mock-data";
 import { verifyToken } from "@/lib/auth";
 import { z } from "zod";
@@ -17,6 +22,15 @@ const createSectionSchema = z.object({
 
 const deleteSectionSchema = z.object({
   id: z.string().min(1),
+});
+
+const updateSectionSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1).max(200).optional(),
+  description: z.string().max(1000).optional(),
+  icon: z.string().max(100).optional(),
+  imageGradient: z.string().optional(),
+  category: z.string().max(200).optional(),
 });
 
 function getTokenFromRequest(request: NextRequest): string | null {
@@ -82,6 +96,51 @@ export async function POST(request: NextRequest) {
     console.error("Ошибка создания раздела:", error);
     return NextResponse.json(
       { error: "Ошибка создания раздела" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  const token = getTokenFromRequest(request);
+  if (!token || !verifyToken(token)) {
+    return NextResponse.json({ error: "Неавторизован" }, { status: 401 });
+  }
+
+  const dbAvailable = await isDatabaseAvailable();
+
+  if (!dbAvailable) {
+    return NextResponse.json(
+      { error: "База данных недоступна в статическом режиме" },
+      { status: 503 }
+    );
+  }
+
+  try {
+    const body = await request.json();
+    const parsed = updateSectionSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Некорректные данные", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const { id, ...data } = parsed.data;
+    const updated = await updateSection(id, data);
+
+    if (!updated) {
+      return NextResponse.json({ error: "Раздел не найден" }, { status: 404 });
+    }
+
+    revalidateTag("sections", "max");
+
+    return NextResponse.json(updated);
+  } catch (error) {
+    console.error("Ошибка обновления раздела:", error);
+    return NextResponse.json(
+      { error: "Ошибка обновления раздела" },
       { status: 500 }
     );
   }
