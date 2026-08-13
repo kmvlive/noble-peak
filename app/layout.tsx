@@ -3,7 +3,7 @@ import Link from "next/link";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
-import { sections } from "@/lib/data";
+import type { SectionRecord } from "@/lib/models";
 import { appName } from "@/lib/app-name";
 import {
   BridgeProvider,
@@ -33,11 +33,22 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  let sections: SectionRecord[] = [];
+  try {
+    const baseUrl = process.env.BASE_URL || "http://localhost:8080";
+    const res = await fetch(`${baseUrl}/api/sections`, {
+      next: { revalidate: 60, tags: ["sections"] },
+    });
+    sections = await res.json();
+  } catch {
+    sections = [];
+  }
+
   return (
     <html lang="ru" className={cn("font-sans", geist.variable)}>
       <body className="antialiased min-h-screen bg-background flex flex-col">
@@ -67,8 +78,8 @@ export default function RootLayout({
           <nav className="container mx-auto flex gap-1 overflow-x-auto px-4 pb-2 scrollbar-none">
             {sections.map((section) => (
               <Link
-                key={section.slug}
-                href={`/sections/${section.slug}`}
+                key={section.id}
+                href={`/sections/${section.id}`}
                 className="shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground min-h-8 flex items-center"
               >
                 {section.name}

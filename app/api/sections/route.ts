@@ -1,7 +1,33 @@
 import { NextResponse } from "next/server";
 import { isDatabaseAvailable } from "@/lib/db";
-import { getAllSections } from "@/lib/models";
-import { mockSections } from "@/lib/mock-data";
+import { getAllActivities, getAllSections } from "@/lib/models";
+import type { ActivityRecord, SectionRecord } from "@/lib/models";
+import { mockActivities, mockSections } from "@/lib/mock-data";
+
+function belongsToSection(
+  activitySection: string | undefined,
+  section: SectionRecord
+): boolean {
+  if (!activitySection) return false;
+  return (
+    activitySection === section.category ||
+    activitySection === section.id ||
+    activitySection === section.name
+  );
+}
+
+function sectionsWithActiveActivities(
+  sections: SectionRecord[],
+  activities: ActivityRecord[]
+): SectionRecord[] {
+  return sections.filter((section) =>
+    activities.some(
+      (activity) =>
+        activity.status === "active" &&
+        belongsToSection(activity.section, section)
+    )
+  );
+}
 
 export async function GET() {
   const dbAvailable = await isDatabaseAvailable();
@@ -12,8 +38,14 @@ export async function GET() {
 
   if (dbAvailable) {
     try {
-      const sections = await getAllSections();
-      return NextResponse.json(sections, { headers });
+      const [sections, activities] = await Promise.all([
+        getAllSections(),
+        getAllActivities(),
+      ]);
+      return NextResponse.json(
+        sectionsWithActiveActivities(sections, activities),
+        { headers }
+      );
     } catch (error) {
       console.error("Ошибка получения разделов:", error);
       return NextResponse.json(
@@ -23,5 +55,8 @@ export async function GET() {
     }
   }
 
-  return NextResponse.json(mockSections, { headers });
+  return NextResponse.json(
+    sectionsWithActiveActivities(mockSections, mockActivities),
+    { headers }
+  );
 }

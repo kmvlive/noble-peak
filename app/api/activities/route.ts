@@ -13,7 +13,10 @@ export async function GET() {
   if (dbAvailable) {
     try {
       const activities = await getAllActivities();
-      return NextResponse.json(activities, { headers });
+      return NextResponse.json(
+        activities.filter((a) => a.status === "active"),
+        { headers }
+      );
     } catch (error) {
       console.error("Ошибка получения активностей:", error);
       return NextResponse.json(
@@ -23,5 +26,8 @@ export async function GET() {
     }
   }
 
-  return NextResponse.json(mockActivities, { headers });
+  return NextResponse.json(
+    mockActivities.filter((a) => a.status === "active"),
+    { headers }
+  );
 }
