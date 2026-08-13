@@ -10,6 +10,7 @@ import {
   AnalyticsInjector,
   NotificationPoller,
   HeaderAuth,
+  HeaderCity,
   FooterMenu,
   InstallPrompt,
   Toaster,
@@ -58,7 +59,10 @@ export default function RootLayout({
               </div>
               {appName}
             </Link>
-            <HeaderAuth />
+            <div className="ml-auto flex items-center gap-1 sm:gap-2">
+              <HeaderCity />
+              <HeaderAuth />
+            </div>
           </div>
           <nav className="container mx-auto flex gap-1 overflow-x-auto px-4 pb-2 scrollbar-none">
             {sections.map((section) => (

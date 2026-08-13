@@ -34,6 +34,14 @@ export const HeaderAuth = dynamic(
   { ssr: false }
 );
 
+export const HeaderCity = dynamic(
+  () =>
+    import("@/components/header-city").then((m) => ({
+      default: m.HeaderCity,
+    })),
+  { ssr: false }
+);
+
 export const FooterMenu = dynamic(
   () =>
     import("@/components/footer-menu").then((m) => ({

@@ -32,7 +32,11 @@ interface Booking {
 }
 
 type StatusFilter =
-  "all" | "confirmed" | "pending_payment" | "cancelled" | "completed";
+  | "all"
+  | "confirmed"
+  | "pending_payment"
+  | "cancelled"
+  | "completed";
 type DateFilter = "all" | "upcoming" | "past";
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [

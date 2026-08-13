@@ -2288,7 +2288,10 @@ export async function deleteAnalyticsCounter(id: string): Promise<void> {
 }
 
 export type OrderStatus =
-  "pending_payment" | "paid" | "completed" | "cancelled";
+  | "pending_payment"
+  | "paid"
+  | "completed"
+  | "cancelled";
 
 export const ORDER_STATUS_LABELS: Record<string, string> = {
   pending_payment: "Не оплачен",
