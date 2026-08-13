@@ -46,7 +46,8 @@ workflows:
           - name: full-deploy
             script:
               - echo "=== SSH into production server and deploy ==="
-              - ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 root@my.magazin-tour.ru "
+              - |
+                ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 root@my.magazin-tour.ru "
                 set -e
                 echo '=== Connected to server ==='
                 cd /opt/noble-peak
