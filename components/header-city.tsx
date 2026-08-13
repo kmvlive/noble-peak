@@ -62,7 +62,7 @@ export function HeaderCity() {
         <ul
           role="listbox"
           aria-label="Выбор города"
-          className="absolute right-0 top-full z-50 mt-2 w-72 max-w-[calc(100vw-2rem)] origin-top-right max-h-72 overflow-auto rounded-lg border bg-popover p-1 text-sm shadow-lg animate-in fade-in slide-in-from-top-2 duration-200"
+          className="absolute left-0 top-full z-50 mt-2 w-72 max-w-[calc(100vw-1rem)] origin-top-left sm:left-auto sm:right-0 sm:origin-top-right max-h-72 overflow-auto rounded-lg border bg-popover p-1 text-sm shadow-lg animate-in fade-in slide-in-from-top-2 duration-200"
         >
           {RUSSIAN_CITIES.map((name, index) => (
             <li
