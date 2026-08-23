@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ChevronDownIcon } from "lucide-react";
+import { ChevronDownIcon, HandshakeIcon, UserRoundIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -65,11 +65,19 @@ export function HeaderAuth() {
           Вход
           <ChevronDownIcon className="size-4 text-muted-foreground shrink-0" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" sideOffset={8} className="w-52">
-          <DropdownMenuItem render={<Link href="/partner/login" />}>
+        <DropdownMenuContent align="end" sideOffset={8} className="w-60 p-1.5">
+          <DropdownMenuItem
+            render={<Link href="/partner/login" />}
+            className="justify-center gap-2 px-3 py-2 text-center"
+          >
+            <HandshakeIcon className="size-4 text-muted-foreground" />
             Вход для партнёров
           </DropdownMenuItem>
-          <DropdownMenuItem render={<Link href="/client/login" />}>
+          <DropdownMenuItem
+            render={<Link href="/client/login" />}
+            className="justify-center gap-2 px-3 py-2 text-center"
+          >
+            <UserRoundIcon className="size-4 text-muted-foreground" />
             Вход для клиентов
           </DropdownMenuItem>
         </DropdownMenuContent>
