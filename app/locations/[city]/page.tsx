@@ -8,7 +8,9 @@ import {
   Map,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import type { ActivityRecord } from "@/lib/models";
 import {
   cityToSlug,
@@ -147,11 +149,14 @@ export default async function LocationPage({
             <Compass className="h-8 w-8 text-muted-foreground" />
           </div>
           <p className="text-lg font-medium">
-            В этом городе пока нет активностей
+            В этом городе пока нет активностей, но вы можете стать первым
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Скоро здесь появятся новые приключения
+            Зарегистрируйтесь как партнёр и разместите первую активность
           </p>
+          <Link href="/partner/login" className={cn(buttonVariants(), "mt-6")}>
+            Стать партнёром
+          </Link>
         </div>
       ) : (
         <>
