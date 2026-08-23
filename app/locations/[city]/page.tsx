@@ -10,6 +10,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ActivityRecord } from "@/lib/models";
+import {
+  cityToSlug,
+  slugToCityName,
+  slugToRussian,
+} from "@/lib/russian-cities";
 
 export const revalidate = 60;
 
@@ -57,7 +62,7 @@ export default async function LocationPage({
   const { page: pageStr } = await searchParams;
   const currentPage = Math.max(1, parseInt(pageStr || "1", 10) || 1);
 
-  const cityDecoded = decodeURIComponent(city);
+  const cityDecoded = slugToCityName(city) ?? slugToRussian(city);
   const baseUrl = process.env.BASE_URL || "http://localhost:8080";
 
   const activitiesRes = await fetch(`${baseUrl}/api/activities`, {

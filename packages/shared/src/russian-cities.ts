@@ -1,3 +1,114 @@
+const CYRILLIC_TO_LATIN: Record<string, string> = {
+  а: "a",
+  б: "b",
+  в: "v",
+  г: "g",
+  д: "d",
+  е: "e",
+  ё: "yo",
+  ж: "zh",
+  з: "z",
+  и: "i",
+  й: "y",
+  к: "k",
+  л: "l",
+  м: "m",
+  н: "n",
+  о: "o",
+  п: "p",
+  р: "r",
+  с: "s",
+  т: "t",
+  у: "u",
+  ф: "f",
+  х: "kh",
+  ц: "ts",
+  ч: "ch",
+  ш: "sh",
+  щ: "sch",
+  ъ: "",
+  ы: "y",
+  ь: "",
+  э: "e",
+  ю: "yu",
+  я: "ya",
+};
+
+const LATIN_TO_CYRILLIC: Record<string, string> = {
+  sch: "щ",
+  shch: "щ",
+  yo: "ё",
+  zh: "ж",
+  kh: "х",
+  ts: "ц",
+  ch: "ч",
+  sh: "ш",
+  yu: "ю",
+  ya: "я",
+};
+
+export function cityToSlug(name: string): string {
+  const normalized = name
+    .toLowerCase()
+    .trim()
+    .replace(/^г\.\s*/, "");
+  let result = "";
+  for (const ch of normalized) {
+    result += CYRILLIC_TO_LATIN[ch] ?? ch;
+  }
+  return result.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+export function slugToRussian(slug: string): string {
+  const input = slug.toLowerCase();
+  let result = "";
+  let i = 0;
+  while (i < input.length) {
+    const three = input.slice(i, i + 3);
+    const two = input.slice(i, i + 2);
+    const one = input[i];
+    if (LATIN_TO_CYRILLIC[three]) {
+      result += LATIN_TO_CYRILLIC[three];
+      i += 3;
+    } else if (LATIN_TO_CYRILLIC[two]) {
+      result += LATIN_TO_CYRILLIC[two];
+      i += 2;
+    } else if (one === "y") {
+      const next = input[i + 1];
+      const prev = result.slice(-1);
+      if (next === "a" || next === "o" || next === "u" || next === "e") {
+        result += "й";
+      } else if (!prev) {
+        result += "й";
+      } else {
+        result += "ы";
+      }
+      i += 1;
+    } else {
+      result += CYRILLIC_TO_LATIN[one] ? inverseLetter(one) : one;
+      i += 1;
+    }
+  }
+  return capitalize(result);
+}
+
+function inverseLetter(ch: string): string {
+  const entry = Object.entries(CYRILLIC_TO_LATIN).find(([, v]) => v === ch);
+  return entry ? entry[0] : ch;
+}
+
+function capitalize(str: string): string {
+  return str ? str[0].toUpperCase() + str.slice(1) : str;
+}
+
+export function slugToCityName(slug: string): string | null {
+  const target = slug.toLowerCase();
+  for (const city of RUSSIAN_CITIES) {
+    if (cityToSlug(city) === target) return city;
+  }
+  return null;
+}
+
 export const RUSSIAN_CITIES = [
   "Москва",
   "Санкт-Петербург",

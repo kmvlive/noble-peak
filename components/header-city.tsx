@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, ChevronDown, MapPin, Search } from "lucide-react";
-import { RUSSIAN_CITIES } from "@/lib/russian-cities";
+import { RUSSIAN_CITIES, cityToSlug } from "@/lib/russian-cities";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 
@@ -61,7 +61,7 @@ export function HeaderCity() {
     localStorage.setItem(STORAGE_KEY, name);
     setOpen(false);
     window.dispatchEvent(new CustomEvent("city:changed", { detail: name }));
-    router.push(`/locations/${encodeURIComponent(name)}`);
+    router.push(`/locations/${cityToSlug(name)}`);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

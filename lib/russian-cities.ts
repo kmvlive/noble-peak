@@ -1,1 +1,6 @@
-export { RUSSIAN_CITIES } from "@noble-peak/shared";
+export {
+  RUSSIAN_CITIES,
+  cityToSlug,
+  slugToRussian,
+  slugToCityName,
+} from "@noble-peak/shared";

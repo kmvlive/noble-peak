@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import type { Activity } from "@/lib/data";
+import { cityToSlug } from "@/lib/russian-cities";
 import { ActivityBookingCalendar } from "@/components/activity-booking-calendar";
 import { BookingForm } from "@/components/booking-form";
 import { AgeVerificationOverlay } from "@/components/age-verification-overlay";
@@ -213,7 +214,7 @@ export function ActivityPageContent({ activity }: { activity: Activity }) {
             </h1>
             {activity.location && (
               <Link
-                href={`/locations/${encodeURIComponent(activity.location)}`}
+                href={`/locations/${cityToSlug(activity.location)}`}
                 className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
               >
                 <Map className="h-4 w-4 shrink-0" />

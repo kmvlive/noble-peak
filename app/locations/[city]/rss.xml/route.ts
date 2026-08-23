@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import type { ActivityRecord } from "@/lib/models";
+import {
+  cityToSlug,
+  slugToCityName,
+  slugToRussian,
+} from "@/lib/russian-cities";
 
 export const revalidate = 60;
 
@@ -14,11 +19,12 @@ function escapeXml(str: string): string {
 
 function buildRss(
   cityName: string,
+  slug: string,
   activities: ActivityRecord[],
   baseUrl: string
 ): string {
   const displayName = cityName.replace(/^г\.\s*/, "");
-  const channelLink = `${baseUrl}/locations/${encodeURIComponent(cityName)}`;
+  const channelLink = `${baseUrl}/locations/${slug}`;
 
   const itemsXml = activities
     .map((a) => {
@@ -56,7 +62,8 @@ export async function GET(
   { params }: { params: Promise<{ city: string }> }
 ) {
   const { city } = await params;
-  const cityDecoded = decodeURIComponent(city);
+  const cityDecoded = slugToCityName(city) ?? slugToRussian(city);
+  const slug = cityToSlug(cityDecoded);
   const baseUrl = process.env.BASE_URL || "http://localhost:8080";
 
   const activitiesRes = await fetch(`${baseUrl}/api/activities`, {
@@ -86,7 +93,7 @@ export async function GET(
     return NextResponse.json({ error: "Город не найден" }, { status: 404 });
   }
 
-  const rss = buildRss(cityDecoded, cityActivities, baseUrl);
+  const rss = buildRss(cityDecoded, slug, cityActivities, baseUrl);
 
   return new NextResponse(rss, {
     headers: {
