@@ -323,3 +323,97 @@ export interface AgentSettingsRecord {
   tier3Threshold: number;
   updatedAt: string;
 }
+
+export type HousingType = "rooms" | "apartments" | "houses" | "separate_rooms";
+
+export interface HousingSubtype {
+  value: string;
+  label: string;
+}
+
+export interface HousingTypeDefinition {
+  value: HousingType;
+  label: string;
+  subtypes: HousingSubtype[];
+}
+
+export const HOUSING_TYPES: HousingTypeDefinition[] = [
+  {
+    value: "rooms",
+    label: "Номера / спальные места",
+    subtypes: [
+      { value: "hotel", label: "Гостиница" },
+      { value: "resort", label: "Отель" },
+      { value: "hostel", label: "Хостел" },
+      { value: "guest_house", label: "Гостевой дом" },
+      { value: "base", label: "Турбаза" },
+      { value: "bed", label: "Спальное место" },
+    ],
+  },
+  {
+    value: "apartments",
+    label: "Квартиры / апартаменты целиком",
+    subtypes: [
+      { value: "apartment", label: "Квартира" },
+      { value: "apartments", label: "Апартаменты" },
+      { value: "studio", label: "Студия" },
+    ],
+  },
+  {
+    value: "houses",
+    label: "Дома / коттеджи целиком",
+    subtypes: [
+      { value: "cottage", label: "Коттедж" },
+      { value: "house", label: "Дом" },
+      { value: "dacha", label: "Дача" },
+      { value: "villa", label: "Вилла" },
+      { value: "townhouse", label: "Таунхаус" },
+    ],
+  },
+  {
+    value: "separate_rooms",
+    label: "Отдельные комнаты",
+    subtypes: [
+      { value: "room_in_apartment", label: "Комната в квартире" },
+      { value: "room_in_house", label: "Комната в доме" },
+      { value: "room_in_hostel", label: "Комната в хостеле" },
+    ],
+  },
+];
+
+export function getHousingTypeLabel(type: HousingType): string {
+  return HOUSING_TYPES.find((t) => t.value === type)?.label ?? type;
+}
+
+export function getListingSubtypesForType(type: HousingType): HousingSubtype[] {
+  return HOUSING_TYPES.find((t) => t.value === type)?.subtypes ?? [];
+}
+
+export function getListingSubtypeLabel(
+  type: HousingType,
+  subtype: string
+): string {
+  return (
+    getListingSubtypesForType(type).find((s) => s.value === subtype)?.label ??
+    subtype
+  );
+}
+
+export type ListingStatus = "active" | "pending" | "rejected";
+
+export interface ListingRecord {
+  id: string;
+  title: string;
+  description: string;
+  images: string[];
+  housingType: HousingType;
+  subtype: string;
+  city: string;
+  address?: string;
+  price: number;
+  guests: number;
+  status: ListingStatus;
+  partnerEmail?: string;
+  createdAt: string;
+  updatedAt: string;
+}

@@ -32,6 +32,7 @@ export const TableName = {
   AGENT_SETTINGS: "agent_settings",
   PARTNER_LINKS: "partner_links",
   PAYOUTS: "payouts",
+  LISTINGS: "listings",
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];
@@ -396,6 +397,22 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
       },
     ],
   },
+
+  [TableName.LISTINGS]: {
+    name: TableName.LISTINGS,
+    keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+    attributeDefinitions: [
+      { AttributeName: "id", AttributeType: "S" },
+      { AttributeName: "status", AttributeType: "S" },
+    ],
+    globalSecondaryIndexes: [
+      {
+        IndexName: "status-index",
+        KeySchema: [{ AttributeName: "status", KeyType: "HASH" }],
+        Projection: { ProjectionType: "ALL" },
+      },
+    ],
+  },
 };
 
 export const TABLE_NAMES: TableName[] = Object.values(TableName);
@@ -423,6 +440,7 @@ export const IndexName = {
   PARTNER_LINKS_PARTNER_EMAIL: "partnerEmail-index",
   PARTNER_LINKS_AGENT_EMAIL: "agentEmail-index",
   PAYOUTS_AGENT_EMAIL: "agentEmail-index",
+  LISTINGS_STATUS: "status-index",
 } as const;
 
 export type IndexName = (typeof IndexName)[keyof typeof IndexName];

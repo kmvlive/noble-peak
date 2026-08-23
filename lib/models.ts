@@ -26,6 +26,7 @@ import type {
   AgentBankDetails,
   PayoutRecord,
   PayoutStatus,
+  ListingRecord,
 } from "./schema";
 import { randomUUID } from "node:crypto";
 import { sendVkNotification } from "./vk-notify";
@@ -459,6 +460,130 @@ export async function deleteActivity(id: string): Promise<void> {
   await docClient.send(
     new DeleteCommand({
       TableName: TableName.ACTIVITIES,
+      Key: { id },
+    })
+  );
+}
+
+export async function getAllListings(): Promise<ListingRecord[]> {
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.LISTINGS,
+    })
+  );
+  return (result.Items as ListingRecord[]) ?? [];
+}
+
+export async function getListingsByStatus(
+  status: ListingRecord["status"]
+): Promise<ListingRecord[]> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.LISTINGS,
+      IndexName: IndexName.LISTINGS_STATUS,
+      KeyConditionExpression: "#status = :status",
+      ExpressionAttributeNames: {
+        "#status": "status",
+      },
+      ExpressionAttributeValues: {
+        ":status": status,
+      },
+    })
+  );
+  return (result.Items as ListingRecord[]) ?? [];
+}
+
+export async function getListingById(
+  id: string
+): Promise<ListingRecord | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TableName.LISTINGS,
+      Key: { id },
+    })
+  );
+  return (result.Item as ListingRecord) ?? null;
+}
+
+export async function getListingsByPartnerEmail(
+  partnerEmail: string
+): Promise<ListingRecord[]> {
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.LISTINGS,
+      FilterExpression: "partnerEmail = :partnerEmail",
+      ExpressionAttributeValues: {
+        ":partnerEmail": partnerEmail,
+      },
+    })
+  );
+  return (result.Items as ListingRecord[]) ?? [];
+}
+
+export async function createListing(
+  data: Omit<ListingRecord, "createdAt" | "updatedAt">
+): Promise<ListingRecord> {
+  const now = new Date().toISOString();
+  const listing: ListingRecord = {
+    ...data,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.LISTINGS,
+      Item: listing,
+    })
+  );
+
+  return listing;
+}
+
+export async function updateListing(
+  id: string,
+  data: Partial<Omit<ListingRecord, "id" | "createdAt" | "updatedAt">>
+): Promise<ListingRecord> {
+  const updateExpr: string[] = [];
+  const exprValues: Record<string, unknown> = {};
+  const exprNames: Record<string, string> = {};
+
+  for (const [key, value] of Object.entries(data)) {
+    if (value === undefined) continue;
+    const nameKey = `#${key}`;
+    const valKey = `:${key}`;
+    updateExpr.push(`${nameKey} = ${valKey}`);
+    exprValues[valKey] = value;
+    exprNames[nameKey] = key;
+  }
+
+  if (updateExpr.length === 0) {
+    const existing = await getListingById(id);
+    if (!existing) throw new Error("Listing not found");
+    return existing;
+  }
+
+  updateExpr.push("updatedAt = :updatedAt");
+  exprValues[":updatedAt"] = new Date().toISOString();
+
+  const result = await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.LISTINGS,
+      Key: { id },
+      UpdateExpression: `set ${updateExpr.join(", ")}`,
+      ExpressionAttributeValues: exprValues,
+      ExpressionAttributeNames: exprNames,
+      ReturnValues: "ALL_NEW",
+    })
+  );
+
+  return result.Attributes as ListingRecord;
+}
+
+export async function deleteListing(id: string): Promise<void> {
+  await docClient.send(
+    new DeleteCommand({
+      TableName: TableName.LISTINGS,
       Key: { id },
     })
   );

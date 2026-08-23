@@ -23,6 +23,7 @@ import type {
   PartnerLinkRecord,
   AgentSettingsRecord,
   PayoutRecord,
+  ListingRecord,
 } from "./models";
 import type { SliderImage, OrderSettingsRecord } from "./models";
 
@@ -59,6 +60,38 @@ export const mockServices: Service[] = [
 export const mockActivities: ActivityRecord[] = [];
 
 export const mockSections: SectionRecord[] = [];
+
+export const mockListings: ListingRecord[] = [
+  {
+    id: "mock-listing-1",
+    title: "Студия у моря",
+    description: "Уютная студия в центре с видом на море.",
+    images: [],
+    housingType: "apartments",
+    subtype: "studio",
+    city: "Севастополь",
+    address: "ул. Морская, 1",
+    price: 3500,
+    guests: 2,
+    status: "active",
+    createdAt: new Date("2024-05-10").toISOString(),
+    updatedAt: new Date("2024-05-10").toISOString(),
+  },
+  {
+    id: "mock-listing-2",
+    title: "Коттедж с баней",
+    description: "Просторный коттедж для большой компании.",
+    images: [],
+    housingType: "houses",
+    subtype: "cottage",
+    city: "Ялта",
+    price: 12000,
+    guests: 8,
+    status: "pending",
+    createdAt: new Date("2024-06-01").toISOString(),
+    updatedAt: new Date("2024-06-01").toISOString(),
+  },
+];
 
 export const mockCalendars: ActivityCalendarRecord[] = [];
 
