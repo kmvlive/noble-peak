@@ -7,6 +7,9 @@ import {
   waitUntilTableExists,
 } from "@aws-sdk/client-dynamodb";
 import { TABLE_SCHEMAS, TABLE_NAMES } from "../lib/schema";
+import { loadEnvForScript } from "./lib/load-env";
+
+loadEnvForScript();
 
 const client = new DynamoDBClient({
   endpoint: process.env.DOCUMENT_API_ENDPOINT,

@@ -1,5 +1,8 @@
 import { spawnSync } from "node:child_process";
 import { DynamoDBClient, ListTablesCommand } from "@aws-sdk/client-dynamodb";
+import { loadEnvForScript } from "./lib/load-env";
+
+loadEnvForScript();
 
 const client = new DynamoDBClient({
   endpoint: process.env.DOCUMENT_API_ENDPOINT,

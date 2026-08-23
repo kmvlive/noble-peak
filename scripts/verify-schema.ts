@@ -12,6 +12,9 @@ import {
   type GlobalSecondaryIndex,
 } from "@aws-sdk/client-dynamodb";
 import { TABLE_SCHEMAS, TABLE_NAMES, type TableSchema } from "../lib/schema";
+import { loadEnvForScript } from "./lib/load-env";
+
+loadEnvForScript();
 
 type Item = Record<string, AttributeValue>;
 
