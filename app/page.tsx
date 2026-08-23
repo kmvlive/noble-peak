@@ -9,13 +9,17 @@ import {
   Bike,
   Gamepad2,
   Zap,
+  MapPin,
   Map as MapIcon,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ActivityRecord, SectionRecord } from "@/lib/models";
 import { ActivityCard } from "@/components/activity-card";
 import { HeroSearch } from "@/components/hero-search";
 import { HeroSlider } from "@/components/hero-slider";
+import { slugToCityName, slugToRussian } from "@/lib/russian-cities";
 
 export const dynamic = "force-dynamic";
 
@@ -103,7 +107,31 @@ function ActivitySection({
   );
 }
 
-export default async function HomePage() {
+function EmptyCityState({ cityName }: { cityName: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+        <MapPin className="h-8 w-8 text-muted-foreground" />
+      </div>
+      <p className="text-lg font-medium">
+        В этом городе пока нет активностей, но вы можете стать первым
+      </p>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Зарегистрируйтесь как партнёр и разместите первую активность в городе{" "}
+        {cityName}
+      </p>
+      <Link href="/partner/login" className={cn(buttonVariants(), "mt-6")}>
+        Стать партнёром
+      </Link>
+    </div>
+  );
+}
+
+export default async function HomePage(props: {
+  searchParams?: Promise<{ city?: string }>;
+}) {
+  const searchParams = await props.searchParams;
+  const citySlug = searchParams?.city?.trim();
   const baseUrl = process.env.BASE_URL || "http://localhost:8080";
 
   const [activitiesRes, sectionsRes] = await Promise.all([
@@ -118,13 +146,26 @@ export default async function HomePage() {
   const activities: ActivityRecord[] = await activitiesRes.json();
   const sections: SectionRecord[] = await sectionsRes.json();
 
+  let activeCityName: string | null = null;
+  let scopedActivities = activities;
+
+  if (citySlug) {
+    activeCityName = slugToCityName(citySlug) ?? slugToRussian(citySlug);
+    const cityLower = activeCityName.toLowerCase().replace(/^г\.\s*/, "");
+    const cityFullLower = activeCityName.toLowerCase();
+    scopedActivities = activities.filter((a) => {
+      const loc = (a.location || "").toLowerCase();
+      return loc.includes(cityFullLower) || loc.includes(cityLower);
+    });
+  }
+
   const sectionNameMap = new Map<string, string>();
   for (const s of sections) {
     sectionNameMap.set(s.category, s.name);
   }
 
   const activityCountBySection = new Map<string, number>();
-  for (const a of activities) {
+  for (const a of scopedActivities) {
     activityCountBySection.set(
       a.section,
       (activityCountBySection.get(a.section) || 0) + 1
@@ -132,7 +173,7 @@ export default async function HomePage() {
   }
 
   const sectionPhotosMap = new Map<string, string[]>();
-  for (const a of activities) {
+  for (const a of scopedActivities) {
     const validImages = (a.images || []).filter(
       (img) => img.startsWith("http") || img.startsWith("/uploads/")
     );
@@ -152,7 +193,11 @@ export default async function HomePage() {
     sectionRandomPhoto.set(sectionId, randomPhoto);
   }
 
-  const latest = [...activities]
+  const visibleSections = citySlug
+    ? sections.filter((s) => (activityCountBySection.get(s.category) || 0) > 0)
+    : sections;
+
+  const latest = [...scopedActivities]
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .slice(0, 5)
     .map((a) => ({
@@ -160,7 +205,7 @@ export default async function HomePage() {
       sectionName: sectionNameMap.get(a.section) || a.section,
     }));
 
-  const popular = activities
+  const popular = scopedActivities
     .filter((a) => a.isPopular)
     .map((a) => ({
       ...a,
@@ -186,38 +231,48 @@ export default async function HomePage() {
       </HeroSlider>
 
       <div className="mx-auto max-w-5xl space-y-10 px-4 py-8 sm:py-12">
-        <section className="space-y-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-              <MapIcon className="h-4 w-4 text-primary" />
-            </div>
-            <h2 className="text-xl font-semibold tracking-tight">Разделы</h2>
-          </div>
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {sections.map((section) => (
-              <SectionCard
-                key={section.id}
-                section={section}
-                activityCount={
-                  activityCountBySection.get(section.category) || 0
-                }
-                randomImage={sectionRandomPhoto.get(section.category) ?? null}
-              />
-            ))}
-          </div>
-        </section>
+        {citySlug && scopedActivities.length === 0 && activeCityName ? (
+          <EmptyCityState cityName={activeCityName} />
+        ) : (
+          <>
+            <section className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                  <MapIcon className="h-4 w-4 text-primary" />
+                </div>
+                <h2 className="text-xl font-semibold tracking-tight">
+                  Разделы
+                </h2>
+              </div>
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {visibleSections.map((section) => (
+                  <SectionCard
+                    key={section.id}
+                    section={section}
+                    activityCount={
+                      activityCountBySection.get(section.category) || 0
+                    }
+                    randomImage={
+                      sectionRandomPhoto.get(section.category) ?? null
+                    }
+                  />
+                ))}
+              </div>
+            </section>
 
-        <ActivitySection
-          title="Последние активности"
-          icon={Star}
-          items={latest}
-        />
+            <ActivitySection
+              title="Последние активности"
+              icon={Star}
+              items={latest}
+            />
 
-        <ActivitySection
-          title="Популярные активности"
-          icon={Heart}
-          items={popular}
-        />
+            <ActivitySection
+              title="Популярные активности"
+              icon={Heart}
+              items={popular}
+            />
+          </>
+        )}
       </div>
     </div>
   );
