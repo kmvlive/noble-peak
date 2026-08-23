@@ -70,9 +70,6 @@ export default async function RootLayout({
                 />
               </div>
               {appName}
-              <span className="rounded bg-primary/10 px-1 text-xs font-medium text-primary align-middle">
-                [v2]
-              </span>
             </Link>
             <HeaderSectionSwitch />
             <div className="ml-auto flex items-center gap-1 sm:gap-2">
