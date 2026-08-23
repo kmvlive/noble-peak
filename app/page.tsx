@@ -12,8 +12,6 @@ import {
   MapPin,
   Map as MapIcon,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ActivityRecord, SectionRecord } from "@/lib/models";
 import { ActivityCard } from "@/components/activity-card";
@@ -120,7 +118,10 @@ function EmptyCityState({ cityName }: { cityName: string }) {
         Зарегистрируйтесь как партнёр и разместите первую активность в городе{" "}
         {cityName}
       </p>
-      <Link href="/partner/login" className={cn(buttonVariants(), "mt-6")}>
+      <Link
+        href="/partner/login"
+        className="group/button mt-6 inline-flex h-10 shrink-0 items-center justify-center rounded-lg border border-transparent bg-primary px-4 text-sm font-medium whitespace-nowrap text-primary-foreground bg-clip-padding transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [a]:hover:bg-primary/80"
+      >
         Стать партнёром
       </Link>
     </div>
