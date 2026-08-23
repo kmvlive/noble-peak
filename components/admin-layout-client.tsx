@@ -25,6 +25,7 @@ import {
   ShoppingCart,
   CircleDollarSign,
   BedDouble,
+  BadgePercent,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -162,6 +163,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
       icon: BedDouble,
     },
     { href: "/admin/reviews", label: "Отзывы", icon: MessageSquare },
+    { href: "/admin/promo", label: "Промо", icon: BadgePercent },
     { href: "/admin/sections", label: "Разделы", icon: FolderOpen },
     { href: "/admin/slider", label: "Слайдер", icon: Image },
     { href: "/admin/menu/admin", label: "Меню админов", icon: Navigation },
