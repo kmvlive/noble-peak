@@ -24,6 +24,7 @@ import {
   Image,
   ShoppingCart,
   CircleDollarSign,
+  BedDouble,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -154,6 +155,11 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
       href: "/admin/activities/pending",
       label: "Новые активности",
       icon: Clock,
+    },
+    {
+      href: "/admin/listings/pending",
+      label: "Новые услуги",
+      icon: BedDouble,
     },
     { href: "/admin/reviews", label: "Отзывы", icon: MessageSquare },
     { href: "/admin/sections", label: "Разделы", icon: FolderOpen },
