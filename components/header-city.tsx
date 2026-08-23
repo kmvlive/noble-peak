@@ -34,6 +34,7 @@ export function HeaderCity() {
     setCity(name);
     localStorage.setItem(STORAGE_KEY, name);
     setOpen(false);
+    window.dispatchEvent(new CustomEvent("city:changed", { detail: name }));
   };
 
   const buttonClass =
