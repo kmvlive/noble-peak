@@ -27,7 +27,7 @@ import { HOUSING_TYPES } from "@noble-peak/shared";
 import type { ListingRecord } from "@noble-peak/shared";
 
 const STORAGE_KEY = "selected_city";
-const DEFAULT_CITY = "Севастополь";
+const DEFAULT_CITY = "Пятигорск";
 const CITY_CHANGED_EVENT = "city:changed";
 
 function readStoredCity(): string {
