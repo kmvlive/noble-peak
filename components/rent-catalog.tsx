@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import {
   Home,
   MapPin,
@@ -8,6 +9,7 @@ import {
   Bot,
   Search,
   RotateCcw,
+  UserRoundPlus,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -18,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ListingCard } from "@/components/listing-card";
 import { HousingAiAssistant } from "@/components/housing-ai-assistant";
@@ -73,6 +75,11 @@ export function RentCatalog({
       return true;
     });
   }, [initialListings, housingType, city, guests, priceMin, priceMax]);
+
+  const cityListings = useMemo(
+    () => initialListings.filter((l) => city === "all" || l.city === city),
+    [initialListings, city]
+  );
 
   const hasFilters =
     housingType !== "all" ||
@@ -244,23 +251,47 @@ export function RentCatalog({
         </div>
 
         {filtered.length === 0 ? (
-          <Card className="border-dashed">
-            <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-                <Home className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <p className="font-medium text-muted-foreground">
-                По заданным фильтрам ничего не найдено
-              </p>
-              <p className="max-w-md text-sm text-muted-foreground">
-                Попробуйте изменить параметры поиска или сбросить фильтры.
-              </p>
-              <Button variant="outline" size="sm" onClick={resetFilters}>
-                <RotateCcw className="mr-1 h-4 w-4" />
-                Сбросить фильтры
-              </Button>
-            </CardContent>
-          </Card>
+          cityListings.length === 0 ? (
+            <Card className="border-dashed">
+              <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                  <MapPin className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <p className="font-medium">
+                  В этом городе пока нет активностей, но вы можете стать первым
+                </p>
+                <p className="max-w-md text-sm text-muted-foreground">
+                  Зарегистрируйтесь как партнёр и разместите первое объявление
+                  об аренде жилья.
+                </p>
+                <Link
+                  href="/partner/login"
+                  className={buttonVariants({ size: "sm" })}
+                >
+                  <UserRoundPlus className="mr-1 h-4 w-4" />
+                  Стать партнёром
+                </Link>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="border-dashed">
+              <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                  <Home className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <p className="font-medium text-muted-foreground">
+                  По заданным фильтрам ничего не найдено
+                </p>
+                <p className="max-w-md text-sm text-muted-foreground">
+                  Попробуйте изменить параметры поиска или сбросить фильтры.
+                </p>
+                <Button variant="outline" size="sm" onClick={resetFilters}>
+                  <RotateCcw className="mr-1 h-4 w-4" />
+                  Сбросить фильтры
+                </Button>
+              </CardContent>
+            </Card>
+          )
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((listing) => (
