@@ -19,11 +19,26 @@ export async function POST(request: NextRequest) {
   }
 
   const cwd = process.cwd();
+  const githubToken = process.env.GITHUB_TOKEN;
+  const deployRepo = process.env.DEPLOY_REPO || "artkmv1/noble-peak";
+  const deployRepoUrl =
+    process.env.DEPLOY_REPO_URL ||
+    (githubToken
+      ? `https://artkmv1:${githubToken}@github.com/${deployRepo}.git`
+      : `https://github.com/${deployRepo}.git`);
   const commands = [
     `cd "${cwd}"`,
-    "echo '🔄 git pull...'",
-    "git pull",
-    "echo '✓ git pull выполнен'",
+    `echo "🔄 Настройка git remote artkmv1 (${deployRepo})..."`,
+    `git remote set-url artkmv1 "${deployRepoUrl}" 2>/dev/null || git remote add artkmv1 "${deployRepoUrl}"`,
+    `git remote set-url artkmv1 "${deployRepoUrl}"`,
+    "echo '✓ Remote artkmv1 настроен'",
+    "echo '🔄 git fetch из artkmv1/noble-peak (ветка main)...'",
+    "git fetch artkmv1 main",
+    "echo '✓ git fetch выполнен'",
+    "echo '🔄 Переключение на main и синхронизация с artkmv1...'",
+    "git checkout -f main",
+    "git reset --hard artkmv1/main",
+    "echo '✓ Код получен из artkmv1/noble-peak (main)'",
     "echo '📦 npm install (включая dev-зависимости)...'",
     "npm install --include=dev",
     "echo '✓ npm install выполнен'",
