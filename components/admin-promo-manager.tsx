@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Pencil, Heart } from "lucide-react";
+import { Pencil, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { getToken } from "./admin-layout-client";
@@ -13,7 +13,7 @@ interface PromoActivity {
   section: string;
   price: number;
   likes: number;
-  isPopular: boolean;
+  isPromo: boolean;
   location?: string;
 }
 
@@ -31,7 +31,7 @@ export function AdminPromoManager() {
       const res = await fetch("/api/admin/activities");
       const data = await res.json();
       const list = Array.isArray(data) ? data : [];
-      setActivities(list.filter((a) => a.isPopular));
+      setActivities(list.filter((a) => a.isPromo));
     } catch {
       toast.error("Ошибка загрузки промо-активностей");
     } finally {
@@ -51,7 +51,7 @@ export function AdminPromoManager() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ isPopular: false }),
+        body: JSON.stringify({ isPromo: false }),
       });
 
       if (!res.ok) {
@@ -82,18 +82,17 @@ export function AdminPromoManager() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Промо</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Активности с включённой пометкой «Популярная активность». Они попадают
-          в блок «Популярные активности» на главной.
+          Активности с включённой пометкой «Промо». Они попадают в блок
+          «Популярные активности» на главной и показываются во всех городах.
         </p>
       </div>
 
       {activities.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-20 text-muted-foreground">
-          <Heart className="h-8 w-8" />
+          <Sparkles className="h-8 w-8" />
           <p className="text-sm">Промо-активностей пока нет</p>
           <p className="text-xs">
-            Отметьте «Популярная активность» в карточке активности, чтобы она
-            появилась здесь
+            Отметьте «Промо» в карточке активности, чтобы она появилась здесь
           </p>
         </div>
       ) : (
@@ -109,7 +108,7 @@ export function AdminPromoManager() {
                   Цена
                 </th>
                 <th className="px-4 py-3 text-center font-medium hidden md:table-cell">
-                  <Heart className="inline h-3.5 w-3.5" />
+                  <Sparkles className="inline h-3.5 w-3.5" />
                 </th>
                 <th className="px-4 py-3 text-right font-medium">Действия</th>
               </tr>
@@ -128,8 +127,8 @@ export function AdminPromoManager() {
                     {activity.price.toLocaleString("ru-RU")} ₽
                   </td>
                   <td className="px-4 py-3 text-center hidden md:table-cell">
-                    <span className="inline-flex items-center gap-1 text-xs text-red-500">
-                      <Heart className="h-3.5 w-3.5 fill-red-500" />
+                    <span className="inline-flex items-center gap-1 text-xs text-amber-500">
+                      <Sparkles className="h-3.5 w-3.5" />
                       {activity.likes}
                     </span>
                   </td>

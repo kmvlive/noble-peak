@@ -22,6 +22,7 @@ const updateActivitySchema = z.object({
   partnerPricePercent: z.number().min(0).max(100).optional(),
   likes: z.number().min(0).optional(),
   isPopular: z.boolean().optional(),
+  isPromo: z.boolean().optional(),
   over18: z.boolean().optional(),
   activityType: z.enum(["individual", "group"]).optional(),
   orderType: z.enum(["payment", "order_form"]).optional(),

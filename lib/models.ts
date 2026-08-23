@@ -58,6 +58,7 @@ export interface ActivityRecord {
   partnerPricePercent?: number;
   likes: number;
   isPopular: boolean;
+  isPromo: boolean;
   over18: boolean;
   activityType: ActivityType;
   orderType: OrderType;

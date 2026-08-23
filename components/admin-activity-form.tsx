@@ -40,6 +40,7 @@ interface AdminActivityFormProps {
     partnerPrice?: number;
     likes: number;
     isPopular: boolean;
+    isPromo: boolean;
     over18: boolean;
     activityType: ActivityType;
     orderType: OrderType;
@@ -86,6 +87,7 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
   );
   const [likes, setLikes] = useState(String(activity?.likes ?? 0));
   const [isPopular, setIsPopular] = useState(activity?.isPopular ?? false);
+  const [isPromo, setIsPromo] = useState(activity?.isPromo ?? false);
   const [imageGradient, setImageGradient] = useState(
     activity?.imageGradient ?? gradientOptions[0]
   );
@@ -149,6 +151,7 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
       partnerPrice: partnerPrice ? Number(partnerPrice) : undefined,
       likes: Number(likes),
       isPopular,
+      isPromo,
       over18,
       activityType,
       orderType,
@@ -609,6 +612,22 @@ export function AdminActivityForm({ activity }: AdminActivityFormProps) {
             <span className="ml-3 text-sm font-medium">
               {orderType === "payment" ? "Оплата" : "Форма заказа"}
             </span>
+          </label>
+        </div>
+
+        <div className="flex items-center gap-3 min-h-11">
+          <input
+            type="checkbox"
+            id="isPromo"
+            checked={isPromo}
+            onChange={(e) => setIsPromo(e.target.checked)}
+            className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
+          />
+          <label
+            htmlFor="isPromo"
+            className="text-sm font-medium cursor-pointer py-2"
+          >
+            Промо
           </label>
         </div>
 

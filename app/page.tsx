@@ -206,12 +206,14 @@ export default async function HomePage(props: {
       sectionName: sectionNameMap.get(a.section) || a.section,
     }));
 
-  const popular = scopedActivities
-    .filter((a) => a.isPopular)
-    .map((a) => ({
-      ...a,
-      sectionName: sectionNameMap.get(a.section) || a.section,
-    }));
+  const promoActivities = activities.filter((a) => a.isPromo);
+  const popularActivities = scopedActivities.filter(
+    (a) => !a.isPromo && a.isPopular
+  );
+  const popular = [...promoActivities, ...popularActivities].map((a) => ({
+    ...a,
+    sectionName: sectionNameMap.get(a.section) || a.section,
+  }));
 
   return (
     <div className="min-h-[calc(100vh-9rem)]">

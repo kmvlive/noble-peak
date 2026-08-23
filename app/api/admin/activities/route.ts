@@ -21,6 +21,7 @@ const createActivitySchema = z.object({
   partnerPrice: z.number().min(0).optional(),
   likes: z.number().min(0).optional().default(0),
   isPopular: z.boolean().optional().default(false),
+  isPromo: z.boolean().optional().default(false),
   over18: z.boolean().optional().default(false),
   activityType: z
     .enum(["individual", "group"])

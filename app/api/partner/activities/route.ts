@@ -102,6 +102,7 @@ export async function POST(request: NextRequest) {
       id,
       likes: 0,
       isPopular: false,
+      isPromo: false,
       partnerEmail,
       status: "pending",
       orderType: canUseOrderForm ? parsed.data.orderType : "payment",
