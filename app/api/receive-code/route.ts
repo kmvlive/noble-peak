@@ -48,6 +48,12 @@ function triggerBuild() {
     // На сервере приложение реально запущено через docker compose.
     // Если docker-compose.prod.yml существует — пересобираем и перезапускаем
     // контейнер, иначе (локально / PM2) — собираем и перезапускаем через PM2.
+    // Перед пересборкой всегда ставим dev-зависимости (--include=dev),
+    // чтобы при NODE_ENV=production они были на месте (напр. @types/js-yaml)
+    // и build не падал с «Could not find a declaration file for module ...».
+    "echo '📦 npm install --include=dev...'",
+    "npm install --include=dev",
+    "echo '✓ Dependencies installed'",
     `if [ -f "${composeFile}" ]; then`,
     "  echo '🏗️ docker compose build...'",
     `  docker compose -f ${composeFile} build`,
