@@ -70,7 +70,7 @@ export default async function RootLayout({
                   className="h-5 w-5"
                 />
               </div>
-              {appName}
+              <span className="hidden sm:inline">{appName}</span>
             </Link>
             <HeaderSectionSwitch />
             <div className="ml-auto flex items-center gap-1 sm:gap-2">
