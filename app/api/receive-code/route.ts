@@ -41,45 +41,44 @@ async function writeFiles(files: { path: string; content: string }[]) {
 
 function triggerBuild() {
   const cwd = process.cwd();
-  const composeFile =
-    process.env.RECEIVE_CODE_COMPOSE_FILE ?? "docker-compose.prod.yml";
   const logFile = path.join(cwd, ".receive-code-build.log");
 
+  // Боевой рантайм на сервере — это PM2 (процесс noble-peak занимает порт 8080,
+  // его перезапускает app/api/deploy). Docker-контейнер magazin-tour-app НЕ
+  // является боевым рантаймом и конфликтует с PM2 за порт 8080, поэтому перед
+  // сборкой он останавливается/удаляется, чтобы не блокировать перезапуск.
+  //
   // Скрипт выполняет шаги строго последовательно и останавливается при первом
   // сбое благодаря `set -e`:
-  //   1) npm install --include=dev — установка dev-зависимостей (обязательна
+  //   1) docker rm -f magazin-tour-app и docker compose stop app — убрать
+  //      Docker-контейнер, конфликтующий за порт 8080;
+  //   2) npm install --include=dev — установка dev-зависимостей (обязательна
   //      при NODE_ENV=production, иначе build падает, напр. из-за @types/js-yaml);
-  //   2) сборка (docker compose build ИЛИ npm run build);
-  //   3) ТОЛЬКО если сборка успешна — перезапуск (docker compose up
-  //      --force-recreate ИЛИ pm2 restart all).
-  // Так как `pm2 restart`/`up --force-recreate` стоят ПОСЛЕ успешной сборки,
-  // при сбое установки или сборки старое работающее приложение НЕ трогается и
-  // сайт продолжает отдавать предыдущую сборку. Весь вывод пишется в лог-файл,
-  // чтобы можно было диагностировать, почему перезапуск не сработал.
+  //   3) npm run build — сборка;
+  //   4) ТОЛЬКО если сборка успешна — pm2 restart all.
+  // Так как `pm2 restart` стоит ПОСЛЕ успешной сборки, при сбое установки или
+  // сборки старое работающее приложение НЕ трогается и сайт продолжает отдавать
+  // предыдущую сборку. Весь вывод пишется в лог-файл, чтобы можно было
+  // диагностировать, почему перезапуск не сработал.
   const commands = [
     "set -eu",
     `cd "${cwd}"`,
     `exec >> "${logFile}" 2>&1`,
     `echo ""`,
     `echo "===== receive-code build started $(date '+%Y-%m-%d %H:%M:%S') ====="`,
+    "echo '🗑️ Stopping/removing Docker container magazin-tour-app...'",
+    "docker rm -f magazin-tour-app || true",
+    "docker compose -f docker-compose.prod.yml stop app || true",
+    "echo '✓ Docker container cleared'",
     "echo '📦 npm install --include=dev...'",
     "npm install --include=dev",
     "echo '✓ Dependencies installed'",
-    `if [ -f "${composeFile}" ]; then`,
-    "  echo '🏗️ docker compose build...'",
-    `  docker compose -f ${composeFile} build`,
-    "  echo '✓ Build completed'",
-    "  echo '🔄 docker compose up --force-recreate...'",
-    `  docker compose -f ${composeFile} up -d --force-recreate`,
-    "  echo '✓ Container restarted'",
-    "else",
-    "  echo '🏗️ npm run build...'",
-    "  npm run build",
-    "  echo '✓ Build completed'",
-    "  echo '🔄 PM2 restart all...'",
-    "  pm2 restart all",
-    "  echo '✓ Restart complete'",
-    "fi",
+    "echo '🏗️ npm run build...'",
+    "npm run build",
+    "echo '✓ Build completed'",
+    "echo '🔄 PM2 restart all...'",
+    "pm2 restart all",
+    "echo '✓ Restart complete'",
     `echo "===== receive-code build finished OK $(date '+%Y-%m-%d %H:%M:%S') ====="`,
   ].join("\n");
 
