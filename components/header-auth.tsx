@@ -2,6 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ChevronDownIcon } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function HeaderAuth() {
   const [partnerToken, setPartnerToken] = useState<string | null>(null);
@@ -47,15 +56,24 @@ export function HeaderAuth() {
   }
 
   return (
-    <div className="ml-auto flex items-center gap-1 sm:gap-2 flex-wrap justify-end max-w-full">
-      <Link href="/partner/login" className={linkClass}>
-        <span className="sm:hidden">Партнёрам</span>
-        <span className="hidden sm:inline">Вход для партнёров</span>
-      </Link>
-      <Link href="/client/login" className={linkClass}>
-        <span className="sm:hidden">Клиентам</span>
-        <span className="hidden sm:inline">Вход для клиентов</span>
-      </Link>
+    <div className="ml-auto flex items-center justify-end max-w-full">
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={<Button variant="outline" size="sm" />}
+          className="rounded-full gap-1 px-3 text-xs"
+        >
+          Вход
+          <ChevronDownIcon className="size-4 text-muted-foreground" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem render={<Link href="/partner/login" />}>
+            Вход для партнёров
+          </DropdownMenuItem>
+          <DropdownMenuItem render={<Link href="/client/login" />}>
+            Вход для клиентов
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
