@@ -83,10 +83,12 @@ function ActivitySection({
   title,
   icon: Icon,
   items,
+  promoOutline = false,
 }: {
   title: string;
   icon: typeof Star;
   items: (ActivityRecord & { sectionName: string })[];
+  promoOutline?: boolean;
 }) {
   return (
     <section className="space-y-4">
@@ -98,7 +100,13 @@ function ActivitySection({
       </div>
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {items.map(({ id, sectionName, ...rest }) => (
-          <ActivityCard key={id} _id={id} category={sectionName} {...rest} />
+          <ActivityCard
+            key={id}
+            _id={id}
+            category={sectionName}
+            promoOutline={promoOutline}
+            {...rest}
+          />
         ))}
       </div>
     </section>
@@ -273,6 +281,7 @@ export default async function HomePage(props: {
               title="Популярные активности"
               icon={Heart}
               items={popular}
+              promoOutline
             />
           </>
         )}

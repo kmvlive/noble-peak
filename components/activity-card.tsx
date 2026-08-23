@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Heart, MapIcon, Compass, Sparkles } from "lucide-react";
+import { Heart, MapIcon, Compass } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -13,6 +13,7 @@ export function ActivityCard({
   likes,
   images,
   isPromo,
+  promoOutline,
 }: {
   _id: string;
   title: string;
@@ -23,6 +24,7 @@ export function ActivityCard({
   likes: number;
   images: string[];
   isPromo?: boolean;
+  promoOutline?: boolean;
 }) {
   const firstImage = images?.[0];
   const hasRealImage =
@@ -31,7 +33,9 @@ export function ActivityCard({
 
   return (
     <Link href={`/activities/${_id}`}>
-      <Card className="card-hover h-full">
+      <Card
+        className={`card-hover h-full ${promoOutline && isPromo ? "ring-1 ring-amber-500" : ""}`}
+      >
         {hasRealImage ? (
           <div className="bg-muted">
             <img
@@ -54,12 +58,6 @@ export function ActivityCard({
                 <MapIcon className="mr-0.5 h-3 w-3" />
                 {category}
               </Badge>
-              {isPromo && (
-                <Badge className="bg-amber-500 text-white hover:bg-amber-500">
-                  <Sparkles className="mr-0.5 h-3 w-3" />
-                  Промо
-                </Badge>
-              )}
             </div>
             <span className="flex items-center gap-1 text-xs text-muted-foreground">
               <Heart className="h-3 w-3" />
