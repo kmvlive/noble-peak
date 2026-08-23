@@ -3,24 +3,37 @@ import { isDatabaseAvailable } from "@/lib/db";
 import { mockListings } from "@/lib/mock-data";
 import { getAllListings, createListing, deleteListing } from "@/lib/models";
 import { createListingSchema } from "@/lib/validation/listing";
+import type { ListingRecord } from "@noble-peak/shared";
 
-export async function GET() {
-  const dbAvailable = await isDatabaseAvailable();
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const status = searchParams.get("status");
+  const city = searchParams.get("city");
 
-  if (!dbAvailable) {
-    return NextResponse.json(mockListings);
+  let listings: ListingRecord[];
+
+  if (!(await isDatabaseAvailable())) {
+    listings = mockListings;
+  } else {
+    try {
+      listings = await getAllListings();
+    } catch (error) {
+      console.error("Ошибка получения объявлений:", error);
+      return NextResponse.json(
+        { error: "Ошибка получения данных из DynamoDB" },
+        { status: 500 }
+      );
+    }
   }
 
-  try {
-    const listings = await getAllListings();
-    return NextResponse.json(listings);
-  } catch (error) {
-    console.error("Ошибка получения объявлений:", error);
-    return NextResponse.json(
-      { error: "Ошибка получения данных из DynamoDB" },
-      { status: 500 }
-    );
+  if (status) {
+    listings = listings.filter((l) => l.status === status);
   }
+  if (city) {
+    listings = listings.filter((l) => l.city === city);
+  }
+
+  return NextResponse.json(listings);
 }
 
 export async function POST(request: NextRequest) {
