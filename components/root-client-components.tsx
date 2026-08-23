@@ -34,6 +34,14 @@ export const HeaderAuth = dynamic(
   { ssr: false }
 );
 
+export const HeaderSectionSwitch = dynamic(
+  () =>
+    import("@/components/header-section-switch").then((m) => ({
+      default: m.HeaderSectionSwitch,
+    })),
+  { ssr: false }
+);
+
 export const HeaderCity = dynamic(
   () =>
     import("@/components/header-city").then((m) => ({
