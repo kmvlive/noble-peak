@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import {
   Heart,
   ChevronLeft,
@@ -75,8 +74,6 @@ export default async function LocationPage({
     return loc.includes(cityFullLower) || loc.includes(cityLower);
   });
 
-  if (cityActivities.length === 0) notFound();
-
   const totalItems = cityActivities.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
   const clampedPage = Math.min(currentPage, totalPages);
@@ -106,14 +103,16 @@ export default async function LocationPage({
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl text-center">
               {displayName}
             </h1>
-            <p className="text-sm text-white/80">
-              {totalItems}{" "}
-              {totalItems === 1
-                ? "активность"
-                : totalItems >= 2 && totalItems <= 4
-                  ? "активности"
-                  : "активностей"}
-            </p>
+            {totalItems > 0 && (
+              <p className="text-sm text-white/80">
+                {totalItems}{" "}
+                {totalItems === 1
+                  ? "активность"
+                  : totalItems >= 2 && totalItems <= 4
+                    ? "активности"
+                    : "активностей"}
+              </p>
+            )}
           </div>
         </div>
 
