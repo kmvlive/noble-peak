@@ -36,3 +36,46 @@ export function isSubtypeValidForType(
 }
 
 export type CreateListingInput = z.infer<typeof createListingSchema>;
+
+export const listingRoomSchema = z.object({
+  name: z.string().max(200).optional().default(""),
+  capacity: z.number().int().min(1, "Вместимость должна быть не меньше 1"),
+  price: z.number().min(0, "Цена не может быть отрицательной"),
+});
+
+export const createPartnerListingSchema = z
+  .object({
+    housingType: housingTypeSchema,
+    subtype: z.string().min(1).max(50),
+    title: z.string().min(1).max(200),
+    description: z.string().max(10_000).default(""),
+    city: z.string().min(1).max(100),
+    address: z.string().max(300).optional(),
+    images: z.array(z.string()).max(30).default([]),
+    rooms: z
+      .array(listingRoomSchema)
+      .min(1, "Добавьте хотя бы один номер")
+      .max(100)
+      .optional(),
+    meals: z.array(z.string().min(1).max(200)).max(50).optional(),
+  })
+  .superRefine((val, ctx) => {
+    if (!isSubtypeValidForType(val.housingType, val.subtype)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["subtype"],
+        message: "Подтип не соответствует выбранному типу жилья",
+      });
+    }
+    if (val.housingType === "rooms" && (!val.rooms || val.rooms.length === 0)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["rooms"],
+        message: "Для типа «Номера / спальные места» нужен хотя бы один номер",
+      });
+    }
+  });
+
+export type CreatePartnerListingInput = z.infer<
+  typeof createPartnerListingSchema
+>;

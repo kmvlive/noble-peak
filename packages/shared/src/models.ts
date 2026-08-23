@@ -401,6 +401,13 @@ export function getListingSubtypeLabel(
 
 export type ListingStatus = "active" | "pending" | "rejected";
 
+export interface ListingRoom {
+  id?: string;
+  name?: string;
+  capacity: number;
+  price: number;
+}
+
 export interface ListingRecord {
   id: string;
   title: string;
@@ -414,6 +421,8 @@ export interface ListingRecord {
   guests: number;
   status: ListingStatus;
   partnerEmail?: string;
+  rooms?: ListingRoom[];
+  meals?: string[];
   createdAt: string;
   updatedAt: string;
 }
