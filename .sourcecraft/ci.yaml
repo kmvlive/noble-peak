@@ -40,8 +40,19 @@ workflows:
               - git remote add github "${GITHUB_URL}"
               - git push --force github HEAD:main
               - echo "=== PUSH TO GITHUB COMPLETE ==="
-      - name: deploy-via-ssh
+      - name: deliver-code
         needs: [push-code-to-github]
+        cubes:
+          - name: deliver
+            script:
+              - set -e
+              - echo "=== Delivering code to production via deliver:code ==="
+              - RECEIVE_CODE_TOKEN=${{ secrets.RECEIVE_CODE_TOKEN }}
+              - export RECEIVE_CODE_TOKEN
+              - npm run deliver:code
+              - echo "=== DELIVER CODE COMPLETE ==="
+      - name: deploy-via-ssh
+        needs: [push-code-to-github, deliver-code]
         cubes:
           - name: full-deploy
             script:
