@@ -12,7 +12,26 @@ tokens:
 workflows:
   deploy:
     tasks:
+      - name: backup-uploads
+        cubes:
+          - name: backup
+            script:
+              - set -e
+              - echo "=== Backing up public/uploads BEFORE code delivery (never lose uploads) ==="
+              - npm install --include=dev
+              - git config user.name "SourceCraft CI"
+              - git config user.email "ci@sourcecraft.local"
+              - echo "=== Creating fresh tar backup and auto-committing public/uploads ==="
+              - npm run upload:backup
+              - echo "=== Pushing uploads commit to github so uploads are committed and synced ==="
+              - GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+              - GITHUB_URL="https://kmvlive:${GITHUB_TOKEN}@github.com/kmvlive/noble-peak.git"
+              - git remote remove github 2>/dev/null || true
+              - git remote add github "${GITHUB_URL}"
+              - git push github HEAD:main 2>/dev/null || echo "No new uploads to push or remote sync needed"
+              - echo "=== BACKUP UPLOADS COMPLETE ==="
       - name: sync-from-github
+        needs: [backup-uploads]
         cubes:
           - name: sync
             script:
