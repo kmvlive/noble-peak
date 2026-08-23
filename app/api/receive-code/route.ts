@@ -55,7 +55,10 @@ function triggerBuild() {
   //   2) npm install --include=dev — установка dev-зависимостей (обязательна
   //      при NODE_ENV=production, иначе build падает, напр. из-за @types/js-yaml);
   //   3) npm run build — сборка;
-  //   4) ТОЛЬКО если сборка успешна — pm2 restart all.
+  //   4) npm run db:verify — проверка/исправление схемы DynamoDB: создаёт
+  //      недостающие таблицы и индексы, чтобы новая сущность заработала сразу
+  //      после доставки кода без ручного деплоя;
+  //   5) ТОЛЬКО если сборка успешна — pm2 restart all.
   // Так как `pm2 restart` стоит ПОСЛЕ успешной сборки, при сбое установки или
   // сборки старое работающее приложение НЕ трогается и сайт продолжает отдавать
   // предыдущую сборку. Весь вывод пишется в лог-файл, чтобы можно было
@@ -76,6 +79,9 @@ function triggerBuild() {
     "echo '🏗️ npm run build...'",
     "npm run build",
     "echo '✓ Build completed'",
+    "echo '🗄️ npm run db:verify (проверка/создание схемы DynamoDB)...'",
+    "npm run db:verify",
+    "echo '✓ DB schema verified'",
     "echo '🔄 PM2 restart all...'",
     "pm2 restart all",
     "echo '✓ Restart complete'",
