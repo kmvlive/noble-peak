@@ -1,21 +1,26 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, MapPin } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Check, ChevronDown, MapPin, Search } from "lucide-react";
 import { RUSSIAN_CITIES } from "@/lib/russian-cities";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
 
 const STORAGE_KEY = "selected_city";
 const DEFAULT_CITY = "Севастополь";
 
 export function HeaderCity() {
+  const router = useRouter();
   const [city, setCity] = useState<string>(() => {
     if (typeof window === "undefined") return DEFAULT_CITY;
     return localStorage.getItem(STORAGE_KEY) ?? DEFAULT_CITY;
   });
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -30,11 +35,53 @@ export function HeaderCity() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (open) {
+      const t = window.setTimeout(() => inputRef.current?.focus(), 0);
+      return () => window.clearTimeout(t);
+    }
+  }, [open]);
+
+  const handleToggle = () => {
+    if (!open) {
+      setQuery("");
+      setHighlightedIndex(-1);
+    }
+    setOpen((o) => !o);
+  };
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return RUSSIAN_CITIES;
+    return RUSSIAN_CITIES.filter((c) => c.toLowerCase().includes(q));
+  }, [query]);
+
   const selectCity = (name: string) => {
     setCity(name);
     localStorage.setItem(STORAGE_KEY, name);
     setOpen(false);
     window.dispatchEvent(new CustomEvent("city:changed", { detail: name }));
+    router.push(`/locations/${encodeURIComponent(name)}`);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (filtered.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightedIndex((prev) =>
+        prev < filtered.length - 1 ? prev + 1 : 0
+      );
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightedIndex((prev) =>
+        prev > 0 ? prev - 1 : filtered.length - 1
+      );
+    } else if (e.key === "Enter" && highlightedIndex >= 0) {
+      e.preventDefault();
+      selectCity(filtered[highlightedIndex]);
+    } else if (e.key === "Escape") {
+      setOpen(false);
+    }
   };
 
   const buttonClass =
@@ -44,7 +91,7 @@ export function HeaderCity() {
     <div ref={wrapperRef} className="relative">
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={handleToggle}
         aria-haspopup="listbox"
         aria-expanded={open}
         className={buttonClass}
@@ -60,36 +107,60 @@ export function HeaderCity() {
       </button>
 
       {open && (
-        <ul
+        <div
           role="listbox"
           aria-label="Выбор города"
-          className="absolute left-0 top-full z-50 mt-2 w-72 max-w-[calc(100vw-1rem)] origin-top-left sm:left-auto sm:right-0 sm:origin-top-right max-h-72 overflow-auto rounded-lg border bg-popover p-1 text-sm shadow-lg animate-in fade-in slide-in-from-top-2 duration-200"
+          className="absolute left-0 top-full z-50 mt-2 w-72 max-w-[calc(100vw-1rem)] origin-top-left sm:left-auto sm:right-0 sm:origin-top-right overflow-hidden rounded-lg border bg-popover text-sm shadow-lg animate-in fade-in slide-in-from-top-2 duration-200"
         >
-          {RUSSIAN_CITIES.map((name, index) => (
-            <li
-              key={name}
-              role="option"
-              aria-selected={name === city}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                selectCity(name);
+          <div className="relative border-b p-2">
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              ref={inputRef}
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setHighlightedIndex(-1);
               }}
-              onMouseEnter={() => setHighlightedIndex(index)}
-              className={cn(
-                "relative flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-2 outline-none transition-colors",
-                index === highlightedIndex && "bg-accent text-accent-foreground"
-              )}
-            >
-              <Check
-                className={cn(
-                  "h-4 w-4 shrink-0",
-                  name === city ? "opacity-100" : "opacity-0"
-                )}
-              />
-              {name}
-            </li>
-          ))}
-        </ul>
+              onKeyDown={handleKeyDown}
+              placeholder="Поиск города"
+              className="h-9 pl-9"
+              autoComplete="off"
+            />
+          </div>
+          <ul className="max-h-64 overflow-auto p-1">
+            {filtered.length === 0 ? (
+              <li className="px-3 py-2 text-sm text-muted-foreground">
+                Город не найден
+              </li>
+            ) : (
+              filtered.map((name, index) => (
+                <li
+                  key={name}
+                  role="option"
+                  aria-selected={name === city}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    selectCity(name);
+                  }}
+                  onMouseEnter={() => setHighlightedIndex(index)}
+                  className={cn(
+                    "relative flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-2 outline-none transition-colors",
+                    index === highlightedIndex &&
+                      "bg-accent text-accent-foreground"
+                  )}
+                >
+                  <Check
+                    className={cn(
+                      "h-4 w-4 shrink-0",
+                      name === city ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {name}
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
       )}
     </div>
   );
