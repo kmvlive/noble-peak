@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Check, ChevronDown, MapPin, Search } from "lucide-react";
 import { RUSSIAN_CITIES, cityToSlug } from "@/lib/russian-cities";
 import { cn } from "@/lib/utils";
@@ -11,7 +10,6 @@ const STORAGE_KEY = "selected_city";
 const DEFAULT_CITY = "Севастополь";
 
 export function HeaderCity() {
-  const router = useRouter();
   const [city, setCity] = useState<string>(() => {
     if (typeof window === "undefined") return DEFAULT_CITY;
     return localStorage.getItem(STORAGE_KEY) ?? DEFAULT_CITY;
@@ -61,7 +59,7 @@ export function HeaderCity() {
     localStorage.setItem(STORAGE_KEY, name);
     setOpen(false);
     window.dispatchEvent(new CustomEvent("city:changed", { detail: name }));
-    router.push(`/locations/${cityToSlug(name)}`);
+    window.location.href = `https://my.magazin-tour.ru/?city=${cityToSlug(name)}`;
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
