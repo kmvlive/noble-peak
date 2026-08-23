@@ -51,7 +51,11 @@ export const createPartnerListingSchema = z
     description: z.string().max(10_000).default(""),
     city: z.string().min(1).max(100),
     address: z.string().max(300).optional(),
+    latitude: z.number().min(-90).max(90).optional(),
+    longitude: z.number().min(-180).max(180).optional(),
     images: z.array(z.string()).max(30).default([]),
+    price: z.number().nonnegative().optional(),
+    guests: z.number().int().nonnegative().default(1),
     rooms: z
       .array(listingRoomSchema)
       .min(1, "Добавьте хотя бы один номер")
@@ -67,12 +71,30 @@ export const createPartnerListingSchema = z
         message: "Подтип не соответствует выбранному типу жилья",
       });
     }
-    if (val.housingType === "rooms" && (!val.rooms || val.rooms.length === 0)) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["rooms"],
-        message: "Для типа «Номера / спальные места» нужен хотя бы один номер",
-      });
+    if (val.housingType === "rooms") {
+      if (!val.rooms || val.rooms.length === 0) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["rooms"],
+          message:
+            "Для типа «Номера / спальные места» нужен хотя бы один номер",
+        });
+      }
+    } else {
+      if (val.price === undefined) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["price"],
+          message: "Укажите цену за сутки",
+        });
+      }
+      if (!val.address || val.address.trim().length === 0) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["address"],
+          message: "Укажите адрес",
+        });
+      }
     }
   });
 

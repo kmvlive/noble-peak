@@ -56,14 +56,15 @@ export async function POST(request: NextRequest) {
 
     const data = parsed.data;
 
+    const isRooms = data.housingType === "rooms";
     const totalPrice =
-      data.rooms && data.rooms.length > 0
+      isRooms && data.rooms && data.rooms.length > 0
         ? data.rooms.reduce((sum, r) => sum + r.price, 0)
-        : 0;
+        : (data.price ?? 0);
     const totalGuests =
-      data.rooms && data.rooms.length > 0
+      isRooms && data.rooms && data.rooms.length > 0
         ? data.rooms.reduce((sum, r) => sum + r.capacity, 0)
-        : 1;
+        : (data.guests ?? 1);
 
     const listing = await createListing({
       id: crypto.randomUUID(),
@@ -74,6 +75,8 @@ export async function POST(request: NextRequest) {
       subtype: data.subtype,
       city: data.city,
       address: data.address || undefined,
+      latitude: data.latitude,
+      longitude: data.longitude,
       price: totalPrice,
       guests: totalGuests,
       rooms: data.rooms,

@@ -417,6 +417,8 @@ export interface ListingRecord {
   subtype: string;
   city: string;
   address?: string;
+  latitude?: number;
+  longitude?: number;
   price: number;
   guests: number;
   status: ListingStatus;

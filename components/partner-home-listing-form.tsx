@@ -1,26 +1,24 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
-  BedDouble,
   Building2,
   ChevronLeft,
   ChevronRight,
   ImageIcon,
-  Plus,
+  LocateFixed,
+  MapPin,
   Send,
   Trash2,
   Upload,
-  Utensils,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -28,78 +26,112 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { HOUSING_TYPES, getListingSubtypesForType } from "@noble-peak/shared";
-import type { HousingType, ListingRoom } from "@noble-peak/shared";
+import { getListingSubtypesForType } from "@noble-peak/shared";
+import type { HousingType } from "@noble-peak/shared";
 import { getToken } from "./partner-layout-client";
 import { CityAutocomplete } from "./city-autocomplete";
 import { createPartnerListingSchema } from "@/lib/validation/listing";
-import { PartnerHomeListingForm } from "./partner-home-listing-form";
 
 const STEPS = [
+  { title: "Адрес и карта", icon: MapPin },
   { title: "Основная информация", icon: Building2 },
-  { title: "Фотографии", icon: ImageIcon },
-  { title: "Номера", icon: BedDouble },
-  { title: "Питание", icon: Utensils },
+  { title: "Фото и цена", icon: ImageIcon },
 ];
 
-interface RoomDraft {
-  id: string;
-  name: string;
-  capacity: string;
-  price: string;
+async function geocodeAddress(query: string): Promise<{
+  lat: number;
+  lon: number;
+} | null> {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`,
+      { headers: { "User-Agent": "magazin-tour/1.0" } }
+    );
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) {
+      return {
+        lat: Number.parseFloat(data[0].lat),
+        lon: Number.parseFloat(data[0].lon),
+      };
+    }
+  } catch {
+    // геокодирование недоступно
+  }
+  return null;
 }
 
-function emptyRoom(): RoomDraft {
-  return { id: crypto.randomUUID(), name: "", capacity: "2", price: "" };
+function osmEmbedUrl(lat: number, lon: number): string {
+  const dLat = 0.01;
+  const dLon = 0.015;
+  const bbox = `${lon - dLon},${lat - dLat},${lon + dLon},${lat + dLat}`;
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lon}`;
 }
 
-export function PartnerListingForm() {
+interface PartnerHomeListingFormProps {
+  housingType: HousingType;
+  onBack?: () => void;
+}
+
+export function PartnerHomeListingForm({
+  housingType,
+  onBack,
+}: PartnerHomeListingFormProps) {
   const router = useRouter();
 
-  const [housingType, setHousingType] = useState<HousingType | null>(null);
   const [step, setStep] = useState(0);
 
   const [subtype, setSubtype] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [city, setCity] = useState("");
+
   const [address, setAddress] = useState("");
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+  const [locating, setLocating] = useState(false);
 
   const [images, setImages] = useState<string[]>([]);
   const [newImageUrl, setNewImageUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [rooms, setRooms] = useState<RoomDraft[]>([emptyRoom()]);
-  const [meals, setMeals] = useState<string[]>([""]);
+  const [price, setPrice] = useState("");
+  const [guests, setGuests] = useState("2");
 
   const [saving, setSaving] = useState(false);
 
-  const subtypes = housingType ? getListingSubtypesForType(housingType) : [];
+  const subtypes = getListingSubtypesForType(housingType);
 
-  const selectType = (type: HousingType) => {
-    setHousingType(type);
-    if (type === "rooms") {
-      setStep(0);
+  const locate = async () => {
+    const query = [city.trim(), address.trim()].filter(Boolean).join(", ");
+    if (!query) {
+      toast.error("Введите адрес и город для поиска на карте");
       return;
     }
-    setStep(-1);
+    setLocating(true);
+    try {
+      const coords = await geocodeAddress(query);
+      if (!coords) {
+        toast.error("Не удалось определить место по адресу");
+        return;
+      }
+      setLatitude(coords.lat);
+      setLongitude(coords.lon);
+      toast.success("Место определено на карте");
+    } finally {
+      setLocating(false);
+    }
   };
 
   const canProceedFromStep = (): boolean => {
     if (step === 0) {
+      return Boolean(address.trim() && latitude !== null && longitude !== null);
+    }
+    if (step === 1) {
       return Boolean(subtype && title.trim() && city.trim());
     }
-    if (step === 1) return true;
     if (step === 2) {
-      const valid = rooms.some(
-        (r) =>
-          Number(r.capacity) >= 1 &&
-          !Number.isNaN(Number(r.capacity)) &&
-          Number(r.price) >= 0 &&
-          !Number.isNaN(Number(r.price))
-      );
-      return valid;
+      return Number(price) >= 0 && !Number.isNaN(Number(price));
     }
     return true;
   };
@@ -110,28 +142,6 @@ export function PartnerListingForm() {
       return;
     }
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
-  };
-
-  const addRoom = () => setRooms((prev) => [...prev, emptyRoom()]);
-
-  const updateRoom = (id: string, patch: Partial<RoomDraft>) => {
-    setRooms((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
-  };
-
-  const removeRoom = (id: string) => {
-    setRooms((prev) =>
-      prev.length === 1 ? prev : prev.filter((r) => r.id !== id)
-    );
-  };
-
-  const updateMeal = (index: number, value: string) => {
-    setMeals((prev) => prev.map((m, i) => (i === index ? value : m)));
-  };
-
-  const removeMeal = (index: number) => {
-    setMeals((prev) =>
-      prev.length === 1 ? prev : prev.filter((_, i) => i !== index)
-    );
   };
 
   const addImageUrl = () => {
@@ -190,30 +200,18 @@ export function PartnerListingForm() {
   };
 
   const handleSubmit = async () => {
-    const normalizedRooms: ListingRoom[] = rooms
-      .filter(
-        (r) =>
-          !Number.isNaN(Number(r.capacity)) &&
-          Number(r.capacity) >= 1 &&
-          !Number.isNaN(Number(r.price)) &&
-          Number(r.price) >= 0
-      )
-      .map((r) => ({
-        name: r.name.trim() || undefined,
-        capacity: Number(r.capacity),
-        price: Number(r.price),
-      }));
-
     const payload = {
-      housingType: housingType as HousingType,
+      housingType,
       subtype,
       title: title.trim(),
       description: description.trim(),
       city: city.trim(),
-      address: address.trim() || undefined,
+      address: address.trim(),
+      latitude: latitude ?? undefined,
+      longitude: longitude ?? undefined,
       images,
-      rooms: normalizedRooms,
-      meals: meals.map((m) => m.trim()).filter((m) => m.length > 0),
+      price: Number(price),
+      guests: Number(guests) >= 1 ? Number(guests) : 1,
     };
 
     const parsed = createPartnerListingSchema.safeParse(payload);
@@ -253,48 +251,10 @@ export function PartnerListingForm() {
     }
   };
 
-  if (housingType && housingType !== "rooms") {
-    return (
-      <PartnerHomeListingForm
-        housingType={housingType}
-        onBack={() => setHousingType(null)}
-      />
-    );
-  }
-
-  if (!housingType) {
-    return (
-      <div className="mx-auto max-w-2xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Добавить объявление
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Выберите тип жилья. Объявление пройдёт модерацию перед публикацией.
-          </p>
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-2">
-          {HOUSING_TYPES.map((t) => (
-            <button
-              key={t.value}
-              type="button"
-              onClick={() => selectType(t.value)}
-              className="flex flex-col items-start gap-2 rounded-xl border bg-card p-4 text-left transition-colors hover:border-primary card-hover"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <BedDouble className="h-5 w-5" />
-              </div>
-              <span className="font-semibold">{t.label}</span>
-              <span className="text-xs text-muted-foreground">
-                {t.subtypes.map((s) => s.label).join(", ")}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const mapSrc =
+    latitude !== null && longitude !== null
+      ? osmEmbedUrl(latitude, longitude)
+      : null;
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -303,8 +263,7 @@ export function PartnerListingForm() {
           Добавить объявление
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Номера / спальные места · После отправки объявление уйдёт на
-          модерацию.
+          После отправки объявление уйдёт на модерацию.
         </p>
       </div>
 
@@ -336,19 +295,67 @@ export function PartnerListingForm() {
           {step === 0 && (
             <div className="space-y-5 animate-in fade-in duration-300">
               <div className="space-y-2">
-                <Label>Тип жилья</Label>
-                <Select value="rooms" onValueChange={() => {}} disabled>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Номера / спальные места" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="rooms">
-                      Номера / спальные места
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label>Адрес</Label>
+                <Input
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Например, ул. Морская, 1"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Город / населённый пункт</Label>
+                <CityAutocomplete
+                  value={city}
+                  onChange={setCity}
+                  placeholder="Севастополь"
+                />
               </div>
 
+              <Button
+                type="button"
+                variant="outline"
+                onClick={locate}
+                disabled={locating}
+                className="w-full"
+              >
+                <LocateFixed className="h-4 w-4 sm:mr-1.5" />
+                <span>
+                  {locating ? "Поиск места..." : "Точно определить на карте"}
+                </span>
+              </Button>
+
+              <div className="overflow-hidden rounded-xl border">
+                {mapSrc ? (
+                  <>
+                    <iframe
+                      src={mapSrc}
+                      width="100%"
+                      height="280"
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title={`Карта ${address || "объекта"}`}
+                    />
+                    <div className="flex items-center gap-2 border-t bg-muted px-3 py-2 text-xs text-muted-foreground">
+                      <MapPin className="h-3.5 w-3.5 shrink-0" />
+                      {latitude !== null &&
+                        longitude !== null &&
+                        `Точка определена: ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`}
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex h-64 items-center justify-center bg-muted px-6 text-center text-sm text-muted-foreground">
+                    Укажите адрес и нажмите «Точно определить на карте», чтобы
+                    отметить точное место объекта
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {step === 1 && (
+            <div className="space-y-5 animate-in fade-in duration-300">
               <div className="space-y-2">
                 <Label>Подтип</Label>
                 <Select
@@ -373,7 +380,7 @@ export function PartnerListingForm() {
                 <Input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Например, Гостиница «Уют»"
+                  placeholder="Например, Светлая студия в центре"
                 />
               </div>
 
@@ -387,29 +394,19 @@ export function PartnerListingForm() {
                 />
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Город</Label>
-                  <CityAutocomplete
-                    value={city}
-                    onChange={setCity}
-                    placeholder="Севастополь"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Адрес</Label>
-                  <Input
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="ул. Морская, 1"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label>Город</Label>
+                <CityAutocomplete
+                  value={city}
+                  onChange={setCity}
+                  placeholder="Севастополь"
+                />
               </div>
             </div>
           )}
 
-          {step === 1 && (
-            <div className="space-y-4 animate-in fade-in duration-300">
+          {step === 2 && (
+            <div className="space-y-5 animate-in fade-in duration-300">
               <div className="flex flex-col gap-2 sm:flex-row">
                 <div className="flex flex-1 gap-2">
                   <Input
@@ -493,155 +490,49 @@ export function PartnerListingForm() {
                   ))}
                 </div>
               )}
-              <p className="text-xs text-muted-foreground">
-                Максимум 30 фотографий. Можно загрузить с компьютера или указать
-                URL.
-              </p>
-            </div>
-          )}
 
-          {step === 2 && (
-            <div className="space-y-4 animate-in fade-in duration-300">
-              <div className="flex items-center justify-between">
-                <Label>Номера / спальные места</Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={addRoom}
-                >
-                  <Plus className="mr-1.5 h-4 w-4" />
-                  Добавить номер
-                </Button>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Цена, ₽/сутки</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    placeholder="3500"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Число гостей</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={guests}
+                    onChange={(e) => setGuests(e.target.value)}
+                  />
+                </div>
               </div>
-
-              <div className="space-y-3">
-                {rooms.map((room, index) => (
-                  <div
-                    key={room.id}
-                    className="rounded-xl border p-3 space-y-3"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">
-                        Номер {index + 1}
-                      </span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        aria-label="Удалить номер"
-                        onClick={() => removeRoom(room.id)}
-                        disabled={rooms.length === 1}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Название номера</Label>
-                      <Input
-                        value={room.name}
-                        onChange={(e) =>
-                          updateRoom(room.id, { name: e.target.value })
-                        }
-                        placeholder="Например, Стандарт"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-2">
-                        <Label>Вместимость, гостей</Label>
-                        <Input
-                          type="number"
-                          min={1}
-                          value={room.capacity}
-                          onChange={(e) =>
-                            updateRoom(room.id, { capacity: e.target.value })
-                          }
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Цена, ₽/сутки</Label>
-                        <Input
-                          type="number"
-                          min={0}
-                          value={room.price}
-                          onChange={(e) =>
-                            updateRoom(room.id, { price: e.target.value })
-                          }
-                          placeholder="3500"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {subtypes.length > 0 && (
-                  <Badge variant="secondary">
-                    Подтип:{" "}
-                    {getListingSubtypesForType("rooms").find(
-                      (s) => s.value === subtype
-                    )?.label ?? subtype}
-                  </Badge>
-                )}
-              </div>
-            </div>
-          )}
-
-          {step === 3 && (
-            <div className="space-y-4 animate-in fade-in duration-300">
-              <div className="flex items-center justify-between">
-                <Label>Что входит в питание</Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setMeals((prev) => [...prev, ""])}
-                >
-                  <Plus className="mr-1.5 h-4 w-4" />
-                  Добавить пункт
-                </Button>
-              </div>
-
-              <div className="space-y-2">
-                {meals.map((meal, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Input
-                      value={meal}
-                      onChange={(e) => updateMeal(index, e.target.value)}
-                      placeholder="Например, Завтрак"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      aria-label="Удалить пункт питания"
-                      onClick={() => removeMeal(index)}
-                      disabled={meals.length === 1}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-
-              {meals.filter((m) => m.trim()).length === 0 && (
-                <p className="text-xs text-muted-foreground">
-                  Если питание не входит в стоимость, оставьте поле пустым.
-                </p>
-              )}
             </div>
           )}
 
           <div className="flex items-center justify-between border-t pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setStep((s) => Math.max(s - 1, 0))}
-            >
-              <ChevronLeft className="mr-1.5 h-4 w-4" />
-              Назад
-            </Button>
+            {step > 0 ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setStep((s) => Math.max(s - 1, 0))}
+              >
+                <ChevronLeft className="mr-1.5 h-4 w-4" />
+                Назад
+              </Button>
+            ) : onBack ? (
+              <Button type="button" variant="outline" onClick={onBack}>
+                <ChevronLeft className="mr-1.5 h-4 w-4" />
+                Изменить тип жилья
+              </Button>
+            ) : (
+              <span />
+            )}
 
             {step < STEPS.length - 1 ? (
               <Button type="button" onClick={nextStep}>
