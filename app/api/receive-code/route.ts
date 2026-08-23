@@ -43,14 +43,25 @@ function triggerBuild() {
   const cwd = process.cwd();
   const composeFile =
     process.env.RECEIVE_CODE_COMPOSE_FILE ?? "docker-compose.prod.yml";
+  const logFile = path.join(cwd, ".receive-code-build.log");
+
+  // Скрипт выполняет шаги строго последовательно и останавливается при первом
+  // сбое благодаря `set -e`:
+  //   1) npm install --include=dev — установка dev-зависимостей (обязательна
+  //      при NODE_ENV=production, иначе build падает, напр. из-за @types/js-yaml);
+  //   2) сборка (docker compose build ИЛИ npm run build);
+  //   3) ТОЛЬКО если сборка успешна — перезапуск (docker compose up
+  //      --force-recreate ИЛИ pm2 restart all).
+  // Так как `pm2 restart`/`up --force-recreate` стоят ПОСЛЕ успешной сборки,
+  // при сбое установки или сборки старое работающее приложение НЕ трогается и
+  // сайт продолжает отдавать предыдущую сборку. Весь вывод пишется в лог-файл,
+  // чтобы можно было диагностировать, почему перезапуск не сработал.
   const commands = [
+    "set -eu",
     `cd "${cwd}"`,
-    // На сервере приложение реально запущено через docker compose.
-    // Если docker-compose.prod.yml существует — пересобираем и перезапускаем
-    // контейнер, иначе (локально / PM2) — собираем и перезапускаем через PM2.
-    // Перед пересборкой всегда ставим dev-зависимости (--include=dev),
-    // чтобы при NODE_ENV=production они были на месте (напр. @types/js-yaml)
-    // и build не падал с «Could not find a declaration file for module ...».
+    `exec >> "${logFile}" 2>&1`,
+    `echo ""`,
+    `echo "===== receive-code build started $(date '+%Y-%m-%d %H:%M:%S') ====="`,
     "echo '📦 npm install --include=dev...'",
     "npm install --include=dev",
     "echo '✓ Dependencies installed'",
@@ -65,10 +76,11 @@ function triggerBuild() {
     "  echo '🏗️ npm run build...'",
     "  npm run build",
     "  echo '✓ Build completed'",
-    "  echo '🔄 PM2 restart...'",
-    "  pm2 restart all || (npm run build && npm run start &)",
+    "  echo '🔄 PM2 restart all...'",
+    "  pm2 restart all",
     "  echo '✓ Restart complete'",
     "fi",
+    `echo "===== receive-code build finished OK $(date '+%Y-%m-%d %H:%M:%S') ====="`,
   ].join("\n");
 
   const child = spawn("sh", ["-c", commands], {
@@ -77,6 +89,11 @@ function triggerBuild() {
     detached: true,
   });
 
+  // При сбое любого шага процесс завершится с ненулевым кодом; диагностика — в
+  // .receive-code-build.log. Отсоединяем процесс, чтобы он жил после ответа API.
+  child.on("error", (err) => {
+    console.error("Failed to spawn receive-code build:", err);
+  });
   child.unref();
 }
 
