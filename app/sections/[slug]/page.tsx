@@ -34,38 +34,6 @@ export default async function SectionPage({
     (a) => a.section === section.category
   );
 
-  const filteredByCategory = activities.filter(
-    (a) => a.section === section.category
-  );
-  const filteredById = activities.filter((a) => a.section === section.id);
-  const filteredByName = activities.filter((a) => a.section === section.name);
-
-  const debugInfo = {
-    slug,
-    section: { id: section.id, name: section.name, category: section.category },
-    sectionsCount: sections.length,
-    activitiesCount: activities.length,
-    activeActivitiesCount: activities.filter((a) => a.status === "active")
-      .length,
-    categoryActivitiesCount: categoryActivities.length,
-    filteredByCategoryCount: filteredByCategory.length,
-    filteredByIdCount: filteredById.length,
-    filteredByNameCount: filteredByName.length,
-    allActivities: activities.map((a) => ({
-      id: a.id,
-      title: a.title,
-      section: a.section,
-      status: a.status,
-    })),
-    allSections: sections.map((s) => ({
-      id: s.id,
-      name: s.name,
-      category: s.category,
-    })),
-  };
-
-  const isDebug = true;
-
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:py-12">
       <Link
@@ -159,16 +127,6 @@ export default async function SectionPage({
             );
           })}
         </div>
-      )}
-      {isDebug && (
-        <details className="mt-8 rounded-lg border border-dashed border-amber-400 bg-amber-50 p-4 text-xs font-mono">
-          <summary className="cursor-pointer font-semibold text-amber-800">
-            Debug: данные страницы раздела
-          </summary>
-          <pre className="mt-2 max-h-96 overflow-auto whitespace-pre-wrap">
-            {JSON.stringify(debugInfo, null, 2)}
-          </pre>
-        </details>
       )}
     </div>
   );
