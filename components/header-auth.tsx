@@ -33,7 +33,7 @@ export function HeaderAuth() {
   }, []);
 
   const linkClass =
-    "rounded-full border px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground min-h-9 flex items-center";
+    "rounded-full border px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground min-h-9 flex items-center whitespace-nowrap";
 
   if (partnerToken) {
     return (
@@ -60,12 +60,12 @@ export function HeaderAuth() {
       <DropdownMenu>
         <DropdownMenuTrigger
           render={<Button variant="outline" size="sm" />}
-          className="rounded-full gap-1 px-3 text-xs"
+          className="rounded-full gap-1 px-2.5 sm:px-3 text-xs whitespace-nowrap"
         >
           Вход
-          <ChevronDownIcon className="size-4 text-muted-foreground" />
+          <ChevronDownIcon className="size-4 text-muted-foreground shrink-0" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end" sideOffset={8} className="w-52">
           <DropdownMenuItem render={<Link href="/partner/login" />}>
             Вход для партнёров
           </DropdownMenuItem>
