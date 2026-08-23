@@ -223,5 +223,9 @@ tasks:
     meta:
       quick_implement_marker: quick_implement:call_43181c3f4e324d01b660af84
     id: task-2617
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      Исправлен автодеплой: в скрипте app/api/deploy/route.ts команда npm install
+      заменена на npm install --include=dev, чтобы при NODE_ENV=production
+      dev-зависимости (например, @types/js-yaml) всегда устанавливались и типчек
+      при сборке не падал.
