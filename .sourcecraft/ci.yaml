@@ -1,3 +1,11 @@
+on:
+  push:
+    - workflows: deploy
+      filter:
+        branches: "main"
+  implement_project:
+    - deploy
+
 tokens:
   SERVICE_CONNECTION:
     service_connection: vibecraft-service-connection
