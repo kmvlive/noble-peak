@@ -55,6 +55,7 @@ workflows:
               - echo "=== Delivering code to production via deliver:code ==="
               - RECEIVE_CODE_TOKEN=${{ secrets.RECEIVE_CODE_TOKEN }}
               - export RECEIVE_CODE_TOKEN
+              - npm install --include=dev
               - npm run deliver:code
               - echo "=== DELIVER CODE COMPLETE ==="
       - name: deploy-via-ssh
