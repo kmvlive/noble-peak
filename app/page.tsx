@@ -44,7 +44,7 @@ function SectionCard({
 
   return (
     <Link href={`/sections/${section.id}`}>
-      <Card className="min-w-[180px] snap-start card-hover">
+      <Card className="card-hover h-full">
         {hasRealImage ? (
           <div className="bg-muted">
             <img
@@ -94,7 +94,7 @@ function ActivitySection({
         </div>
         <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
       </div>
-      <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-none">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {items.map(({ id, sectionName, ...rest }) => (
           <ActivityCard key={id} _id={id} category={sectionName} {...rest} />
         ))}
@@ -193,7 +193,7 @@ export default async function HomePage() {
             </div>
             <h2 className="text-xl font-semibold tracking-tight">Разделы</h2>
           </div>
-          <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-none">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {sections.map((section) => (
               <SectionCard
                 key={section.id}

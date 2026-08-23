@@ -29,7 +29,7 @@ export function ActivityCard({
 
   return (
     <Link href={`/activities/${_id}`}>
-      <Card className="min-w-[260px] snap-start card-hover">
+      <Card className="card-hover h-full">
         {hasRealImage ? (
           <div className="bg-muted">
             <img
