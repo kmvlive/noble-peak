@@ -159,7 +159,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
     },
     {
       href: "/admin/listings/pending",
-      label: "Новые услуги",
+      label: "Новые объекты",
       icon: BedDouble,
     },
     { href: "/admin/reviews", label: "Отзывы", icon: MessageSquare },

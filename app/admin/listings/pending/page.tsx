@@ -116,7 +116,7 @@ export default function AdminPendingListingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Новые услуги</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Новые объекты</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Объявления, добавленные партнёрами. Здесь они ожидают модерации.
         </p>
