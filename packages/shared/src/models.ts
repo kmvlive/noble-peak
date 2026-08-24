@@ -476,3 +476,30 @@ export interface ListingBookingRecord {
   status: ListingBookingStatus;
   createdAt: string;
 }
+
+/**
+ * Состояние синхронизации подключения к менеджеру каналов (например, Bnovo).
+ * Хранит маппинг единиц объявления на канальные сущности, кэш токена и
+ * статус последней синхронизации, чтобы избегать двойных броней и потери данных.
+ */
+export interface ListingChannelSyncRecord {
+  connectionId: string;
+  listingId: string;
+  channelType: ListingChannelType;
+  /** Маппинг unitId нашего объявления -> id комнаты/типа комнаты канала. */
+  mapping?: Record<string, string>;
+  /** id объекта недвижимости в канале (property/hotel). */
+  propertyId?: string;
+  /** id тарифа/плана цен в канале. */
+  planId?: string;
+  /** Маппинг id нашей брони -> id брони в канале (для исключения двойных). */
+  bookingMappings?: Record<string, string>;
+  token?: string;
+  tokenExpiresAt?: string;
+  webhookRegistered?: boolean;
+  /** Идентификатор подписчика вебхука в канале. */
+  webhookId?: string;
+  lastSyncAt?: string;
+  lastError?: string;
+  updatedAt: string;
+}

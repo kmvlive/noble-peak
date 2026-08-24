@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Cable, Plug, Plus, Trash2 } from "lucide-react";
+import { Cable, Loader2, Plug, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { CHANNEL_MANAGERS, getChannelManager } from "@/lib/channels";
 import type {
   ListingChannelConnection,
@@ -21,16 +22,21 @@ import {
 interface ListingChannelsManagerProps {
   initialConnections?: ListingChannelConnection[];
   onChange: (connections: ListingChannelConnection[]) => void;
+  listingId?: string;
 }
 
 export function ListingChannelsManager({
   initialConnections = [],
   onChange,
+  listingId,
 }: ListingChannelsManagerProps) {
   const [connections, setConnections] =
     useState<ListingChannelConnection[]>(initialConnections);
   const [draftType, setDraftType] = useState<ListingChannelType | "">("");
   const [draftValues, setDraftValues] = useState<Record<string, string>>({});
+  const [connectingId, setConnectingId] = useState<string | null>(null);
+  const [syncingId, setSyncingId] = useState<string | null>(null);
+  const [connected, setConnected] = useState<Record<string, boolean>>({});
 
   const manager = draftType ? getChannelManager(draftType) : undefined;
 
@@ -65,6 +71,78 @@ export function ListingChannelsManager({
   const removeConnection = (id: string) =>
     commit(connections.filter((c) => c.id !== id));
 
+  const connectBnovo = async (conn: ListingChannelConnection) => {
+    if (!listingId) {
+      toast.error("Сохраните объявление, чтобы подключить канал");
+      return;
+    }
+    const creds = Object.fromEntries(
+      conn.credentials.map((c) => [c.key, c.value])
+    );
+    if (!creds.login || !creds.password) {
+      toast.error("Введите логин и пароль API Bnovo");
+      return;
+    }
+    setConnectingId(conn.id);
+    try {
+      const res = await fetch("/api/channels/bnovo/connect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          connectionId: conn.id,
+          listingId,
+          login: creds.login,
+          password: creds.password,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error ?? "Не удалось подключить Bnovo");
+        return;
+      }
+      setConnected((prev) => ({ ...prev, [conn.id]: true }));
+      toast.success(
+        data.webhookRegistered
+          ? "Аккаунт Bnovo подключён, вебхуки зарегистрированы"
+          : "Аккаунт Bnovo подключён"
+      );
+    } catch {
+      toast.error("Ошибка подключения к Bnovo");
+    } finally {
+      setConnectingId(null);
+    }
+  };
+
+  const syncNow = async (conn: ListingChannelConnection) => {
+    if (!listingId) {
+      toast.error("Сохраните объявление, чтобы синхронизировать календарь");
+      return;
+    }
+    setSyncingId(conn.id);
+    try {
+      const res = await fetch("/api/channels/bnovo/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ listingId }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error ?? "Ошибка синхронизации");
+        return;
+      }
+      const result = data.results?.[listingId];
+      toast.success(
+        result?.ok
+          ? "Синхронизация с Bnovo выполнена"
+          : "Синхронизация завершена с ошибкой"
+      );
+    } catch {
+      toast.error("Ошибка синхронизации");
+    } finally {
+      setSyncingId(null);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -72,8 +150,8 @@ export function ListingChannelsManager({
         <div>
           <p className="font-medium">Менеджеры каналов</p>
           <p className="text-sm text-muted-foreground">
-            Подключите аккаунты менеджеров каналов для будущей синхронизации
-            календаря. Реальная синхронизация появится позже.
+            Подключите аккаунты менеджеров каналов для двухсторонней
+            синхронизации календаря.
           </p>
         </div>
       </div>
@@ -84,38 +162,78 @@ export function ListingChannelsManager({
             <Plug className="h-6 w-6 text-muted-foreground" />
           </div>
           <p className="max-w-xs text-sm text-muted-foreground">
-            Каналы пока не подключены. Добавьте менеджер канала, чтобы
-            подготовить объявление к синхронизации.
+            Каналы пока не подключены. Добавьте менеджер канала, чтобы включить
+            синхронизацию календаря.
           </p>
         </div>
       ) : (
         <ul className="space-y-3">
           {connections.map((conn) => {
             const def = getChannelManager(conn.type);
+            const isBnovo = conn.type === "bnovo";
+            const isBusy = connectingId === conn.id || syncingId === conn.id;
             return (
-              <li
-                key={conn.id}
-                className="flex items-center justify-between gap-3 rounded-xl border p-3"
-              >
-                <div>
-                  <p className="text-sm font-medium">
-                    {def?.name ?? conn.type}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {conn.credentials
-                      .map((c) => (c.value ? "••••••••" : `${c.key}: пусто`))
-                      .join(" · ") || "Нет данных аккаунта"}
-                  </p>
+              <li key={conn.id} className="space-y-2 rounded-xl border p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">
+                      {def?.name ?? conn.type}
+                      {connected[conn.id] && (
+                        <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700">
+                          подключён
+                        </span>
+                      )}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {conn.credentials
+                        .map((c) => (c.value ? "••••••••" : `${c.key}: пусто`))
+                        .join(" · ") || "Нет данных аккаунта"}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1">
+                    {isBnovo && (
+                      <>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => connectBnovo(conn)}
+                          disabled={isBusy}
+                        >
+                          {connectingId === conn.id ? (
+                            <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Plug className="mr-1 h-4 w-4" />
+                          )}
+                          Проверить
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => syncNow(conn)}
+                          disabled={isBusy}
+                        >
+                          {syncingId === conn.id ? (
+                            <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                          ) : (
+                            <RefreshCw className="mr-1 h-4 w-4" />
+                          )}
+                          Синхронизировать
+                        </Button>
+                      </>
+                    )}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Отключить канал"
+                      onClick={() => removeConnection(conn.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Отключить канал"
-                  onClick={() => removeConnection(conn.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
               </li>
             );
           })}

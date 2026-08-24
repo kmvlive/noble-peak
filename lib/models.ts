@@ -30,6 +30,7 @@ import type {
   ListingCalendarRecord,
   ListingDateStatus,
   ListingBookingRecord,
+  ListingChannelSyncRecord,
 } from "./schema";
 import { randomUUID } from "node:crypto";
 import { sendVkNotification } from "./vk-notify";
@@ -881,6 +882,47 @@ export async function blockListingDates(
   const dates = existing?.dates ? { ...existing.dates } : {};
   for (const date of getListingNightDates(checkIn, checkOut)) {
     dates[date] = "booked";
+  }
+  return setListingCalendar(listingId, unitId, dates, {
+    prices: existing?.prices,
+    minNights: existing?.minNights,
+  });
+}
+
+/** Снимает блокировку «занято» с диапазона дат (например, при отмене брони). */
+export async function unblockListingDates(
+  listingId: string,
+  unitId: string,
+  checkIn: string,
+  checkOut: string
+): Promise<ListingCalendarRecord> {
+  const existing = await getListingCalendar(listingId, unitId);
+  const dates = existing?.dates ? { ...existing.dates } : {};
+  for (const date of getListingNightDates(checkIn, checkOut)) {
+    if (dates[date] === "booked") {
+      delete dates[date];
+    }
+  }
+  return setListingCalendar(listingId, unitId, dates, {
+    prices: existing?.prices,
+    minNights: existing?.minNights,
+  });
+}
+
+/** Закрывает даты от новых броней (закрытие продаж владельцем), диапазон включительно. */
+export async function closeListingDates(
+  listingId: string,
+  unitId: string,
+  fromDate: string,
+  toDate: string
+): Promise<ListingCalendarRecord> {
+  const existing = await getListingCalendar(listingId, unitId);
+  const dates = existing?.dates ? { ...existing.dates } : {};
+  const endExclusive = new Date(toDate + "T00:00:00Z");
+  endExclusive.setUTCDate(endExclusive.getUTCDate() + 1);
+  const toIso = endExclusive.toISOString().split("T")[0];
+  for (const date of getListingNightDates(fromDate, toIso)) {
+    dates[date] = "closed";
   }
   return setListingCalendar(listingId, unitId, dates, {
     prices: existing?.prices,
@@ -3550,6 +3592,63 @@ export async function deleteInfoPage(id: string): Promise<void> {
     new DeleteCommand({
       TableName: TableName.INFO_PAGES,
       Key: { id },
+    })
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Каналы: состояние синхронизации (ListingChannelSyncRecord)
+// ---------------------------------------------------------------------------
+
+export async function getChannelSyncRecord(
+  connectionId: string
+): Promise<ListingChannelSyncRecord | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TableName.LISTING_CHANNEL_SYNC,
+      Key: { connectionId },
+    })
+  );
+  return (result.Item as ListingChannelSyncRecord) ?? null;
+}
+
+export async function getChannelSyncByListing(
+  listingId: string
+): Promise<ListingChannelSyncRecord[]> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.LISTING_CHANNEL_SYNC,
+      IndexName: IndexName.LISTING_CHANNEL_SYNC_LISTING_ID,
+      KeyConditionExpression: "listingId = :listingId",
+      ExpressionAttributeValues: { ":listingId": listingId },
+    })
+  );
+  return (result.Items as ListingChannelSyncRecord[]) ?? [];
+}
+
+export async function saveChannelSyncRecord(
+  record: ListingChannelSyncRecord
+): Promise<ListingChannelSyncRecord> {
+  const item: ListingChannelSyncRecord = {
+    ...record,
+    updatedAt: new Date().toISOString(),
+  };
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.LISTING_CHANNEL_SYNC,
+      Item: item,
+    })
+  );
+  return item;
+}
+
+export async function deleteChannelSyncRecord(
+  connectionId: string
+): Promise<void> {
+  await docClient.send(
+    new DeleteCommand({
+      TableName: TableName.LISTING_CHANNEL_SYNC,
+      Key: { connectionId },
     })
   );
 }

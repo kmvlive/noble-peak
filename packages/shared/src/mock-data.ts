@@ -27,7 +27,7 @@ import type {
 } from "./models";
 import type { SliderImage, OrderSettingsRecord } from "./models";
 import { LISTING_UNIT_OBJECT, type ListingCalendarRecord } from "./models";
-import type { ListingBookingRecord } from "./models";
+import type { ListingBookingRecord, ListingChannelSyncRecord } from "./models";
 
 export const mockServices: Service[] = [
   {
@@ -172,6 +172,20 @@ export const mockListingCalendars: ListingCalendarRecord[] = [
 ];
 
 export const mockListingBookings: ListingBookingRecord[] = [];
+
+export const mockChannelSyncRecords: ListingChannelSyncRecord[] = [
+  {
+    connectionId: "mock-bnovo-sync-1",
+    listingId: "mock-listing-3",
+    channelType: "bnovo",
+    propertyId: "100",
+    planId: "200",
+    mapping: { [LISTING_UNIT_OBJECT]: "300" },
+    webhookRegistered: true,
+    lastSyncAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+];
 
 export const mockBookings: BookingRecord[] = [
   {

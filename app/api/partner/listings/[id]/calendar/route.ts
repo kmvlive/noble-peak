@@ -17,6 +17,7 @@ import {
   listingCalendarPricesSchema,
 } from "@/lib/validation/listing-calendar";
 import { mockListings, mockListingCalendars } from "@/lib/mock-data";
+import { syncListingBnovo } from "@/lib/channels/bnovo";
 
 const saveCalendarSchema = z.object({
   unitId: z.string().min(1).max(200),
@@ -135,6 +136,10 @@ export async function PUT(
     }
 
     const calendar = await reblockListingBookedDates(id, unitId);
+    // Публикуем изменения (закрытые даты, цены) в подключённые каналы Bnovo.
+    syncListingBnovo(id).catch((err) =>
+      console.error("Ошибка синхронизации календаря с Bnovo:", err)
+    );
     return NextResponse.json(calendar);
   } catch (error) {
     console.error("Ошибка сохранения календаря объявления:", error);

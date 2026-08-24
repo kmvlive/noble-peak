@@ -698,6 +698,7 @@ export function PartnerListingEditForm({ listingId }: { listingId: string }) {
             <ListingChannelsManager
               initialConnections={channelConnections}
               onChange={setChannelConnections}
+              listingId={listingId}
             />
           </div>
 

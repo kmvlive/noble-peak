@@ -35,6 +35,7 @@ export const TableName = {
   LISTINGS: "listings",
   LISTING_CALENDAR: "listing_calendar",
   LISTING_BOOKINGS: "listing_bookings",
+  LISTING_CHANNEL_SYNC: "listing_channel_sync",
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];
@@ -449,6 +450,22 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
       },
     ],
   },
+
+  [TableName.LISTING_CHANNEL_SYNC]: {
+    name: TableName.LISTING_CHANNEL_SYNC,
+    keySchema: [{ AttributeName: "connectionId", KeyType: "HASH" }],
+    attributeDefinitions: [
+      { AttributeName: "connectionId", AttributeType: "S" },
+      { AttributeName: "listingId", AttributeType: "S" },
+    ],
+    globalSecondaryIndexes: [
+      {
+        IndexName: "listingId-index",
+        KeySchema: [{ AttributeName: "listingId", KeyType: "HASH" }],
+        Projection: { ProjectionType: "ALL" },
+      },
+    ],
+  },
 };
 
 export const TABLE_NAMES: TableName[] = Object.values(TableName);
@@ -479,6 +496,7 @@ export const IndexName = {
   LISTINGS_STATUS: "status-index",
   LISTING_BOOKINGS_LISTING_ID: "listingId-index",
   LISTING_BOOKINGS_CLIENT_EMAIL: "clientEmail-index",
+  LISTING_CHANNEL_SYNC_LISTING_ID: "listingId-index",
 } as const;
 
 export type IndexName = (typeof IndexName)[keyof typeof IndexName];

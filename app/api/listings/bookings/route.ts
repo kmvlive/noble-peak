@@ -20,6 +20,7 @@ import {
   createClientToken,
 } from "@/lib/client-auth";
 import { mockListingBookings } from "@/lib/mock-data";
+import { pushBookingToBnovo } from "@/lib/channels/bnovo";
 
 function generateGuestEmail(phone: string): string {
   const cleanPhone = phone.replace(/\D/g, "");
@@ -189,6 +190,11 @@ export async function POST(request: NextRequest) {
   });
 
   await blockListingDates(listingId, unitId, checkIn, checkOut);
+
+  // Отправляем бронь в подключённые каналы (Bnovo) без блокировки ответа клиенту.
+  pushBookingToBnovo(booking).catch((err) =>
+    console.error("Ошибка отправки брони в канал:", err)
+  );
 
   const setPasswordToken = !getClientEmailFromRequest(request)
     ? createClientToken(clientEmail)
