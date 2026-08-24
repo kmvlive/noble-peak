@@ -429,3 +429,14 @@ export interface ListingRecord {
   createdAt: string;
   updatedAt: string;
 }
+
+export const LISTING_UNIT_OBJECT = "__object__";
+
+export type ListingDateStatus = "available" | "booked" | "closed";
+
+export interface ListingCalendarRecord {
+  listingId: string;
+  unitId: string;
+  dates: Record<string, ListingDateStatus>;
+  updatedAt: string;
+}

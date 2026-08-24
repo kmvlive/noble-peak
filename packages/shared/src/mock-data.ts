@@ -26,6 +26,7 @@ import type {
   ListingRecord,
 } from "./models";
 import type { SliderImage, OrderSettingsRecord } from "./models";
+import { LISTING_UNIT_OBJECT, type ListingCalendarRecord } from "./models";
 
 export const mockServices: Service[] = [
   {
@@ -147,6 +148,19 @@ export const mockListings: ListingRecord[] = [
 ];
 
 export const mockCalendars: ActivityCalendarRecord[] = [];
+
+export const mockListingCalendars: ListingCalendarRecord[] = [
+  {
+    listingId: "mock-listing-3",
+    unitId: LISTING_UNIT_OBJECT,
+    dates: {
+      "2026-09-01": "available",
+      "2026-09-02": "booked",
+      "2026-09-03": "closed",
+    },
+    updatedAt: new Date().toISOString(),
+  },
+];
 
 export const mockBookings: BookingRecord[] = [
   {

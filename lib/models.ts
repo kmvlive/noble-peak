@@ -15,7 +15,7 @@ import {
   ScanCommand,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
-import { TableName, IndexName } from "./schema";
+import { TableName, IndexName, LISTING_UNIT_OBJECT } from "./schema";
 import type {
   InfoPageRecord,
   InfoPageTarget,
@@ -27,6 +27,8 @@ import type {
   PayoutRecord,
   PayoutStatus,
   ListingRecord,
+  ListingCalendarRecord,
+  ListingDateStatus,
 } from "./schema";
 import { randomUUID } from "node:crypto";
 import { sendVkNotification } from "./vk-notify";
@@ -588,6 +590,75 @@ export async function deleteListing(id: string): Promise<void> {
       Key: { id },
     })
   );
+}
+
+export function getListingCalendarUnits(listing: ListingRecord): string[] {
+  if (listing.housingType === "rooms") {
+    const rooms = listing.rooms ?? [];
+    if (rooms.length === 0) return [LISTING_UNIT_OBJECT];
+    return rooms.map((room, index) => room.id ?? room.name ?? `room-${index}`);
+  }
+  return [LISTING_UNIT_OBJECT];
+}
+
+export async function getListingCalendar(
+  listingId: string,
+  unitId: string
+): Promise<ListingCalendarRecord | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TableName.LISTING_CALENDAR,
+      Key: { listingId, unitId },
+    })
+  );
+  return (result.Item as ListingCalendarRecord) ?? null;
+}
+
+export async function getListingCalendars(
+  listingId: string
+): Promise<ListingCalendarRecord[]> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.LISTING_CALENDAR,
+      KeyConditionExpression: "listingId = :listingId",
+      ExpressionAttributeValues: { ":listingId": listingId },
+    })
+  );
+  return (result.Items as ListingCalendarRecord[]) ?? [];
+}
+
+export async function setListingCalendar(
+  listingId: string,
+  unitId: string,
+  dates: Record<string, ListingDateStatus>
+): Promise<ListingCalendarRecord> {
+  const record: ListingCalendarRecord = {
+    listingId,
+    unitId,
+    dates,
+    updatedAt: new Date().toISOString(),
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.LISTING_CALENDAR,
+      Item: record,
+    })
+  );
+
+  return record;
+}
+
+export async function setListingDateStatus(
+  listingId: string,
+  unitId: string,
+  date: string,
+  status: ListingDateStatus
+): Promise<ListingCalendarRecord> {
+  const existing = await getListingCalendar(listingId, unitId);
+  const dates = existing?.dates ? { ...existing.dates } : {};
+  dates[date] = status;
+  return setListingCalendar(listingId, unitId, dates);
 }
 
 export interface SectionRecord {

@@ -33,6 +33,7 @@ export const TableName = {
   PARTNER_LINKS: "partner_links",
   PAYOUTS: "payouts",
   LISTINGS: "listings",
+  LISTING_CALENDAR: "listing_calendar",
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];
@@ -411,6 +412,18 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
         KeySchema: [{ AttributeName: "status", KeyType: "HASH" }],
         Projection: { ProjectionType: "ALL" },
       },
+    ],
+  },
+
+  [TableName.LISTING_CALENDAR]: {
+    name: TableName.LISTING_CALENDAR,
+    keySchema: [
+      { AttributeName: "listingId", KeyType: "HASH" },
+      { AttributeName: "unitId", KeyType: "RANGE" },
+    ],
+    attributeDefinitions: [
+      { AttributeName: "listingId", AttributeType: "S" },
+      { AttributeName: "unitId", AttributeType: "S" },
     ],
   },
 };
