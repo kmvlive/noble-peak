@@ -1702,5 +1702,5 @@ tasks:
         переделки ядра
       - Реальная синхронизация с каналами выполняется отдельным этапом
     id: task-1885
-    status: pending
-    summary: null
+    status: completed
+    summary: "Реализован каркас интеграции с менеджерами каналов (realtycalendar, travelline, bnovo, агаст). Модель объявления дополнена полем channelConnections, в форму редактирования объявления добавлен раздел для ввода API-ключа/логина аккаунта канала. Архитектура синхронизации в lib/channels.ts: реестр менеджеров каналов, интерфейс ChannelSyncAdapter и регистрация адаптеров без изменения ядра календаря. Реальная синхронизация — отдельный этап. Основная реализация: lib/channels.ts, components/listing-channels-manager.tsx, lib/validation/listing-channel.ts, packages/shared/src/models.ts."

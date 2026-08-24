@@ -76,6 +76,14 @@ export const mockListings: ListingRecord[] = [
     price: 3500,
     guests: 2,
     status: "active",
+    channelConnections: [
+      {
+        id: "mock-channel-1",
+        type: "realtycalendar",
+        credentials: [{ key: "apiKey", value: "mock-api-key" }],
+        connectedAt: new Date("2024-05-10").toISOString(),
+      },
+    ],
     createdAt: new Date("2024-05-10").toISOString(),
     updatedAt: new Date("2024-05-10").toISOString(),
   },

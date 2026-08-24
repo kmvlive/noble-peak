@@ -409,6 +409,21 @@ export interface ListingRoom {
   price: number;
 }
 
+export type ListingChannelType =
+  "realtycalendar" | "travelline" | "bnovo" | "agast";
+
+export interface ListingChannelCredential {
+  key: string;
+  value: string;
+}
+
+export interface ListingChannelConnection {
+  id: string;
+  type: ListingChannelType;
+  credentials: ListingChannelCredential[];
+  connectedAt: string;
+}
+
 export interface ListingRecord {
   id: string;
   title: string;
@@ -426,6 +441,7 @@ export interface ListingRecord {
   partnerEmail?: string;
   rooms?: ListingRoom[];
   meals?: string[];
+  channelConnections?: ListingChannelConnection[];
   createdAt: string;
   updatedAt: string;
 }

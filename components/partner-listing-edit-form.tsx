@@ -36,7 +36,9 @@ import type {
   ListingRecord,
   HousingType,
   ListingRoom,
+  ListingChannelConnection,
 } from "@noble-peak/shared";
+import { ListingChannelsManager } from "./listing-channels-manager";
 
 interface RoomDraft {
   id: string;
@@ -100,6 +102,9 @@ export function PartnerListingEditForm({ listingId }: { listingId: string }) {
 
   const [rooms, setRooms] = useState<RoomDraft[]>([]);
   const [meals, setMeals] = useState<string[]>([""]);
+  const [channelConnections, setChannelConnections] = useState<
+    ListingChannelConnection[]
+  >([]);
 
   const [saving, setSaving] = useState(false);
 
@@ -142,6 +147,7 @@ export function PartnerListingEditForm({ listingId }: { listingId: string }) {
         setMeals(
           data.meals && data.meals.length > 0 ? [...data.meals, ""] : [""]
         );
+        setChannelConnections(data.channelConnections ?? []);
         setLoading(false);
       })
       .catch((err) => {
@@ -262,6 +268,7 @@ export function PartnerListingEditForm({ listingId }: { listingId: string }) {
         images,
         rooms: normalizedRooms,
         meals: meals.map((m) => m.trim()).filter((m) => m.length > 0),
+        channelConnections,
       };
     } else {
       payload = {
@@ -274,6 +281,7 @@ export function PartnerListingEditForm({ listingId }: { listingId: string }) {
         images,
         price: Number(price),
         guests: Number(guests) >= 1 ? Number(guests) : 1,
+        channelConnections,
       };
     }
 
@@ -685,6 +693,13 @@ export function PartnerListingEditForm({ listingId }: { listingId: string }) {
               </div>
             </>
           )}
+
+          <div className="rounded-xl border p-4">
+            <ListingChannelsManager
+              initialConnections={channelConnections}
+              onChange={setChannelConnections}
+            />
+          </div>
 
           <div className="flex items-center justify-between border-t pt-4">
             <Link href="/partner/listings">

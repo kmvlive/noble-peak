@@ -113,6 +113,10 @@ export async function PUT(
       guests: totalGuests,
       rooms: data.rooms,
       meals: data.meals,
+      channelConnections: data.channelConnections?.map((conn) => ({
+        ...conn,
+        connectedAt: new Date().toISOString(),
+      })),
       status: listing.status,
     });
 

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { HOUSING_TYPES, getListingSubtypesForType } from "@noble-peak/shared";
 import type { HousingType } from "@noble-peak/shared";
+import { listingChannelConnectionsSchema } from "./listing-channel";
 
 export const housingTypeSchema = z.enum(
   HOUSING_TYPES.map((t) => t.value) as [HousingType, ...HousingType[]]
@@ -62,6 +63,7 @@ export const createPartnerListingSchema = z
       .max(100)
       .optional(),
     meals: z.array(z.string().min(1).max(200)).max(50).optional(),
+    channelConnections: listingChannelConnectionsSchema,
   })
   .superRefine((val, ctx) => {
     if (!isSubtypeValidForType(val.housingType, val.subtype)) {
