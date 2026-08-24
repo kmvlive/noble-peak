@@ -460,7 +460,7 @@ export interface ListingCalendarRecord {
   updatedAt: string;
 }
 
-export type ListingBookingStatus = "confirmed";
+export type ListingBookingStatus = "confirmed" | "cancelled" | "completed";
 
 export interface ListingBookingRecord {
   id: string;

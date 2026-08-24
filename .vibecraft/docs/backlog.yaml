@@ -1890,8 +1890,15 @@ tasks:
       - При включённых настройках уведомления дублируются в Telegram и/или
         ВКонтакте
     id: task-5222
-    status: pending
-    summary: null
+    status: completed
+    summary: "Реализованы уведомления по операциям с жильём. При новом
+      бронировании партнёр получает уведомление на сайте (и в Telegram/ВК при
+      включённых настройках), администратор — письмо на email
+      (app/api/listings/bookings/route.ts). Добавлены операции изменения статуса
+      брони (PATCH) и удаления (DELETE) с уведомлениями клиенту и партнёру
+      (app/api/listings/bookings/[id]/route.ts), модели
+      updateListingBookingStatus/deleteListingBooking (lib/models.ts),
+      статусы расширены до confirmed/cancelled/completed."
   - title:
       Чат между клиентом и партнёром по каждому подтверждённому бронированию
       жилья

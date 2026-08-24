@@ -30,6 +30,7 @@ import type {
   ListingCalendarRecord,
   ListingDateStatus,
   ListingBookingRecord,
+  ListingBookingStatus,
   ListingChannelSyncRecord,
 } from "./schema";
 import { randomUUID } from "node:crypto";
@@ -889,6 +890,46 @@ export async function getClientListingBookings(
     })
   );
   return (result.Items as ListingBookingRecord[]) ?? [];
+}
+
+export async function updateListingBookingStatus(
+  id: string,
+  status: ListingBookingStatus
+): Promise<ListingBookingRecord | null> {
+  await docClient.send(
+    new UpdateCommand({
+      TableName: TableName.LISTING_BOOKINGS,
+      Key: { id },
+      UpdateExpression: "set #status = :status",
+      ExpressionAttributeNames: { "#status": "status" },
+      ExpressionAttributeValues: { ":status": status },
+    })
+  );
+  return getListingBookingById(id);
+}
+
+/** Удаляет бронь жилья и снимает блокировку занятых дат. */
+export async function deleteListingBooking(
+  id: string
+): Promise<ListingBookingRecord | null> {
+  const booking = await getListingBookingById(id);
+  if (!booking) return null;
+
+  await docClient.send(
+    new DeleteCommand({
+      TableName: TableName.LISTING_BOOKINGS,
+      Key: { id },
+    })
+  );
+
+  await unblockListingDates(
+    booking.listingId,
+    booking.unitId,
+    booking.checkIn,
+    booking.checkOut
+  );
+
+  return booking;
 }
 
 export async function blockListingDates(
