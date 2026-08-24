@@ -2005,5 +2005,13 @@ tasks:
       - Администратор может открыть и редактировать каждое объявление
       - Пункт «Все объекты» добавлен в боковое меню админ-панели
     id: task-6431
-    status: pending
-    summary: null
+    status: completed
+    summary:
+      "В админ-панель добавлен раздел «Все объекты» (app/admin/listings/page.tsx,
+      пункт в боковом меню components/admin-layout-client.tsx), который показывает
+      все объявления по жилью — активные, на модерации и отклонённые — с фильтром
+      по статусу. Данные берутся из GET /api/admin/listings (с мок-фолбэком).
+      Каждое объявление открывается на странице app/admin/listings/[id]/edit
+      (components/admin-listing-edit-form.tsx) и редактируется через расширенный
+      PUT /api/admin/listings/[id] (zod-валидация, поля жилья + каналы брони).
+      typecheck, lint и build проходят без ошибок."

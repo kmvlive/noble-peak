@@ -9,11 +9,28 @@ import {
 } from "@/lib/models";
 import { verifyToken } from "@/lib/auth";
 import { z } from "zod";
+import { housingTypeSchema, listingRoomSchema } from "@/lib/validation/listing";
+import { listingChannelConnectionsSchema } from "@/lib/validation/listing-channel";
+import type { ListingRecord } from "@noble-peak/shared";
 
 const updateListingSchema = z.object({
   status: z.enum(["active", "pending", "rejected"]).optional(),
   partnerPrice: z.number().min(0).optional(),
   partnerPricePercent: z.number().min(0).max(100).optional(),
+  housingType: housingTypeSchema.optional(),
+  subtype: z.string().min(1).max(50).optional(),
+  title: z.string().min(1).max(200).optional(),
+  description: z.string().max(10_000).optional(),
+  city: z.string().min(1).max(100).optional(),
+  address: z.string().max(300).optional(),
+  latitude: z.number().min(-90).max(90).optional(),
+  longitude: z.number().min(-180).max(180).optional(),
+  images: z.array(z.string()).max(30).optional(),
+  price: z.number().nonnegative().optional(),
+  guests: z.number().int().nonnegative().optional(),
+  rooms: z.array(listingRoomSchema).min(1).max(100).optional(),
+  meals: z.array(z.string().min(1).max(200)).max(50).optional(),
+  channelConnections: listingChannelConnectionsSchema.optional(),
 });
 
 function getTokenFromRequest(request: NextRequest): string | null {
@@ -101,7 +118,17 @@ export async function PUT(
       );
     }
 
-    const updateData = { ...parsed.data };
+    const { channelConnections, ...restData } = parsed.data;
+    const updateData: Partial<
+      Omit<ListingRecord, "id" | "createdAt" | "updatedAt">
+    > = { ...restData };
+
+    if (channelConnections !== undefined) {
+      updateData.channelConnections = channelConnections.map((conn) => ({
+        ...conn,
+        connectedAt: new Date().toISOString(),
+      }));
+    }
 
     if (
       updateData.status === "active" &&
