@@ -3,10 +3,11 @@ import { isDatabaseAvailable } from "@/lib/db";
 import {
   sendChatMessage,
   getChatMessagesByOrder,
-  getChatThreadsForPartner,
+  getPartnerChatThreads,
+  getMockPartnerChatThreads,
 } from "@/lib/models";
 import { getPartnerEmailFromRequest } from "@/lib/partner-auth";
-import { mockChatMessages, mockPartnerBookings } from "@/lib/mock-data";
+import { mockChatMessages } from "@/lib/mock-data";
 import { z } from "zod";
 
 const sendMessageSchema = z.object({
@@ -37,17 +38,13 @@ export async function GET(request: NextRequest) {
     }
 
     if (dbAvailable) {
-      const messages = await getChatThreadsForPartner(partnerEmail);
-      return NextResponse.json(messages);
+      const threads = await getPartnerChatThreads(partnerEmail);
+      return NextResponse.json({ threads });
     }
 
-    const partnerActivityIds = mockPartnerBookings
-      .filter((b) => b.status === "confirmed")
-      .map((b) => b.id);
-    const threads = mockChatMessages.filter((m) =>
-      partnerActivityIds.includes(m.orderId)
-    );
-    return NextResponse.json(threads);
+    return NextResponse.json({
+      threads: getMockPartnerChatThreads(partnerEmail),
+    });
   } catch {
     return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
   }

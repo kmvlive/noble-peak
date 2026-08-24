@@ -332,7 +332,7 @@ export function PartnerNotificationsList() {
       )}
 
       {tab === "chat" ? (
-        <ChatWidget userRole="partner" userEmail="" apiBase="/api/partner" />
+        <ChatWidget userRole="partner" apiBase="/api/partner" />
       ) : loading ? (
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (

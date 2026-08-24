@@ -6,6 +6,9 @@ import {
   mockOrders,
   mockAgentSettings,
   mockPayouts,
+  mockListings,
+  mockListingBookings,
+  mockChatMessages,
 } from "./mock-data";
 import {
   GetCommand,
@@ -3539,6 +3542,259 @@ export async function getChatThreadsForPartner(
     })
   );
   return (result.Items as ChatMessageRecord[]) ?? [];
+}
+
+/** Единая карточка чат-потока, отображаемая в разделе «Уведомления и чат». */
+export interface ChatThreadItem {
+  orderId: string;
+  kind: "activity" | "listing";
+  title: string;
+  clientEmail: string;
+  clientName?: string;
+  partnerEmail: string;
+  lastMessage: ChatMessageRecord | null;
+}
+
+function groupChatMessagesByOrder(
+  messages: ChatMessageRecord[]
+): Map<string, ChatMessageRecord[]> {
+  const map = new Map<string, ChatMessageRecord[]>();
+  for (const msg of messages) {
+    const list = map.get(msg.orderId) ?? [];
+    list.push(msg);
+    map.set(msg.orderId, list);
+  }
+  return map;
+}
+
+function latestChatMessage(
+  messages: ChatMessageRecord[] | undefined
+): ChatMessageRecord | null {
+  if (!messages || messages.length === 0) return null;
+  return [...messages].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  )[0];
+}
+
+/** Чат по брони жилья активен с подтверждения и до окончания проживания. */
+function isListingBookingChatActive(b: ListingBookingRecord): boolean {
+  const today = new Date().toISOString().split("T")[0];
+  return b.status === "confirmed" && b.checkOut >= today;
+}
+
+async function buildListingChatThreads(
+  bookingList: ListingBookingRecord[],
+  listingList: ListingRecord[],
+  byOrder: Map<string, ChatMessageRecord[]>
+): Promise<ChatThreadItem[]> {
+  const listingMap = new Map(listingList.filter(Boolean).map((l) => [l.id, l]));
+  return bookingList.map((booking) => {
+    const listing = listingMap.get(booking.listingId);
+    return {
+      orderId: booking.id,
+      kind: "listing",
+      title: booking.listingTitle,
+      clientEmail: booking.clientEmail,
+      clientName: booking.clientName,
+      partnerEmail: listing?.partnerEmail ?? "",
+      lastMessage: latestChatMessage(byOrder.get(booking.id)),
+    };
+  });
+}
+
+function sortChatThreads(threads: ChatThreadItem[]): ChatThreadItem[] {
+  return threads.sort((a, b) => {
+    const at = a.lastMessage ? new Date(a.lastMessage.createdAt).getTime() : -1;
+    const bt = b.lastMessage ? new Date(b.lastMessage.createdAt).getTime() : -1;
+    return bt - at;
+  });
+}
+
+/** Возвращает потоки чата клиента: заказы активностей + брони жилья. */
+export async function getClientChatThreads(
+  clientEmail: string
+): Promise<ChatThreadItem[]> {
+  const [messages, clientBookings, listingBookings] = await Promise.all([
+    getChatThreadsForClient(clientEmail),
+    getClientBookings(clientEmail),
+    getClientListingBookings(clientEmail),
+  ]);
+
+  const byOrder = groupChatMessagesByOrder(messages);
+  const confirmedActivityIds = new Set(
+    clientBookings.filter((b) => b.status === "confirmed").map((b) => b.id)
+  );
+  const bookingMap = new Map(clientBookings.map((b) => [b.id, b]));
+
+  const activityThreads: ChatThreadItem[] = [];
+  for (const [orderId, msgs] of byOrder) {
+    if (!confirmedActivityIds.has(orderId)) continue;
+    const booking = bookingMap.get(orderId);
+    activityThreads.push({
+      orderId,
+      kind: "activity",
+      title: booking?.activityTitle ?? "Заказ",
+      clientEmail,
+      clientName: booking?.clientName,
+      partnerEmail: msgs[0].partnerEmail,
+      lastMessage: latestChatMessage(msgs),
+    });
+  }
+
+  const activeListings = listingBookings.filter(isListingBookingChatActive);
+  const listingIds = Array.from(
+    new Set(activeListings.map((b) => b.listingId))
+  );
+  const listings = (
+    await Promise.all(listingIds.map((id) => getListingById(id)))
+  ).filter((l): l is ListingRecord => Boolean(l));
+  const listingThreads = await buildListingChatThreads(
+    activeListings,
+    listings,
+    byOrder
+  );
+
+  return sortChatThreads([...activityThreads, ...listingThreads]);
+}
+
+/** Возвращает потоки чата партнёра: заказы активностей + брони жилья. */
+export async function getPartnerChatThreads(
+  partnerEmail: string
+): Promise<ChatThreadItem[]> {
+  const [messages, activities, listings] = await Promise.all([
+    getChatThreadsForPartner(partnerEmail),
+    getActivitiesByPartnerEmail(partnerEmail),
+    getListingsByPartnerEmail(partnerEmail),
+  ]);
+
+  const byOrder = groupChatMessagesByOrder(messages);
+  const activityIds = activities.map((a) => a.id);
+  const partnerBookings =
+    activityIds.length > 0 ? await getBookingsByActivityIds(activityIds) : [];
+  const bookingMap = new Map(partnerBookings.map((b) => [b.id, b]));
+
+  const activityThreads: ChatThreadItem[] = [];
+  for (const [orderId, msgs] of byOrder) {
+    const booking = bookingMap.get(orderId);
+    activityThreads.push({
+      orderId,
+      kind: "activity",
+      title: booking?.activityTitle ?? "Заказ",
+      clientEmail: msgs[0].clientEmail,
+      clientName: booking?.clientName,
+      partnerEmail,
+      lastMessage: latestChatMessage(msgs),
+    });
+  }
+
+  const activeListingBookings: ListingBookingRecord[] = [];
+  for (const listing of listings) {
+    const bookings = await getListingBookingsByListing(listing.id);
+    activeListingBookings.push(...bookings.filter(isListingBookingChatActive));
+  }
+  const listingThreads = await buildListingChatThreads(
+    activeListingBookings,
+    listings,
+    byOrder
+  );
+
+  return sortChatThreads([...activityThreads, ...listingThreads]);
+}
+
+/** Мок-потоки чата клиента для статического режима. */
+export function getMockClientChatThreads(
+  clientEmail: string
+): ChatThreadItem[] {
+  const byOrder = groupChatMessagesByOrder(mockChatMessages);
+  const confirmedOrderIds = mockOrders
+    .filter((o) => o.clientEmail === clientEmail && o.status === "paid")
+    .map((o) => o.id);
+  const orderMap = new Map(mockOrders.map((o) => [o.id, o]));
+
+  const activityThreads: ChatThreadItem[] = [];
+  for (const [orderId, msgs] of byOrder) {
+    if (!confirmedOrderIds.includes(orderId)) continue;
+    const order = orderMap.get(orderId);
+    activityThreads.push({
+      orderId,
+      kind: "activity",
+      title: order?.activityTitle ?? "Заказ",
+      clientEmail,
+      clientName: order?.clientName,
+      partnerEmail: msgs[0].partnerEmail,
+      lastMessage: latestChatMessage(msgs),
+    });
+  }
+
+  const activeListings = mockListingBookings.filter(
+    (b) => b.clientEmail === clientEmail && isListingBookingChatActive(b)
+  );
+  const listingThreads = buildListingChatThreadsSync(
+    activeListings,
+    mockListings,
+    byOrder
+  );
+
+  return sortChatThreads([...activityThreads, ...listingThreads]);
+}
+
+/** Мок-потоки чата партнёра для статического режима. */
+export function getMockPartnerChatThreads(
+  partnerEmail: string
+): ChatThreadItem[] {
+  const byOrder = groupChatMessagesByOrder(mockChatMessages);
+  const orderMap = new Map(mockOrders.map((o) => [o.id, o]));
+
+  const activityThreads: ChatThreadItem[] = [];
+  for (const [orderId, msgs] of byOrder) {
+    if (msgs[0].partnerEmail !== partnerEmail) continue;
+    const order = orderMap.get(orderId);
+    activityThreads.push({
+      orderId,
+      kind: "activity",
+      title: order?.activityTitle ?? "Заказ",
+      clientEmail: msgs[0].clientEmail,
+      clientName: order?.clientName,
+      partnerEmail,
+      lastMessage: latestChatMessage(msgs),
+    });
+  }
+
+  const partnerListings = mockListings.filter(
+    (l) => l.partnerEmail === partnerEmail
+  );
+  const activeListings = mockListingBookings.filter((b) =>
+    isListingBookingChatActive(b)
+  );
+  const listingThreads = buildListingChatThreadsSync(
+    activeListings,
+    partnerListings,
+    byOrder
+  );
+
+  return sortChatThreads([...activityThreads, ...listingThreads]);
+}
+
+function buildListingChatThreadsSync(
+  bookingList: ListingBookingRecord[],
+  listingList: ListingRecord[],
+  byOrder: Map<string, ChatMessageRecord[]>
+): ChatThreadItem[] {
+  const listingMap = new Map(listingList.filter(Boolean).map((l) => [l.id, l]));
+  return bookingList
+    .filter((b) => listingMap.has(b.listingId))
+    .map((booking) => {
+      const listing = listingMap.get(booking.listingId)!;
+      return {
+        orderId: booking.id,
+        kind: "listing",
+        title: booking.listingTitle,
+        clientEmail: booking.clientEmail,
+        clientName: booking.clientName,
+        partnerEmail: listing.partnerEmail ?? "",
+        lastMessage: latestChatMessage(byOrder.get(booking.id)),
+      };
+    });
 }
 
 export async function getInfoPagesByTarget(

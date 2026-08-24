@@ -318,7 +318,7 @@ export function ClientNotificationsList() {
 
       {tab === "chat" ? (
         <div className="flex flex-1 flex-col min-h-0">
-          <ChatWidget userRole="client" userEmail="" apiBase="/api/client" />
+          <ChatWidget userRole="client" apiBase="/api/client" />
         </div>
       ) : loading ? (
         <div className="space-y-3 mt-4">

@@ -3,27 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MessageSquare, Send, ArrowLeft, ChevronRight } from "lucide-react";
-import { mockOrders, mockPartnerBookings } from "@/lib/mock-data";
 import { toast } from "sonner";
-
-interface ChatMessage {
-  id: string;
-  orderId: string;
-  senderEmail: string;
-  senderRole: "client" | "partner";
-  text: string;
-  clientEmail: string;
-  partnerEmail: string;
-  createdAt: string;
-}
-
-interface ThreadInfo {
-  orderId: string;
-  lastMessage: ChatMessage;
-  activityTitle: string;
-  partnerName?: string;
-  clientName?: string;
-}
+import type { ChatThreadItem, ChatMessageRecord } from "@/lib/models";
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
@@ -57,17 +38,15 @@ function formatTime(dateStr: string): string {
 
 export function ChatWidget({
   userRole,
-  userEmail,
   apiBase,
 }: {
   userRole: "client" | "partner";
-  userEmail: string;
   apiBase: string;
 }) {
-  const [threads, setThreads] = useState<ThreadInfo[]>([]);
+  const [threads, setThreads] = useState<ChatThreadItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessageRecord[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [inputText, setInputText] = useState("");
   const [sending, setSending] = useState(false);
@@ -82,45 +61,19 @@ export function ChatWidget({
           return;
         }
         const data = await res.json();
-        const items: ChatMessage[] = data.threads ?? data ?? [];
+        const items: ChatThreadItem[] = data.threads ?? [];
 
-        if (items.length === 0) {
-          setThreads([]);
-          return;
-        }
+        items.sort((a, b) => {
+          const at = a.lastMessage
+            ? new Date(a.lastMessage.createdAt).getTime()
+            : -1;
+          const bt = b.lastMessage
+            ? new Date(b.lastMessage.createdAt).getTime()
+            : -1;
+          return bt - at;
+        });
 
-        const orderMap = new Map<string, ChatMessage[]>();
-        for (const msg of items) {
-          if (!orderMap.has(msg.orderId)) {
-            orderMap.set(msg.orderId, []);
-          }
-          orderMap.get(msg.orderId)!.push(msg);
-        }
-
-        const result: ThreadInfo[] = [];
-        for (const [orderId, msgs] of orderMap) {
-          msgs.sort(
-            (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-          const activityTitle = getActivityTitle(orderId);
-          const clientName = getClientName(orderId);
-          result.push({
-            orderId,
-            lastMessage: msgs[0],
-            activityTitle,
-            partnerName: "Партнёр",
-            clientName,
-          });
-        }
-
-        result.sort(
-          (a, b) =>
-            new Date(b.lastMessage.createdAt).getTime() -
-            new Date(a.lastMessage.createdAt).getTime()
-        );
-
-        setThreads(result);
+        setThreads(items);
       } catch {
         setThreads([]);
       } finally {
@@ -147,7 +100,8 @@ export function ChatWidget({
         return;
       }
       const data = await res.json();
-      const items: ChatMessage[] = data.messages ?? data ?? [];
+      const items: ChatMessageRecord[] =
+        data.messages ?? (Array.isArray(data) ? data : []);
       items.sort(
         (a, b) =>
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
@@ -166,23 +120,15 @@ export function ChatWidget({
     const thread = threads.find((t) => t.orderId === selectedOrderId);
     if (!thread) return;
 
-    const partnerEmail =
-      userRole === "client"
-        ? thread.lastMessage.partnerEmail
-        : thread.lastMessage.clientEmail;
-
-    const clientEmail =
-      userRole === "client" ? userEmail : thread.lastMessage.clientEmail;
-
     const body: Record<string, string> = {
       orderId: selectedOrderId,
       text: inputText.trim(),
     };
 
     if (userRole === "client") {
-      body.partnerEmail = partnerEmail;
+      body.partnerEmail = thread.partnerEmail;
     } else {
-      body.clientEmail = clientEmail;
+      body.clientEmail = thread.clientEmail;
     }
 
     setSending(true);
@@ -200,7 +146,7 @@ export function ChatWidget({
       }
 
       const data = await res.json();
-      const newMsg: ChatMessage = data.message ?? data;
+      const newMsg: ChatMessageRecord = data.message ?? data;
 
       setMessages((prev) => [...prev, newMsg]);
       setInputText("");
@@ -235,7 +181,7 @@ export function ChatWidget({
         </div>
         <p className="mt-3 text-sm text-muted-foreground">Нет активных чатов</p>
         <p className="mt-1 text-xs text-muted-foreground">
-          Чат появляется после подтверждения заказа
+          Чат появляется после подтверждения заказа или бронирования жилья
         </p>
       </div>
     );
@@ -256,7 +202,7 @@ export function ChatWidget({
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div>
-            <h3 className="text-sm font-semibold">{thread?.activityTitle}</h3>
+            <h3 className="text-sm font-semibold">{thread?.title}</h3>
             <p className="text-xs text-muted-foreground">
               {userRole === "client"
                 ? "Чат с организатором"
@@ -357,17 +303,23 @@ export function ChatWidget({
         >
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <h3 className="text-sm font-semibold">{thread.activityTitle}</h3>
+              <h3 className="text-sm font-semibold">{thread.title}</h3>
               <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
-                {userRole === "client"
-                  ? thread.lastMessage.text
-                  : `${thread.clientName ?? "Клиент"}: ${thread.lastMessage.text}`}
+                {thread.kind === "listing"
+                  ? userRole === "client"
+                    ? "Бронирование жилья"
+                    : `Клиент ${thread.clientName ?? ""}: бронирование жилья`
+                  : userRole === "client"
+                    ? (thread.lastMessage?.text ?? "Нет сообщений")
+                    : `${thread.clientName ?? "Клиент"}: ${thread.lastMessage?.text ?? "Нет сообщений"}`}
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
-              <span className="whitespace-nowrap text-[10px] text-muted-foreground">
-                {formatDate(thread.lastMessage.createdAt)}
-              </span>
+              {thread.lastMessage && (
+                <span className="whitespace-nowrap text-[10px] text-muted-foreground">
+                  {formatDate(thread.lastMessage.createdAt)}
+                </span>
+              )}
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </div>
           </div>
@@ -375,24 +327,4 @@ export function ChatWidget({
       ))}
     </div>
   );
-}
-
-function getActivityTitle(orderId: string): string {
-  const order = mockOrders.find((o) => o.id === orderId);
-  if (order) return order.activityTitle;
-
-  const booking = mockPartnerBookings.find((b) => b.id === orderId);
-  if (booking) return booking.activityTitle;
-
-  return "Заказ";
-}
-
-function getClientName(orderId: string): string {
-  const order = mockOrders.find((o) => o.id === orderId);
-  if (order) return order.clientName;
-
-  const booking = mockPartnerBookings.find((b) => b.id === orderId);
-  if (booking) return booking.clientName;
-
-  return "Клиент";
 }

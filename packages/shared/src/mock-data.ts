@@ -176,7 +176,24 @@ export const mockListingCalendars: ListingCalendarRecord[] = [
   },
 ];
 
-export const mockListingBookings: ListingBookingRecord[] = [];
+export const mockListingBookings: ListingBookingRecord[] = [
+  {
+    id: "mock-listing-booking-chat-1",
+    listingId: "mock-listing-4",
+    listingNumber: "000004",
+    listingTitle: "Апартаменты на набережной",
+    unitId: LISTING_UNIT_OBJECT,
+    clientEmail: "ivan@example.com",
+    clientName: "Иван Петров",
+    clientPhone: "+7 (999) 111-22-33",
+    checkIn: new Date(Date.now() + 86400000).toISOString().split("T")[0],
+    checkOut: new Date(Date.now() + 86400000 * 3).toISOString().split("T")[0],
+    nights: 2,
+    price: 6500,
+    status: "confirmed",
+    createdAt: new Date().toISOString(),
+  },
+];
 
 export const mockChannelSyncRecords: ListingChannelSyncRecord[] = [
   {

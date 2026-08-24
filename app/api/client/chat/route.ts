@@ -3,11 +3,11 @@ import { isDatabaseAvailable } from "@/lib/db";
 import {
   sendChatMessage,
   getChatMessagesByOrder,
-  getChatThreadsForClient,
-  getClientBookings,
+  getClientChatThreads,
+  getMockClientChatThreads,
 } from "@/lib/models";
 import { getClientEmailFromRequest } from "@/lib/client-auth";
-import { mockChatMessages, mockOrders } from "@/lib/mock-data";
+import { mockChatMessages } from "@/lib/mock-data";
 import { z } from "zod";
 
 const sendMessageSchema = z.object({
@@ -41,24 +41,13 @@ export async function GET(request: NextRequest) {
     }
 
     if (dbAvailable) {
-      const messages = await getChatThreadsForClient(clientEmail);
-      const clientBookings = await getClientBookings(clientEmail);
-      const confirmedOrderIds = clientBookings
-        .filter((b) => b.status === "confirmed")
-        .map((b) => b.id);
-      const threads = messages.filter((m) =>
-        confirmedOrderIds.includes(m.orderId)
-      );
+      const threads = await getClientChatThreads(clientEmail);
       return NextResponse.json({ threads });
     }
 
-    const confirmedOrderIds = mockOrders
-      .filter((o) => o.clientEmail === clientEmail && o.status === "paid")
-      .map((o) => o.id);
-    const threads = mockChatMessages.filter((m) =>
-      confirmedOrderIds.includes(m.orderId)
-    );
-    return NextResponse.json({ threads });
+    return NextResponse.json({
+      threads: getMockClientChatThreads(clientEmail),
+    });
   } catch {
     return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
   }
