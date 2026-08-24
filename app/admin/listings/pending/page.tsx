@@ -8,9 +8,11 @@ import {
   Loader2,
   MapPin,
   Users,
+  Percent,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -26,12 +28,17 @@ import {
 } from "@noble-peak/shared";
 import type { ListingRecord } from "@noble-peak/shared";
 
+interface PendingListing extends ListingRecord {
+  agentCommissionPercent?: number;
+}
+
 export default function AdminPendingListingsPage() {
-  const [listings, setListings] = useState<ListingRecord[]>([]);
+  const [listings, setListings] = useState<PendingListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [approveDialogId, setApproveDialogId] = useState<string | null>(null);
   const [rejectDialogId, setRejectDialogId] = useState<string | null>(null);
+  const [partnerPercent, setPartnerPercent] = useState("70");
 
   useEffect(() => {
     fetch("/api/admin/listings/pending")
@@ -44,6 +51,12 @@ export default function AdminPendingListingsPage() {
   }, []);
 
   const handleApprove = async (id: string) => {
+    const percent = Number(partnerPercent);
+    if (isNaN(percent) || percent < 0 || percent > 100) {
+      toast.error("Введите процент от 0 до 100");
+      return;
+    }
+
     setProcessingId(id);
     const token = getToken();
     try {
@@ -53,7 +66,10 @@ export default function AdminPendingListingsPage() {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ status: "active" }),
+        body: JSON.stringify({
+          status: "active",
+          partnerPricePercent: percent,
+        }),
       });
 
       if (!res.ok) {
@@ -141,6 +157,12 @@ export default function AdminPendingListingsPage() {
               listing.housingType,
               listing.subtype
             );
+            const agentPercent = listing.agentCommissionPercent ?? 0;
+            const effectivePercent = Math.max(
+              0,
+              Number(partnerPercent) - agentPercent
+            );
+            const partnerPriceCalc = listing.price * (effectivePercent / 100);
 
             return (
               <div
@@ -193,7 +215,10 @@ export default function AdminPendingListingsPage() {
                     variant="default"
                     size="sm"
                     disabled={isProcessing}
-                    onClick={() => setApproveDialogId(listing.id)}
+                    onClick={() => {
+                      setPartnerPercent("70");
+                      setApproveDialogId(listing.id);
+                    }}
                     className="w-full sm:w-auto"
                   >
                     {isProcessing ? (
@@ -225,27 +250,61 @@ export default function AdminPendingListingsPage() {
                     <DialogHeader>
                       <DialogTitle>Одобрить объявление</DialogTitle>
                       <DialogDescription>
-                        Объявление станет активным и появится на сайте.
+                        Укажите цену для партнёра в % от цены клиента ({" "}
+                        {listing.price} ₽ ).
+                        {agentPercent > 0 && (
+                          <span className="mt-1 block text-xs text-amber-700 dark:text-amber-400">
+                            У партнёра есть агент: {agentPercent}% агентской
+                            комиссии будет вычтено из доли партнёра.
+                          </span>
+                        )}
                       </DialogDescription>
                     </DialogHeader>
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setApproveDialogId(null)}
-                      >
-                        Отмена
-                      </Button>
-                      <Button
-                        type="button"
-                        disabled={isProcessing}
-                        onClick={() => handleApprove(listing.id)}
-                      >
-                        {isProcessing && (
-                          <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">
+                          <Percent className="mr-1 h-4 w-4 inline" />
+                          Процент от цены клиента
+                        </label>
+                        <Input
+                          type="number"
+                          min={0}
+                          max={100}
+                          value={partnerPercent}
+                          onChange={(e) => setPartnerPercent(e.target.value)}
+                          placeholder="70"
+                        />
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {agentPercent > 0 && (
+                          <span>
+                            Доля партнёра: <strong>{effectivePercent}%</strong>{" "}
+                            (после вычета агентской комиссии).{" "}
+                          </span>
                         )}
-                        Одобрить
-                      </Button>
+                        Цена партнёра:{" "}
+                        <strong>{Math.round(partnerPriceCalc)} ₽</strong> (от{" "}
+                        {listing.price} ₽)
+                      </p>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setApproveDialogId(null)}
+                        >
+                          Отмена
+                        </Button>
+                        <Button
+                          type="button"
+                          disabled={isProcessing}
+                          onClick={() => handleApprove(listing.id)}
+                        >
+                          {isProcessing && (
+                            <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                          )}
+                          Одобрить
+                        </Button>
+                      </div>
                     </div>
                   </DialogContent>
                 </Dialog>

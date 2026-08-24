@@ -437,6 +437,8 @@ export interface ListingRecord {
   latitude?: number;
   longitude?: number;
   price: number;
+  partnerPrice?: number;
+  partnerPricePercent?: number;
   guests: number;
   status: ListingStatus;
   partnerEmail?: string;

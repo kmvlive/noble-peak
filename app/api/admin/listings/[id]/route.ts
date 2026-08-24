@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { isDatabaseAvailable } from "@/lib/db";
-import { getListingById, updateListing } from "@/lib/models";
+import {
+  getListingById,
+  updateListing,
+  getPartnerByEmail,
+  getAgentCommissionRateForMonth,
+} from "@/lib/models";
 import { verifyToken } from "@/lib/auth";
 import { z } from "zod";
 
-const updateListingStatusSchema = z.object({
-  status: z.enum(["active", "pending", "rejected"]),
+const updateListingSchema = z.object({
+  status: z.enum(["active", "pending", "rejected"]).optional(),
+  partnerPrice: z.number().min(0).optional(),
+  partnerPricePercent: z.number().min(0).max(100).optional(),
 });
 
 function getTokenFromRequest(request: NextRequest): string | null {
@@ -77,7 +84,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const parsed = updateListingStatusSchema.safeParse(body);
+    const parsed = updateListingSchema.safeParse(body);
 
     if (!parsed.success) {
       return NextResponse.json(
@@ -94,7 +101,32 @@ export async function PUT(
       );
     }
 
-    const updated = await updateListing(id, { status: parsed.data.status });
+    const updateData = { ...parsed.data };
+
+    if (
+      updateData.status === "active" &&
+      updateData.partnerPricePercent !== undefined
+    ) {
+      let effectivePercent = updateData.partnerPricePercent;
+
+      if (existing.partnerEmail) {
+        const partner = await getPartnerByEmail(existing.partnerEmail);
+        if (partner?.agentEmail) {
+          const rate = await getAgentCommissionRateForMonth(partner.agentEmail);
+          effectivePercent = Math.max(
+            0,
+            effectivePercent - Math.round(rate * 100)
+          );
+          updateData.partnerPricePercent = effectivePercent;
+        }
+      }
+
+      updateData.partnerPrice = Math.round(
+        existing.price * (effectivePercent / 100)
+      );
+    }
+
+    const updated = await updateListing(id, updateData);
     revalidateTag("listings", "max");
     return NextResponse.json(updated);
   } catch (error) {
