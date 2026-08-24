@@ -631,7 +631,8 @@ export async function getListingCalendars(
 export async function setListingCalendar(
   listingId: string,
   unitId: string,
-  dates: Record<string, ListingDateStatus>
+  dates: Record<string, ListingDateStatus>,
+  settings?: { prices?: Record<string, number>; minNights?: number }
 ): Promise<ListingCalendarRecord> {
   const record: ListingCalendarRecord = {
     listingId,
@@ -639,6 +640,8 @@ export async function setListingCalendar(
     dates,
     updatedAt: new Date().toISOString(),
   };
+  if (settings?.prices !== undefined) record.prices = settings.prices;
+  if (settings?.minNights !== undefined) record.minNights = settings.minNights;
 
   await docClient.send(
     new PutCommand({
@@ -659,7 +662,87 @@ export async function setListingDateStatus(
   const existing = await getListingCalendar(listingId, unitId);
   const dates = existing?.dates ? { ...existing.dates } : {};
   dates[date] = status;
-  return setListingCalendar(listingId, unitId, dates);
+  return setListingCalendar(listingId, unitId, dates, {
+    prices: existing?.prices,
+    minNights: existing?.minNights,
+  });
+}
+
+export async function setListingPrices(
+  listingId: string,
+  unitId: string,
+  prices: Record<string, number>
+): Promise<ListingCalendarRecord> {
+  const existing = await getListingCalendar(listingId, unitId);
+  const mergedPrices = { ...(existing?.prices ?? {}) };
+  for (const [date, price] of Object.entries(prices)) {
+    if (price > 0) {
+      mergedPrices[date] = price;
+    } else {
+      delete mergedPrices[date];
+    }
+  }
+  return setListingCalendar(listingId, unitId, existing?.dates ?? {}, {
+    prices: mergedPrices,
+    minNights: existing?.minNights,
+  });
+}
+
+export async function setListingMinNights(
+  listingId: string,
+  unitId: string,
+  minNights: number
+): Promise<ListingCalendarRecord> {
+  const existing = await getListingCalendar(listingId, unitId);
+  const record: ListingCalendarRecord = {
+    listingId,
+    unitId,
+    dates: existing?.dates ?? {},
+    updatedAt: new Date().toISOString(),
+  };
+  if (existing?.prices !== undefined) record.prices = existing.prices;
+  if (minNights > 0) record.minNights = minNights;
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.LISTING_CALENDAR,
+      Item: record,
+    })
+  );
+
+  return record;
+}
+
+export function listingPriceForNight(
+  listing: ListingRecord,
+  calendar: ListingCalendarRecord | null,
+  date: string,
+  unitId: string
+): number {
+  if (listing.housingType === "rooms") {
+    const rooms = listing.rooms ?? [];
+    if (rooms.length > 0) {
+      const room = rooms.find((r) => (r.id ?? r.name ?? "") === unitId);
+      if (room && room.price > 0) {
+        return calendar?.prices?.[date] ?? room.price;
+      }
+    }
+  }
+  return calendar?.prices?.[date] ?? listing.price;
+}
+
+export function listingPriceForRange(
+  listing: ListingRecord,
+  calendar: ListingCalendarRecord | null,
+  checkIn: string,
+  checkOut: string,
+  unitId: string
+): number {
+  let total = 0;
+  for (const date of getListingNightDates(checkIn, checkOut)) {
+    total += listingPriceForNight(listing, calendar, date, unitId);
+  }
+  return total;
 }
 
 function listingDateToIso(d: Date): string {
@@ -799,7 +882,32 @@ export async function blockListingDates(
   for (const date of getListingNightDates(checkIn, checkOut)) {
     dates[date] = "booked";
   }
-  return setListingCalendar(listingId, unitId, dates);
+  return setListingCalendar(listingId, unitId, dates, {
+    prices: existing?.prices,
+    minNights: existing?.minNights,
+  });
+}
+
+export async function reblockListingBookedDates(
+  listingId: string,
+  unitId: string
+): Promise<ListingCalendarRecord> {
+  const bookings = await getListingBookingsByListing(listingId);
+  const existing = await getListingCalendar(listingId, unitId);
+  const dates = existing?.dates ? { ...existing.dates } : {};
+  for (const booking of bookings) {
+    if (booking.status !== "confirmed" || booking.unitId !== unitId) continue;
+    for (const date of getListingNightDates(
+      booking.checkIn,
+      booking.checkOut
+    )) {
+      dates[date] = "booked";
+    }
+  }
+  return setListingCalendar(listingId, unitId, dates, {
+    prices: existing?.prices,
+    minNights: existing?.minNights,
+  });
 }
 
 export interface SectionRecord {

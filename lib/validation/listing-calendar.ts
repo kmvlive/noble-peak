@@ -32,3 +32,29 @@ export type SetListingCalendarInput = z.infer<typeof setListingCalendarSchema>;
 export type SetListingDateStatusInput = z.infer<
   typeof setListingDateStatusSchema
 >;
+
+export const listingCalendarPricesSchema = z
+  .record(
+    z.string().min(1).max(32),
+    z.number().int().positive().max(10_000_000)
+  )
+  .refine((prices) =>
+    Object.keys(prices).every((date) => isoDateRegex.test(date))
+  );
+
+export const setListingPricesSchema = z.object({
+  listingId: z.string().min(1).max(200),
+  unitId: z.string().min(1).max(200).default(LISTING_UNIT_OBJECT),
+  prices: listingCalendarPricesSchema,
+});
+
+export const setListingMinNightsSchema = z.object({
+  listingId: z.string().min(1).max(200),
+  unitId: z.string().min(1).max(200).default(LISTING_UNIT_OBJECT),
+  minNights: z.number().int().min(1).max(365),
+});
+
+export type SetListingPricesInput = z.infer<typeof setListingPricesSchema>;
+export type SetListingMinNightsInput = z.infer<
+  typeof setListingMinNightsSchema
+>;

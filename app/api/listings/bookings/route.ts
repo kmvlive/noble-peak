@@ -11,6 +11,8 @@ import {
   getClientByPhone,
   getClientByEmail,
   createClient,
+  getListingCalendar,
+  listingPriceForRange,
 } from "@/lib/models";
 import { createListingBookingSchema } from "@/lib/validation/listing-booking";
 import {
@@ -155,7 +157,22 @@ export async function POST(request: NextRequest) {
   }
 
   const nights = computeListingNights(checkIn, checkOut);
-  const price = listing.price * nights;
+  const calendar = await getListingCalendar(listingId, unitId);
+  if (calendar?.minNights && nights < calendar.minNights) {
+    return NextResponse.json(
+      {
+        error: `Минимальный срок пребывания — ${calendar.minNights} ноч. Выберите более длинный период.`,
+      },
+      { status: 409 }
+    );
+  }
+  const price = listingPriceForRange(
+    listing,
+    calendar,
+    checkIn,
+    checkOut,
+    unitId
+  );
 
   const booking = await createListingBooking({
     listingId,

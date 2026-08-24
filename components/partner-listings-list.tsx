@@ -11,6 +11,7 @@ import {
   Plus,
   BedDouble,
   Building2,
+  CalendarDays,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -154,16 +155,29 @@ export function PartnerListingsList() {
                   </span>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() =>
-                  router.push(`/partner/listings/${listing.id}/edit`)
-                }
-                title="Открыть и редактировать"
-                className="mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-              >
-                <Pencil className="h-4 w-4" />
-              </button>
+              <div className="mt-2 flex shrink-0 items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push(`/partner/listings/${listing.id}/calendar`)
+                  }
+                  title="Управлять календарём"
+                  className="inline-flex h-8 items-center justify-center gap-1 rounded-md border px-2 text-xs font-medium text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                >
+                  <CalendarDays className="h-4 w-4" />
+                  Календарь
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push(`/partner/listings/${listing.id}/edit`)
+                  }
+                  title="Открыть и редактировать"
+                  className="mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           </div>
         );

@@ -438,6 +438,8 @@ export interface ListingCalendarRecord {
   listingId: string;
   unitId: string;
   dates: Record<string, ListingDateStatus>;
+  prices?: Record<string, number>;
+  minNights?: number;
   updatedAt: string;
 }
 

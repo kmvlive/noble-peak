@@ -1672,8 +1672,19 @@ tasks:
       - Партнёр может задавать минимальный срок пребывания
       - Партнёр видит занятые даты своего объявления
     id: task-1665
-    status: pending
-    summary: null
+    status: completed
+    summary: >-
+      В кабинете партнёра добавлена панель управления календарём жилья для
+      каждого объявления (страница /partner/listings/[id]/calendar, компонент
+      components/partner-listing-calendar.tsx): партнёр закрывает/открывает даты
+      от новых броней, задаёт цену по датам и минимальный срок пребывания, видит
+      занятые (забронированные) даты и подтверждённые брони. Для этого расширена
+      модель ListingCalendarRecord (prices, minNights), добавлены функции
+      setListingPrices/setListingMinNights/reblockListingBookedDates в lib/models.ts,
+      маршрут app/api/partner/listings/[id]/calendar/route.ts и схемы валидации в
+      lib/validation/listing-calendar.ts. Динамические цены и минимальный срок
+      учтены при оформлении брони в app/api/listings/bookings/route.ts.
+      Кнопка «Календарь» добавлена в список объявлений.
   - title: Каркас под синхронизацию с менеджерами каналов (realtycalendar,
       travelline, bnovo, Агаст)
     description: "Спроектировать и реализовать каркас интеграции с менеджерами
