@@ -201,6 +201,18 @@ export async function POST(request: NextRequest) {
     console.error("Ошибка отправки брони в канал:", err)
   );
 
+  // Уведомление клиенту на сайте о подтверждении брони жилья (номер объекта,
+  // название, даты заезда/выезда).
+  createNotification({
+    recipientEmail: clientEmail,
+    type: "booking_status",
+    title: "Бронирование подтверждено",
+    message: `Вы забронировали жильё "${listingTitle}" (объект №${listing.listingNumber}) с ${checkIn} по ${checkOut}.`,
+    link: `/client/bookings/${booking.id}`,
+  }).catch((e) =>
+    console.error("Ошибка создания уведомления клиенту о брони жилья:", e)
+  );
+
   // Уведомление партнёру о новом бронировании (на сайте + в Telegram/ВК при
   // включённых настройках).
   if (listing.partnerEmail) {
