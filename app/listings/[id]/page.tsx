@@ -13,6 +13,7 @@ import {
   getListingSubtypeLabel,
 } from "@noble-peak/shared";
 import type { ListingRecord } from "@noble-peak/shared";
+import { ListingBookingForm } from "@/components/listing-booking-form";
 
 export const revalidate = 60;
 
@@ -229,6 +230,14 @@ export default async function ListingPage({
                 {listing.price.toLocaleString("ru-RU")} ₽
               </p>
               <p className="text-sm text-muted-foreground">за сутки</p>
+
+              <div className="mt-6">
+                <ListingBookingForm
+                  listingId={listing.id}
+                  listingTitle={listing.title}
+                  pricePerNight={listing.price}
+                />
+              </div>
             </CardContent>
           </Card>
         </aside>

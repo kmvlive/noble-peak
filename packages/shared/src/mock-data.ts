@@ -27,6 +27,7 @@ import type {
 } from "./models";
 import type { SliderImage, OrderSettingsRecord } from "./models";
 import { LISTING_UNIT_OBJECT, type ListingCalendarRecord } from "./models";
+import type { ListingBookingRecord } from "./models";
 
 export const mockServices: Service[] = [
   {
@@ -161,6 +162,8 @@ export const mockListingCalendars: ListingCalendarRecord[] = [
     updatedAt: new Date().toISOString(),
   },
 ];
+
+export const mockListingBookings: ListingBookingRecord[] = [];
 
 export const mockBookings: BookingRecord[] = [
   {

@@ -34,6 +34,7 @@ export const TableName = {
   PAYOUTS: "payouts",
   LISTINGS: "listings",
   LISTING_CALENDAR: "listing_calendar",
+  LISTING_BOOKINGS: "listing_bookings",
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];
@@ -426,6 +427,28 @@ export const TABLE_SCHEMAS: Record<TableName, TableSchema> = {
       { AttributeName: "unitId", AttributeType: "S" },
     ],
   },
+
+  [TableName.LISTING_BOOKINGS]: {
+    name: TableName.LISTING_BOOKINGS,
+    keySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+    attributeDefinitions: [
+      { AttributeName: "id", AttributeType: "S" },
+      { AttributeName: "listingId", AttributeType: "S" },
+      { AttributeName: "clientEmail", AttributeType: "S" },
+    ],
+    globalSecondaryIndexes: [
+      {
+        IndexName: "listingId-index",
+        KeySchema: [{ AttributeName: "listingId", KeyType: "HASH" }],
+        Projection: { ProjectionType: "ALL" },
+      },
+      {
+        IndexName: "clientEmail-index",
+        KeySchema: [{ AttributeName: "clientEmail", KeyType: "HASH" }],
+        Projection: { ProjectionType: "ALL" },
+      },
+    ],
+  },
 };
 
 export const TABLE_NAMES: TableName[] = Object.values(TableName);
@@ -454,6 +477,8 @@ export const IndexName = {
   PARTNER_LINKS_AGENT_EMAIL: "agentEmail-index",
   PAYOUTS_AGENT_EMAIL: "agentEmail-index",
   LISTINGS_STATUS: "status-index",
+  LISTING_BOOKINGS_LISTING_ID: "listingId-index",
+  LISTING_BOOKINGS_CLIENT_EMAIL: "clientEmail-index",
 } as const;
 
 export type IndexName = (typeof IndexName)[keyof typeof IndexName];

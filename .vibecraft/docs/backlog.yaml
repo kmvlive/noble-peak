@@ -1646,8 +1646,19 @@ tasks:
       - Занятые даты автоматически блокируются при подтверждении брони
       - Стоимость брони считается по количеству ночей
     id: task-5013
-    status: pending
-    summary: null
+    status: completed
+    summary: "Реализовано бронирование жилья по датам заезда-выезда с проверкой
+      занятости. Добавлена таблица LISTING_BOOKINGS (packages/shared/src/schema.ts),
+      модель ListingBookingRecord и CRUD/проверка диапазона в lib/models.ts
+      (isListingRangeAvailable, computeListingNights, getListingNightDates,
+      blockListingDates), API app/api/listings/bookings/route.ts (GET/POST с zod-
+      валидацией и гостевой регистрацией) и форма бронирования
+      components/listing-booking-form.tsx на странице объявления app/listings/[id].
+      При бронировании проверяется, что весь диапазон ночей свободен (нет пересечений
+      с существующими бронями и закрытыми датами владельца); при конфликте возвращается
+      409; при подтверждении занятые даты автоматически помечаются booked в календаре;
+      стоимость считается по количеству ночей (цена за сутки × ночи). typecheck, lint,
+      build и db:migrate проходят."
   - title: Панель управления календарём жилья у партнёра
     description:
       "В кабинете партнёра добавить панель управления календарём жилья

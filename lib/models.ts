@@ -29,6 +29,7 @@ import type {
   ListingRecord,
   ListingCalendarRecord,
   ListingDateStatus,
+  ListingBookingRecord,
 } from "./schema";
 import { randomUUID } from "node:crypto";
 import { sendVkNotification } from "./vk-notify";
@@ -658,6 +659,146 @@ export async function setListingDateStatus(
   const existing = await getListingCalendar(listingId, unitId);
   const dates = existing?.dates ? { ...existing.dates } : {};
   dates[date] = status;
+  return setListingCalendar(listingId, unitId, dates);
+}
+
+function listingDateToIso(d: Date): string {
+  return d.toISOString().split("T")[0];
+}
+
+export function computeListingNights(
+  checkIn: string,
+  checkOut: string
+): number {
+  const inTime = new Date(checkIn + "T00:00:00Z").getTime();
+  const outTime = new Date(checkOut + "T00:00:00Z").getTime();
+  return Math.round((outTime - inTime) / 86400000);
+}
+
+export function getListingNightDates(
+  checkIn: string,
+  checkOut: string
+): string[] {
+  const dates: string[] = [];
+  const cur = new Date(checkIn + "T00:00:00Z");
+  const end = new Date(checkOut + "T00:00:00Z");
+  while (cur < end) {
+    dates.push(listingDateToIso(cur));
+    cur.setUTCDate(cur.getUTCDate() + 1);
+  }
+  return dates;
+}
+
+export interface ListingRangeAvailability {
+  available: boolean;
+  conflictDate?: string;
+  reason?: "booked" | "closed";
+}
+
+export async function isListingRangeAvailable(
+  listingId: string,
+  unitId: string,
+  checkIn: string,
+  checkOut: string
+): Promise<ListingRangeAvailability> {
+  const calendar = await getListingCalendar(listingId, unitId);
+
+  for (const date of getListingNightDates(checkIn, checkOut)) {
+    const status = calendar?.dates?.[date];
+    if (status === "closed") {
+      return { available: false, conflictDate: date, reason: "closed" };
+    }
+    if (status === "booked") {
+      return { available: false, conflictDate: date, reason: "booked" };
+    }
+  }
+
+  const bookings = await getListingBookingsByListing(listingId);
+  for (const booking of bookings) {
+    if (booking.status !== "confirmed" || booking.unitId !== unitId) continue;
+    const bookedDates = new Set(
+      getListingNightDates(booking.checkIn, booking.checkOut)
+    );
+    for (const date of getListingNightDates(checkIn, checkOut)) {
+      if (bookedDates.has(date)) {
+        return { available: false, conflictDate: date, reason: "booked" };
+      }
+    }
+  }
+
+  return { available: true };
+}
+
+export async function createListingBooking(
+  data: Omit<ListingBookingRecord, "id" | "createdAt">
+): Promise<ListingBookingRecord> {
+  const record: ListingBookingRecord = {
+    ...data,
+    id: randomUUID(),
+    createdAt: new Date().toISOString(),
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: TableName.LISTING_BOOKINGS,
+      Item: record,
+    })
+  );
+
+  return record;
+}
+
+export async function getListingBookingById(
+  id: string
+): Promise<ListingBookingRecord | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TableName.LISTING_BOOKINGS,
+      Key: { id },
+    })
+  );
+  return (result.Item as ListingBookingRecord) ?? null;
+}
+
+export async function getListingBookingsByListing(
+  listingId: string
+): Promise<ListingBookingRecord[]> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.LISTING_BOOKINGS,
+      IndexName: IndexName.LISTING_BOOKINGS_LISTING_ID,
+      KeyConditionExpression: "listingId = :listingId",
+      ExpressionAttributeValues: { ":listingId": listingId },
+    })
+  );
+  return (result.Items as ListingBookingRecord[]) ?? [];
+}
+
+export async function getClientListingBookings(
+  clientEmail: string
+): Promise<ListingBookingRecord[]> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TableName.LISTING_BOOKINGS,
+      IndexName: IndexName.LISTING_BOOKINGS_CLIENT_EMAIL,
+      KeyConditionExpression: "clientEmail = :clientEmail",
+      ExpressionAttributeValues: { ":clientEmail": clientEmail },
+    })
+  );
+  return (result.Items as ListingBookingRecord[]) ?? [];
+}
+
+export async function blockListingDates(
+  listingId: string,
+  unitId: string,
+  checkIn: string,
+  checkOut: string
+): Promise<ListingCalendarRecord> {
+  const existing = await getListingCalendar(listingId, unitId);
+  const dates = existing?.dates ? { ...existing.dates } : {};
+  for (const date of getListingNightDates(checkIn, checkOut)) {
+    dates[date] = "booked";
+  }
   return setListingCalendar(listingId, unitId, dates);
 }
 

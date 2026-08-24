@@ -440,3 +440,21 @@ export interface ListingCalendarRecord {
   dates: Record<string, ListingDateStatus>;
   updatedAt: string;
 }
+
+export type ListingBookingStatus = "confirmed";
+
+export interface ListingBookingRecord {
+  id: string;
+  listingId: string;
+  listingTitle: string;
+  unitId: string;
+  clientEmail: string;
+  clientName: string;
+  clientPhone: string;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  price: number;
+  status: ListingBookingStatus;
+  createdAt: string;
+}
