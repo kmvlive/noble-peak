@@ -9,6 +9,7 @@ import {
   BedDouble,
   ShoppingCart,
   CalendarDays,
+  CalendarRange,
   Bell,
   Globe,
   Settings,
@@ -16,6 +17,8 @@ import {
   HelpCircle,
   LogOut,
   Menu,
+  Plus,
+  Plug,
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -58,42 +61,100 @@ function hasToken(): boolean {
   return !!getToken();
 }
 
-const NAV_ITEMS = [
-  { href: "/partner", label: "Дашборд", icon: LayoutDashboard },
-  { href: "/partner/activities", label: "Мои активности", icon: List },
-  { href: "/partner/listings", label: "Мои объявления", icon: BedDouble },
-  { href: "/partner/orders", label: "Заказы", icon: ShoppingCart },
-  { href: "/partner/calendar", label: "Календарь", icon: CalendarDays },
-  { href: "/partner/notifications", label: "Уведомления и чат", icon: Bell },
-  { href: "/partner/profile/public", label: "Публичный профиль", icon: Globe },
-  { href: "/partner/profile", label: "Мой профиль", icon: Settings },
-  { href: "/partner/legal", label: "Анкета партнёра", icon: FileText },
+interface SidebarEntry {
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+}
+
+interface SidebarSection {
+  heading?: string;
+  items: SidebarEntry[];
+}
+
+const SIDEBAR_SECTIONS: SidebarSection[] = [
+  {
+    items: [{ href: "/partner", label: "Дашборд", icon: LayoutDashboard }],
+  },
+  {
+    heading: "Активности",
+    items: [
+      { href: "/partner/activities", label: "Мои активности", icon: List },
+      { href: "/partner/calendar", label: "Календарь", icon: CalendarDays },
+      { href: "/partner/orders", label: "Заказы", icon: ShoppingCart },
+    ],
+  },
+  {
+    heading: "Сдача в аренду",
+    items: [
+      { href: "/partner/listings/new", label: "Добавить объект", icon: Plus },
+      { href: "/partner/listings", label: "Мои объявления", icon: BedDouble },
+      {
+        href: "/partner/listings/calendar",
+        label: "Календарь сдачи",
+        icon: CalendarRange,
+      },
+      { href: "/partner/integrations", label: "Интеграции", icon: Plug },
+    ],
+  },
+  {
+    items: [
+      {
+        href: "/partner/notifications",
+        label: "Уведомления и чат",
+        icon: Bell,
+      },
+      {
+        href: "/partner/profile/public",
+        label: "Публичный профиль",
+        icon: Globe,
+      },
+      { href: "/partner/profile", label: "Мой профиль", icon: Settings },
+      { href: "/partner/legal", label: "Анкета партнёра", icon: FileText },
+    ],
+  },
 ];
 
 function SidebarContent({ pathname }: { pathname: string }) {
+  const allEntries = SIDEBAR_SECTIONS.flatMap((s) => s.items);
+  const activeHref = allEntries
+    .filter((item) =>
+      item.href === "/partner"
+        ? pathname === "/partner"
+        : pathname === item.href || pathname.startsWith(`${item.href}/`)
+    )
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
+
   return (
-    <nav className="flex flex-col gap-1 p-3">
-      {NAV_ITEMS.map((item) => {
-        const Icon = item.icon;
-        const isActive =
-          item.href === "/partner"
-            ? pathname === "/partner"
-            : pathname.startsWith(item.href);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-              isActive
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-            }`}
-          >
-            <Icon className="h-4 w-4 shrink-0" />
-            {item.label}
-          </Link>
-        );
-      })}
+    <nav className="flex flex-col p-3">
+      {SIDEBAR_SECTIONS.map((section, index) => (
+        <div key={index} className="flex flex-col">
+          {index > 0 && <hr className="my-2 border-t border-border/70" />}
+          {section.heading && (
+            <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {section.heading}
+            </p>
+          )}
+          {section.items.map((item) => {
+            const Icon = item.icon;
+            const isActive = item.href === activeHref;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                  isActive
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                }`}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
+      ))}
     </nav>
   );
 }
