@@ -17,6 +17,7 @@ interface PartnerPublicData {
     shortDescription: string;
     price: number;
     location?: string;
+    images: string[];
     imageGradient: string;
     section: string;
   }[];

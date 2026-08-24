@@ -10,8 +10,21 @@ interface PartnerActivity {
   shortDescription: string;
   price: number;
   location?: string;
+  images: string[];
   imageGradient: string;
   section: string;
+}
+
+function getActivityImage(activity: PartnerActivity): string | null {
+  const image = activity.images?.find(
+    (src) =>
+      typeof src === "string" &&
+      src.length > 0 &&
+      (src.startsWith("http://") ||
+        src.startsWith("https://") ||
+        src.startsWith("/uploads/"))
+  );
+  return image || null;
 }
 
 interface PartnerPublicData {
@@ -84,9 +97,17 @@ export function PartnerPublicProfileContent({
                   className="flex items-center gap-3 py-3 transition-colors hover:bg-muted/50 rounded-lg px-3 -mx-3 group"
                 >
                   <div
-                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${activity.imageGradient}`}
+                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${activity.imageGradient} overflow-hidden`}
                   >
-                    <Compass className="h-5 w-5 text-white/70" />
+                    {getActivityImage(activity) ? (
+                      <img
+                        src={getActivityImage(activity)!}
+                        alt={activity.title}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <Compass className="h-5 w-5 text-white/70" />
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate group-hover:text-primary transition-colors">
