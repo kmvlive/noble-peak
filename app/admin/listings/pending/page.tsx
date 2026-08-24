@@ -152,6 +152,11 @@ export default function AdminPendingListingsPage() {
                     <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
                       На модерации
                     </span>
+                    {listing.listingNumber && (
+                      <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                        Объект №{listing.listingNumber}
+                      </span>
+                    )}
                   </div>
                   <h3 className="mt-2 text-base font-semibold truncate">
                     {listing.title}

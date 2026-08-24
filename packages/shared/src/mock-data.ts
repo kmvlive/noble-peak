@@ -66,6 +66,7 @@ export const mockSections: SectionRecord[] = [];
 export const mockListings: ListingRecord[] = [
   {
     id: "mock-listing-1",
+    listingNumber: "000001",
     title: "Студия у моря",
     description: "Уютная студия в центре с видом на море.",
     images: [],
@@ -89,6 +90,7 @@ export const mockListings: ListingRecord[] = [
   },
   {
     id: "mock-listing-2",
+    listingNumber: "000002",
     title: "Коттедж с баней",
     description: "Просторный коттедж для большой компании.",
     images: [],
@@ -103,6 +105,7 @@ export const mockListings: ListingRecord[] = [
   },
   {
     id: "mock-listing-3",
+    listingNumber: "000003",
     title: "Номера в гостинице «Уют»",
     description: "Комфортные номера в центре города.",
     images: [],
@@ -124,6 +127,7 @@ export const mockListings: ListingRecord[] = [
   },
   {
     id: "mock-listing-4",
+    listingNumber: "000004",
     title: "Апартаменты на набережной",
     description: "Светлые апартаменты с видом на море.",
     images: [],
@@ -140,6 +144,7 @@ export const mockListings: ListingRecord[] = [
   },
   {
     id: "mock-listing-5",
+    listingNumber: "000005",
     title: "Комната в квартире",
     description: "Уютная комната в тихой квартире.",
     images: [],

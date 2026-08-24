@@ -177,6 +177,7 @@ export async function POST(request: NextRequest) {
 
   const booking = await createListingBooking({
     listingId,
+    listingNumber: listing.listingNumber,
     listingTitle,
     unitId,
     clientEmail,

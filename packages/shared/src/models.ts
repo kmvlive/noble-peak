@@ -426,6 +426,7 @@ export interface ListingChannelConnection {
 
 export interface ListingRecord {
   id: string;
+  listingNumber?: string;
   title: string;
   description: string;
   images: string[];
@@ -464,6 +465,7 @@ export type ListingBookingStatus = "confirmed";
 export interface ListingBookingRecord {
   id: string;
   listingId: string;
+  listingNumber?: string;
   listingTitle: string;
   unitId: string;
   clientEmail: string;

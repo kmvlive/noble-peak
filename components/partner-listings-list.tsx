@@ -140,6 +140,11 @@ export function PartnerListingsList() {
                     )}
                     {getHousingTypeLabel(listing.housingType)}
                   </span>
+                  {listing.listingNumber && (
+                    <span className="inline-flex items-center rounded-full border bg-background px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                      Объект №{listing.listingNumber}
+                    </span>
+                  )}
                 </div>
                 <h3 className="font-semibold leading-tight">{listing.title}</h3>
                 <p className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">

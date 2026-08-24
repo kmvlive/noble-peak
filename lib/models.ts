@@ -525,12 +525,31 @@ export async function getListingsByPartnerEmail(
   return (result.Items as ListingRecord[]) ?? [];
 }
 
+export async function getNextListingNumber(): Promise<string> {
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: TableName.LISTINGS,
+      ProjectionExpression: "listingNumber",
+    })
+  );
+  const items = (result.Items as { listingNumber?: string }[]) ?? [];
+  let max = 0;
+  for (const item of items) {
+    if (!item.listingNumber) continue;
+    const num = parseInt(item.listingNumber, 10);
+    if (!isNaN(num) && num > max) max = num;
+  }
+  return String(max + 1).padStart(6, "0");
+}
+
 export async function createListing(
   data: Omit<ListingRecord, "createdAt" | "updatedAt">
 ): Promise<ListingRecord> {
   const now = new Date().toISOString();
+  const listingNumber = await getNextListingNumber();
   const listing: ListingRecord = {
     ...data,
+    listingNumber,
     createdAt: now,
     updatedAt: now,
   };

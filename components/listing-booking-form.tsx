@@ -83,7 +83,7 @@ export function ListingBookingForm({
       }
 
       toast.success(
-        `Жильё забронировано: ${nights} ноч. на ${data.price.toLocaleString("ru-RU")} ₽`,
+        `Жильё забронировано${data.booking?.listingNumber ? `, объект №${data.booking.listingNumber}` : ""}: ${nights} ноч. на ${data.price.toLocaleString("ru-RU")} ₽`,
         { id: loadingId }
       );
       setCheckIn("");
